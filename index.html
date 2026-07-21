@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Midnight Builds – Creator Portfolio</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            midnight: { DEFAULT: '#0a0a0f', 800: '#12121a', 700: '#1a1a2e', 600: '#2a2a3e' },
+            accent: { DEFAULT: '#a855f7', light: '#c084fc', dark: '#7c3aed' },
+            glow: '#e879f9',
+          },
+          fontFamily: { inter: ['Inter', 'system-ui', 'sans-serif'] },
+        },
+      },
+    }
+  </script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+    * { scroll-behavior: smooth; }
+    body { font-family: 'Inter', system-ui, sans-serif; }
+    .glow-border { box-shadow: 0 0 20px -4px rgba(168,85,247,.25); }
+    .video-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); }
+    @media (max-width: 400px) { .video-grid { grid-template-columns: 1fr; } }
+    .shimmer { background: linear-gradient(90deg, transparent 0%, rgba(168,85,247,.08) 50%, transparent 100%); background-size: 200% 100%; animation: shimmer 2.5s infinite; }
+    @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+    iframe { aspect-ratio: 16 / 9; }
+    .form-input:focus { box-shadow: 0 0 0 2px rgba(168,85,247,.4); }
+    .nav-blur { backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+  </style>
+</head>
+<body class="bg-midnight text-gray-200 font-inter antialiased">
+
+  <!-- Navigation -->
+  <nav class="fixed top-0 inset-x-0 z-50 nav-blur bg-midnight/80 border-b border-white/5">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <a href="#" class="text-xl font-bold tracking-tight">
+        <span class="text-accent-light">✦</span>
+        <span class="text-white ml-2">Midnight Builds</span>
+      </a>
+      <div class="hidden sm:flex items-center gap-8 text-sm font-medium text-gray-400">
+        <a href="#videos" class="hover:text-accent-light transition-colors">Videos</a>
+        <a href="#connect" class="hover:text-accent-light transition-colors">Connect</a>
+        <a href="#subscribe" class="hover:text-accent-light transition-colors">Subscribe</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <section class="min-h-screen flex items-center justify-center px-4 pt-16 pb-12 relative overflow-hidden">
+    <div class="absolute inset-0 pointer-events-none">
+      <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-accent/5 rounded-full blur-3xl"></div>
+      <div class="absolute bottom-1/4 right-1/4 w-80 h-80 bg-glow/5 rounded-full blur-3xl"></div>
+    </div>
+    <div class="relative z-10 max-w-3xl mx-auto text-center">
+      <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-accent/20 bg-accent/5 text-accent-light text-xs font-medium mb-8 shimmer">
+        <span class="w-1.5 h-1.5 rounded-full bg-green-400"></span>
+        Creator &amp; Builder
+      </div>
+      <h1 class="text-4xl sm:text-5xl md:text-6xl font-extrabold leading-tight text-white">
+        Building things<br/>
+        <span class="bg-gradient-to-r from-accent-light via-glow to-accent bg-clip-text text-transparent">when the world sleeps</span>
+      </h1>
+      <p class="mt-6 text-lg sm:text-xl text-gray-400 leading-relaxed max-w-xl mx-auto">
+        I'm a builder, tinkerer, and storyteller. I craft projects — from DIY electronics to full-stack apps — and document the journey on YouTube. Pull up a chair.
+      </p>
+      <div class="mt-8 flex flex-wrap items-center justify-center gap-4">
+        <a href="#videos" class="inline-flex items-center gap-2 bg-accent hover:bg-accent-dark text-white font-semibold px-6 py-3 rounded-xl transition-all hover:scale-105 glow-border">
+          <i class="fa-brands fa-youtube"></i> Latest Builds
+        </a>
+        <a href="#subscribe" class="inline-flex items-center gap-2 border border-white/10 hover:border-accent/40 text-gray-300 font-medium px-6 py-3 rounded-xl transition-all">
+          <i class="fa-regular fa-envelope"></i> Stay Updated
+        </a>
+      </div>
+      <div class="mt-12 flex items-center justify-center gap-6 text-sm text-gray-500">
+        <span class="flex items-center gap-1.5"><i class="fa-solid fa-code text-accent-light"></i> Code</span>
+        <span class="flex items-center gap-1.5"><i class="fa-solid fa-microchip text-accent-light"></i> Hardware</span>
+        <span class="flex items-center gap-1.5"><i class="fa-solid fa-camera text-accent-light"></i> Tutorials</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Videos -->
+  <section id="videos" class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+    <div class="text-center mb-12">
+      <h2 class="text-3xl sm:text-4xl font-bold text-white">Featured Builds</h2>
+      <p class="mt-3 text-gray-400">Recent projects I've shared on YouTube</p>
+    </div>
+    <div class="video-grid gap-6" id="videoGrid">
+      <!-- populated by JS -->
+    </div>
+  </section>
+
+  <!-- Connect -->
+  <section id="connect" class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+    <div class="text-center mb-12">
+      <h2 class="text-3xl sm:text-4xl font-bold text-white">Connect With Me</h2>
+      <p class="mt-3 text-gray-400">Let's be friends on the internet</p>
+    </div>
+    <div class="flex flex-wrap justify-center gap-4" id="socialLinks">
+      <!-- populated by JS -->
+    </div>
+  </section>
+
+  <!-- Newsletter -->
+  <section id="subscribe" class="max-w-xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+    <div class="relative p-8 sm:p-10 rounded-2xl border border-white/10 bg-midnight-800/60 glow-border text-center">
+      <div class="absolute -top-5 left-1/2 -translate-x-1/2">
+        <span class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-accent text-white text-lg"><i class="fa-regular fa-paper-plane"></i></span>
+      </div>
+      <h2 class="text-2xl sm:text-3xl font-bold text-white mt-2">Join the Workshop</h2>
+      <p class="mt-3 text-gray-400 text-sm">Get notified when I drop a new build or write about what I'm making.</p>
+      <form id="newsletterForm" class="mt-8 flex flex-col sm:flex-row gap-3">
+        <label for="email" class="sr-only">Email address</label>
+        <input
+          type="email"
+          id="email"
+          required
+          placeholder="you@example.com"
+          class="form-input flex-1 px-4 py-3 rounded-xl bg-midnight border border-white/10 text-white placeholder-gray-500 outline-none transition-all text-sm"
+        />
+        <button
+          type="submit"
+          class="px-6 py-3 rounded-xl bg-accent hover:bg-accent-dark text-white font-semibold text-sm transition-all hover:scale-105 whitespace-nowrap"
+        >
+          <i class="fa-regular fa-bell mr-1.5"></i>Subscribe
+        </button>
+      </form>
+      <p id="newsletterMsg" class="mt-4 text-sm hidden"></p>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="border-t border-white/5 py-8 text-center text-sm text-gray-500">
+    <p>&copy; <span id="year"></span> Midnight Builds. Built late at night.</p>
+  </footer>
+
+  <script>
+    // --- Video data ---
+    const videos = [
+      { title: 'Building a Smart Desk Lamp from Scratch', id: 'dQw4w9WgXcQ' },
+      { title: 'Full-Stack Dashboard in 24 Hours',        id: 'dQw4w9WgXcQ' },
+      { title: 'DIY NAS — Cheaper Than Synology',         id: 'dQw4w9WgXcQ' },
+      { title: 'Rust CLI Tool I Use Every Day',           id: 'dQw4w9WgXcQ' },
+      { title: 'Restoring a 90s Mac Classic',             id: 'dQw4w9WgXcQ' },
+      { title: 'Home Assistant: Automate Everything',     id: 'dQw4w9WgXcQ' },
+    ]
+
+    const grid = document.getElementById('videoGrid')
+    videos.forEach(v => {
+      const card = document.createElement('div')
+      card.className =
+        'rounded-xl overflow-hidden border border-white/5 bg-midnight-800/40 hover:border-accent/20 transition-all hover:-translate-y-1'
+      card.innerHTML = `
+        <iframe
+          src="https://www.youtube-nocookie.com/embed/${v.id}"
+          title="${v.title}"
+          frameborder="0"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowfullscreen
+          class="w-full"
+          loading="lazy"
+        ></iframe>
+        <div class="p-4">
+          <h3 class="font-semibold text-sm text-white leading-snug">${v.title}</h3>
+        </div>
+      `
+      grid.appendChild(card)
+    })
+
+    // --- Social links ---
+    const socials = [
+      { icon: 'fa-brands fa-youtube',  label: 'YouTube',  href: '#' },
+      { icon: 'fa-brands fa-github',   label: 'GitHub',   href: '#' },
+      { icon: 'fa-brands fa-twitter',  label: 'Twitter',  href: '#' },
+      { icon: 'fa-brands fa-discord',  label: 'Discord',  href: '#' },
+      { icon: 'fa-brands fa-instagram',label: 'Instagram',href: '#' },
+      { icon: 'fa-brands fa-tiktok',   label: 'TikTok',   href: '#' },
+    ]
+
+    const container = document.getElementById('socialLinks')
+    socials.forEach(s => {
+      const a = document.createElement('a')
+      a.href = s.href
+      a.target = '_blank'
+      a.rel = 'noopener noreferrer'
+      a.className =
+        'inline-flex items-center gap-2 px-5 py-3 rounded-xl border border-white/10 text-gray-300 hover:text-accent-light hover:border-accent/30 transition-all text-sm font-medium'
+      a.innerHTML = `<i class="${s.icon} text-lg"></i> ${s.label}`
+      container.appendChild(a)
+    })
+
+    // --- Newsletter ---
+    const form = document.getElementById('newsletterForm')
+    const msg = document.getElementById('newsletterMsg')
+    form.addEventListener('submit', e => {
+      e.preventDefault()
+      const email = document.getElementById('email').value.trim()
+      msg.classList.remove('hidden', 'text-green-400', 'text-red-400')
+      if (!email) {
+        msg.textContent = 'Please enter a valid email address.'
+        msg.classList.add('text-red-400')
+        return
+      }
+      msg.textContent = 'Thanks for subscribing! Check your inbox shortly.'
+      msg.classList.add('text-green-400')
+      form.reset()
+    })
+
+    // --- Dynamic year ---
+    document.getElementById('year').textContent = new Date().getFullYear()
+  </script>
+</body>
+</html>
