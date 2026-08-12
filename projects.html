@@ -3,14 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Midnight Builds — building things when the world sleeps</title>
-  <meta name="description" content="I build, tinker, and write — mostly in public on GitHub. Hardware, software, and the occasional weekend rabbit hole. A video for every build is on the way." />
+  <title>Projects — Midnight Builds</title>
+  <meta name="description" content="Every project, in public on GitHub — security tooling, AI apps, and the occasional utility. A video and a write-up arrive with each build." />
   <link rel="stylesheet" href="assets/styles.css" />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='16' cy='16' r='14' fill='%23000' stroke='%232997ff' stroke-width='2'/><circle cx='16' cy='16' r='5' fill='%232997ff'/></svg>" />
 </head>
 <body>
 
-  <!-- NAV -->
   <nav class="nav">
     <div class="nav__inner">
       <a class="brand" href="index.html">
@@ -18,32 +17,22 @@
         Midnight Builds
       </a>
       <div class="nav__links">
-        <a href="#projects">Projects</a>
-        <a href="#videos">Videos</a>
+        <a href="index.html#projects">Projects</a>
+        <a href="index.html#videos">Videos</a>
         <a href="articles.html">Writing</a>
-        <a href="#connect">Connect</a>
+        <a href="index.html#connect">Connect</a>
       </div>
     </div>
   </nav>
 
-  <!-- HERO -->
-  <header class="hero wrap">
-    <h1 class="hero__title">Building things when the world sleeps</h1>
-    <p class="hero__sub">I make stuff — security tooling, AI apps, and hardware — and ship it in public. A video for every build is on the way.</p>
-    <div class="hero__cta">
-      <a class="btn" href="#projects">See the projects</a>
-      <a class="link" href="https://github.com/SwatiK425" rel="me">Browse GitHub <span class="arr">&rarr;</span></a>
-    </div>
+  <header class="hero wrap" style="padding-bottom:64px">
+    <h1 class="hero__title" style="max-width:16ch">Projects</h1>
+    <p class="hero__sub" style="max-width:44ch">Everything I ship, in public. Each one gets a build video and a write-up as it lands.</p>
   </header>
 
-  <!-- PROJECTS (the real content) -->
-  <section class="section" id="projects">
+  <section class="section section--plain">
     <div class="wrap">
-      <p class="eyebrow">What I've shipped</p>
-      <h2 class="section-title">Projects</h2>
-      <p class="section-lede">Everything here is real and on GitHub. Each one gets a build video and a write-up as it ships.</p>
-
-      <div class="grid grid--projects" style="margin-top:44px">
+      <div class="grid grid--projects">
         <article class="pcard">
           <h3 class="pcard__name">DLP_guardrail</h3>
           <p class="pcard__desc">A guardrail layer that keeps AI features from leaking sensitive data.</p>
@@ -105,64 +94,11 @@
           <a class="pcard__link" href="https://github.com/SwatiK425/Codex-Demo">View source &rarr;</a>
         </article>
       </div>
-      <p class="section-lede" style="margin-top:32px;font-size:15px"><a class="link" href="projects.html" style="font-size:15px">All projects <span class="arr">&rarr;</span></a></p>
+
+      <p class="section-lede" style="margin-top:40px;font-size:15px">Want these in your inbox as they ship? <a class="link" href="index.html#subscribe">Subscribe <span class="arr">&rarr;</span></a></p>
     </div>
   </section>
 
-  <!-- VIDEOS (honest: arriving with each build) -->
-  <section class="section" id="videos">
-    <div class="wrap">
-      <p class="eyebrow">Builds in motion</p>
-      <h2 class="section-title">A video for every build</h2>
-      <p class="section-lede">I'm filming a dedicated build video for each project — the wins, the dead ends, the wiring. The first ones are in production and will land here as they ship.</p>
-      <div class="hero__cta" style="justify-content:flex-start;margin-top:28px">
-        <a class="btn" href="https://youtube.com/@yourchannel" rel="me">Watch on YouTube</a>
-        <a class="link" href="index.html#subscribe">Get notified <span class="arr">&rarr;</span></a>
-      </div>
-    </div>
-  </section>
-
-  <!-- WRITING (honest teaser) -->
-  <section class="section" id="writing">
-    <div class="wrap">
-      <p class="eyebrow">Writing</p>
-      <h2 class="section-title">Notes from the workbench</h2>
-      <p class="section-lede">Longer thoughts that don't fit in a video. Each one pairs with a build as it ships. <a class="link" href="articles.html" style="font-size:16px">See the writing <span class="arr">&rarr;</span></a></p>
-    </div>
-  </section>
-
-  <!-- CONNECT -->
-  <section class="section" id="connect">
-    <div class="wrap">
-      <p class="eyebrow">Connect</p>
-      <h2 class="section-title">Let's be friends on the internet</h2>
-      <p class="section-lede">Where I post the builds, the code, and the occasional rant.</p>
-      <div class="social">
-        <a href="https://github.com/SwatiK425" rel="me">GitHub</a>
-        <a href="https://youtube.com/@yourchannel" rel="me">YouTube</a>
-        <a href="https://twitter.com/yourhandle" rel="me">Twitter / X</a>
-        <a href="https://discord.gg/yourextra" rel="me">Discord</a>
-        <a href="https://instagram.com/yourhandle" rel="me">Instagram</a>
-        <a href="https://tiktok.com/@yourhandle" rel="me">TikTok</a>
-      </div>
-    </div>
-  </section>
-
-  <!-- SUBSCRIBE -->
-  <section class="section" id="subscribe">
-    <div class="wrap">
-      <p class="eyebrow">Workshop</p>
-      <h2 class="section-title">Get the next build in your inbox</h2>
-      <p class="section-lede">One email when something ships. No noise.</p>
-      <form class="subscribe" data-subscribe>
-        <input type="email" name="email" placeholder="you@example.com" aria-label="Email address" required />
-        <button class="btn" type="submit">Subscribe</button>
-      </form>
-      <p class="note">New here? Start with the <a class="link" href="#projects" style="font-size:13px">projects</a>.</p>
-    </div>
-  </section>
-
-  <!-- FOOTER -->
   <footer class="footer">
     <div class="wrap footer__inner">
       <p class="footer__copy">&copy; <span id="yr"></span> Midnight Builds. Built after dark.</p>
@@ -175,6 +111,5 @@
   </footer>
 
   <script>document.getElementById('yr').textContent = new Date().getFullYear();</script>
-  <script src="assets/site.js"></script>
 </body>
 </html>
