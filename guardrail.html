@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Guard the Vault — Midnight Builds</title>
+  <meta name="description" content="You are the attacker. Craft prompts to breach a vault guarded by a 4-layer intent-based DLP guardrail. Bring your own LLM key." />
+  <link rel="stylesheet" href="assets/styles.css" />
+  <link rel="stylesheet" href="assets/guardrail.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='16' cy='16' r='14' fill='%23000' stroke='%232997ff' stroke-width='2'/><circle cx='16' cy='16' r='5' fill='%232997ff'/></svg>" />
+</head>
+<body>
+  <div class="vault-bg" aria-hidden="true"></div>
+  
+  <nav class="nav">
+    <div class="nav__inner">
+      <a class="brand" href="index.html">
+        <svg class="brand__mark" viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="14" fill="none" stroke="#f5f5f7" stroke-width="2"/><circle cx="16" cy="16" r="5" fill="#2997ff"/></svg>
+        Midnight Builds
+      </a>
+      <div class="nav__score" id="nav-score" hidden>
+        <div class="stat stat--blocked" title="Attacks stopped">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="2"/><line x1="12" y1="9" x2="12" y2="15"/><line x1="9" y1="12" x2="15" y2="12"/></svg>
+          <span class="stat__value" id="stat-blocked">0</span>
+        </div>
+        <div class="stat stat--breached" title="Breaches">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><line x1="12" y1="9" x2="12" y2="15"/><line x1="9" y1="12" x2="15" y2="12"/></svg>
+          <span class="stat__value" id="stat-breached">0</span>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <main class="game-stage">
+    <header class="game-header">
+      <h1 class="game-title">Guard the Vault</h1>
+      <p class="game-subtitle">You are the <span class="role">attacker</span>. The vault holds your data. <span class="target">Try to breach it.</span></p>
+    </header>
+
+    <div class="vault-arena" id="vault-arena">
+      <div id="vault-container" class="vault-state-locked">
+        <!-- Vault SVG injected by JS module -->
+      </div>
+      <div id="result-banner" class="result-banner result-banner--locked" role="status" aria-live="polite">
+        <span class="result-icon" id="result-icon">🔒</span>
+        <span class="result-text" id="result-text">Vault Locked</span>
+      </div>
+      <div id="risk-meter" class="risk-meter" hidden>
+        <div class="risk-bar"><div id="risk-fill" class="risk-fill"></div></div>
+        <span class="risk-label" id="risk-label">—</span>
+      </div>
+      <div class="layer-indicators" id="layer-indicators" role="group" aria-label="Security layers" hidden>
+        <!-- 5 dots injected by JS -->
+      </div>
+    </div>
+
+    <div class="attack-zone" id="attack-zone">
+      <div class="attack-label">
+        <span class="attack-label__text">Your Attack Prompt</span>
+        <span class="attack-label__hint" id="key-hint">No LLM key attached — heuristic layers only</span>
+      </div>
+      <div class="prompt-input-wrapper">
+        <textarea id="prompt-input" placeholder="Craft your attack… jailbreak, injection, data theft, tool hijack" aria-label="Attack prompt" spellcheck="false"></textarea>
+      </div>
+      <div class="attack-actions">
+        <button class="btn btn-launch" id="launch-btn" disabled><span class="btn-spinner" aria-hidden="true"></span><span class="btn-text">Launch Attack</span></button>
+        <button class="btn btn-key" id="key-btn">Attach LLM Key</button>
+      </div>
+      <div class="arsenal" id="arsenal" role="list" aria-label="Attack templates"></div>
+    </div>
+
+    <details class="disclosure" id="disclosure">
+      <summary>How the vault works</summary>
+      <div class="disclosure-content">
+        <h4>4 Layers + Your LLM Judge</h4>
+        <ul>
+          <li><strong>Layer 0</strong> — Decodes obfuscation (encoding, invisible chars, leetspeak, LaTeX)</li>
+          <li><strong>Layer 1</strong> — Detects malicious intent combos (disclosure+retrieval, jailbreak+role, etc.)</li>
+          <li><strong>Layer 2</strong> — Semantic similarity to known attack embeddings</li>
+          <li><strong>Layer 3</strong> — deBERTa transformer classifier for prompt injection</li>
+          <li><strong>LLM Judge</strong> — Your key (BYOK) verifies every non-confident case</li>
+        </ul>
+        <p style="margin-top:12px"><strong>Green dot</strong> = layer passed. <strong>Red dot</strong> = layer caught it. <strong>Gold dot</strong> = layer missed it (breach). <strong>Blue pulse</strong> = layer analyzing.</p>
+      </div>
+    </details>
+
+    <div class="share-moment" id="share-moment" hidden>
+      <button class="share-btn share-btn--primary" id="share-copy" data-text="">Share Breach</button>
+      <button class="share-btn" id="share-again">Try Another Attack</button>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="wrap footer__inner">
+      <p class="footer__copy">&copy; <span id="yr"></span> Midnight Builds. Built after dark.</p>
+      <nav class="footer__nav">
+        <a href="index.html">Home</a>
+        <a href="projects.html">Projects</a>
+        <a href="articles.html">Writing</a>
+      </nav>
+    </div>
+  </footer>
+
+  <div class="key-toast" id="key-toast" role="alert" aria-live="polite" hidden>
+    <div class="key-toast__row">
+      <span class="key-toast__text" id="key-toast-text"></span>
+      <button class="key-toast__close" id="key-toast-close" aria-label="Dismiss">&times;</button>
+    </div>
+  </div>
+
+  <!-- BYOK Modal -->
+  <div class="modal-overlay" id="byok-modal" hidden role="dialog" aria-modal="true" aria-labelledby="byok-title">
+    <div class="modal-panel">
+      <header class="modal-header">
+        <h2 id="byok-title">Attach LLM Judge</h2>
+        <button class="modal-close" id="byok-close" aria-label="Close">&times;</button>
+      </header>
+      <div class="modal-body">
+        <p class="modal-desc">The LLM judge verifies every prompt the heuristic layers aren't confident about. Your key stays in this session only — never stored.</p>
+        
+        <div class="form-group">
+          <label class="form-label" for="byok-provider">Provider</label>
+          <select id="byok-provider" class="form-select">
+            <option value="google">Google (Gemini) — default: gemini-2.5-flash</option>
+            <option value="anthropic">Anthropic (Claude) — default: claude-3-5-haiku-latest</option>
+            <option value="openai">OpenAI — default: gpt-4o-mini</option>
+            <option value="openrouter">OpenRouter — default: openrouter/auto</option>
+            <option value="opencode-zen">OpenCode Zen — default: deepseek-v4-flash-free</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label" for="byok-key">API Key</label>
+          <div class="key-input-wrapper">
+            <input type="password" id="byok-key" class="form-input" placeholder="Paste your key (sk-… or leave blank for env var)" autocomplete="off" />
+            <button type="button" class="key-toggle" id="byok-toggle" aria-label="Show/hide key">👁</button>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label" for="byok-model">Model (optional)</label>
+          <input type="text" id="byok-model" class="form-input" placeholder="Leave blank for provider default" />
+        </div>
+        
+        <div class="modal-actions">
+          <button class="btn btn-primary" id="byok-attach">Attach Key</button>
+          <button class="btn btn-ghost" id="byok-clear" hidden>Clear Key</button>
+        </div>
+        
+        <div id="byok-status" class="key-status key-status--neutral" hidden></div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="assets/guardrail.js"></script>
+</body>
+</html>
