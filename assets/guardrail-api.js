@@ -6,14 +6,15 @@
 
 // ===== CONFIGURATION =====
 // UPDATE THIS TO YOUR DEPLOYED GRADIO URL
-const GRADIO_URL = 'https://midnightbuilds.fyi/gradio'; // Or HF Space URL
+// Must be publicly accessible (HF Space with public visibility, or other host)
+const GRADIO_URL = 'http://64.181.229.187:7860'; // Oracle VM
 
-// Fn index mapping - auto-discovered from Gradio config if possible
+// Fn index mapping - from Gradio config
 const FN_INDEX = {
   ATTACH_KEY: 0,
   CLEAR_KEY: 1,
-  ANALYZE_INDIVIDUAL: 2,
-  ANALYZE_CSV: 3
+  ANALYZE_INDIVIDUAL: 3,
+  ANALYZE_CSV: 4
 };
 
 // ===== SESSION MANAGEMENT =====
