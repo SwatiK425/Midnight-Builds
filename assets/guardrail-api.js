@@ -7,7 +7,7 @@
 // ===== CONFIGURATION =====
 // UPDATE THIS TO YOUR DEPLOYED GRADIO URL
 // Must be publicly accessible (HF Space with public visibility, or other host)
-const GRADIO_URL = 'http://64.181.229.187:7860'; // Oracle VM
+const GRADIO_URL = 'https://praxis.midnightbuilds.fyi/gradio'; // Oracle VM via Caddy
 
 // Fn index mapping - from Gradio config
 const FN_INDEX = {
