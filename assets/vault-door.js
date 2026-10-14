@@ -228,70 +228,49 @@ export function resetLayerDots(dots) {
 }
 
 // Real layer animation based on actual API results
-export function animateLayerDotsReal(dots, layerResults, hasKey) {
-  // layerResults: array of { name, risk, verdict } from API
-  // Maps to layers 0-3, plus layer 4 for LLM Judge
-  
+export function animateLayerDotsReal(dots, layerResults, llmStatus) {
+  // layerResults: array of { name, risk } — risks come from the guardrail's
+  // embedded details JSON (authoritative), not scraped HTML. The backend
+  // layers carry no per-layer verdict field, so bands mirror the guardrail's
+  // own verdict thresholds directly.
+  // llmStatus: { available, used } parsed from the guardrail response.
   const delays = [100, 300, 500, 700, 900];
-  
+
   layerResults.forEach((layer, i) => {
     const dot = dots[i];
     if (!dot) return;
-    
+
     setTimeout(() => {
       dot.classList.add('active');
     }, delays[i]);
-    
+
     setTimeout(() => {
       dot.classList.remove('active');
-      
-      // Map API verdict to visual state
-      // layer.verdict: 'PASS' | 'FAIL' | 'BREACHED' | 'SKIPPED'
-      switch (layer.verdict) {
-        case 'PASS':
-        case 'SAFE':
-          dot.classList.add('passed');
-          break;
-        case 'FAIL':
-        case 'BLOCKED':
-        case 'HIGH_RISK':
-          dot.classList.add('failed');
-          break;
-        case 'BREACHED':
-        case 'MEDIUM_RISK':
-        case 'LOW_RISK':
-          dot.classList.add('breached');
-          break;
-        case 'SKIPPED':
-          dot.classList.add('passed'); // skipped = passed
-          break;
-        default:
-          // Default based on risk score
-          if (layer.risk >= 80) {
-            dot.classList.add('failed');
-          } else if (layer.risk >= 40) {
-            dot.classList.add('breached');
-          } else {
-            dot.classList.add('passed');
-          }
+      // >=80 BLOCKED (caught, red), 40-79 suspicious (gold), <40 clean (green).
+      if (layer.risk >= 80) {
+        dot.classList.add('failed');
+      } else if (layer.risk >= 40) {
+        dot.classList.add('breached');
+      } else {
+        dot.classList.add('passed');
       }
     }, delays[i] + 400);
   });
-  
-  // LLM Judge dot (index 4)
+
+  // LLM Judge dot (index 4) — reflects whether the judge actually ruled.
   const llmDot = dots[4];
   if (llmDot) {
     setTimeout(() => {
       llmDot.classList.add('active');
     }, delays[4]);
-    
+
     setTimeout(() => {
       llmDot.classList.remove('active');
-      if (hasKey) {
-        llmDot.classList.add('passed'); // LLM Judge active = extra protection
-      } else {
-        llmDot.classList.add('passed'); // Not active but not a failure
+      if (llmStatus && llmStatus.used) {
+        llmDot.classList.add('passed'); // judge ruled on this prompt
       }
+      // Not consulted -> stays neutral gray. Gray is honest here:
+      // the judge abstained; it neither passed nor caught anything.
     }, delays[4] + 400);
   }
 }

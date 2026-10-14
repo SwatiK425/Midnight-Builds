@@ -284,7 +284,7 @@ function renderArsenal() {
 }
 
 function escapeHtml(text) {
-  return text.replace(/[&<>"']/g, c => ({'&':'&','<':'<','>':'>','"':'&quot',"'":'''}[c]));
+  return text.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
 
 function capitalize(str) {
@@ -364,14 +364,18 @@ async function launchAttack() {
     }
     saveStats();
     
-    // Animate layers with REAL results from guardrail
-    const layerResults = result.layers.map(l => ({
+    // Animate layers with REAL results from guardrail.
+    // Prefer the authoritative per-layer risks from the embedded details JSON;
+    // fall back to the HTML-scraped layer summary when details are absent.
+    const sourceLayers = (result.details && Array.isArray(result.details.layers) && result.details.layers.length)
+      ? result.details.layers
+      : result.layers;
+    const layerResults = sourceLayers.map(l => ({
       name: l.name,
-      risk: l.risk,
-      verdict: l.verdict
+      risk: l.risk
     }));
-    
-    animateLayerDotsReal(dots, layerResults, hasKey);
+
+    animateLayerDotsReal(dots, layerResults, result.llm_status);
     
     // Set final verdict state
     setVaultState(gameVerdict, riskScore);

@@ -46,12 +46,16 @@ export function createByokModal() {
   
   function setLoading(loading) {
     attachBtn.disabled = loading;
+    // #byok-attach has no .btn-text child (unlike #launch-btn) — guard the lookup.
+    const label = attachBtn.querySelector('.btn-text');
     if (loading) {
       attachBtn.classList.add('loading');
-      attachBtn.querySelector('.btn-text').textContent = 'Attaching…';
+      if (label) label.textContent = 'Attaching…';
+      else attachBtn.textContent = 'Attaching…';
     } else {
       attachBtn.classList.remove('loading');
-      attachBtn.querySelector('.btn-text').textContent = 'Attach Key';
+      if (label) label.textContent = 'Attach Key';
+      else attachBtn.textContent = 'Attach Key';
     }
   }
   
@@ -100,8 +104,11 @@ export function createByokModal() {
         const result = await onAttachCallback(provider, key, model);
         if (result.success) {
           updateKeyUI(true, { provider: result.provider, model: result.model, maskedKey: key.slice(0,4)+'…'+key.slice(-4), rateLimit: {} });
-          modal.close();
-          showToast('<strong>✦ LLM Judge attached</strong><br>Provider: ' + result.provider + '<br>Model: ' + result.model, 'success');
+          // NOTE: `modal` here is the overlay DOM element (no .close() method),
+          // and showToast lives in guardrail.js module scope — not callable here.
+          // The onAttach callback in guardrail.js already toasts + closes via the
+          // modal API object, so just close via the local helper.
+          closeModal();
         } else {
           showStatus(result.html || 'Failed to attach key', 'error');
         }
