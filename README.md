@@ -1,14 +1,16 @@
-# Midnight Builds — redesign
+# Midnight Builds — storybook edition
 
-A hand-built, framework-free personal site. Apple/Steve-Jobs discipline:
-true-black canvas, system font, one blue accent, hairline rules, generous space.
+A hand-built, framework-free personal site. WriterBuilder-inspired discipline:
+warm paper canvas, brown ink, soft book serif, handwritten micro-labels,
+hand-drawn SVG doodles, hairline rules, generous space.
 No Tailwind, no Font Awesome, no CDN — every byte is yours.
 
 ## Files
-- `index.html`    landing: hero, **projects (real repos)**, videos (coming), writing (coming), connect, subscribe
-- `projects.html` every GitHub project, with real links
+- `index.html`    cover: masthead, chapter cards (TOC), tonight-on-the-bench, letter, connect
+- `projects.html` every GitHub project as numbered storybook rows, with real links
 - `articles.html` writing index — honest "coming with the builds" list (no fake posts)
-- `assets/styles.css`  the whole design system
+- `guardrail.html` Guard the Vault game — stays after dark via `body.vault`
+- `assets/styles.css`  the whole design system (paper theme + vault scope)
 - `assets/site.js`     subscribe handler (click-to-play removed — no videos yet)
 
 ## Run locally

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>About Me — Midnight Builds</title>
+  <meta name="description" content="The human behind Midnight Builds: a day job by day, reading, tinkering, writing, and building by night." />
+  <link rel="stylesheet" href="assets/styles.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='M63 18 A38 38 0 1 0 84 74 A30 30 0 1 1 63 18 Z' fill='%23E9C46A' stroke='%232E201B' stroke-width='6'/></svg>" />
+</head>
+<body class="sub">
+  <div class="stage">
+
+    <header class="pageheader">
+      <a class="home" href="index.html">
+        <svg class="moon-mini" viewBox="0 0 32 32" aria-hidden="true"><path d="M20 5 A13 13 0 1 0 27 23 A10 10 0 1 1 20 5 Z" fill="#E9C46A" stroke="#2E201B" stroke-width="2"/></svg>
+        Midnight Builds
+      </a>
+      <span class="crumb">about me</span>
+    </header>
+
+    <div class="titleblock">
+      <img class="about-photo" src="assets/me.png" alt="Swati — black and white photo" />
+      <p class="dept">the human</p>
+      <h1>Hi, I'm Swati.</h1>
+      <p class="dek">Day job by day. Reading, tinkering, writing, building by night.</p>
+    </div>
+
+    <div class="bio">
+      <p>By day I work a day job in tech. By night — coffee in hand — I read, tinker, write, and build whatever's been rattling around my head: security tools, AI apps, the occasional contraption.</p>
+      <p>Everything ships in public on GitHub, with a build video and a note for each one. Nothing here is a demo of a demo — if it's on the shelf, it's real and it runs.</p>
+    </div>
+
+    <div class="toc-rule"><span class="label">presently…</span></div>
+
+    <div class="rows">
+      <div class="row">
+        <span class="row__num">now</span>
+        <span class="row__body">
+          <span class="row__name">Filming the next build video</span>
+          <span class="row__desc">The DLP guardrail build — wins, dead ends, wiring, all of it.</span>
+        </span>
+      </div>
+      <div class="row">
+        <span class="row__num">next</span>
+        <span class="row__body">
+          <span class="row__name">Writing it down</span>
+          <span class="row__desc">Notes on whatever the builds teach me — or whatever else is on my mind.</span>
+        </span>
+      </div>
+    </div>
+
+    <div class="toc-rule"><span class="label">say hello</span></div>
+
+    <nav class="connect" aria-label="Elsewhere">
+      <a href="https://github.com/SwatiK425" rel="me">GitHub</a>
+      <a href="https://youtube.com/@yourchannel" rel="me">YouTube</a>
+      <a href="https://twitter.com/yourhandle" rel="me">Twitter / X</a>
+      <a href="https://discord.gg/yourextra" rel="me">Discord</a>
+      <a href="https://instagram.com/yourhandle" rel="me">Instagram</a>
+      <a href="https://tiktok.com/@yourhandle" rel="me">TikTok</a>
+    </nav>
+
+    <footer class="footer">
+      <p>© <span id="yr"></span> Midnight Builds · built after dark</p>
+    </footer>
+
+  </div>
+  <script>document.getElementById('yr').textContent = new Date().getFullYear();</script>
+</body>
+</html>

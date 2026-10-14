@@ -76,12 +76,24 @@ export async function attachKey(provider, apiKey, model) {
     const result = await callGradio(FN_INDEX.ATTACH_KEY, [provider, apiKey || '', model || '']);
     
     // Gradio returns: { data: [htmlStatus, guardrailSessionData] }
-    const html = result.data?.[0] || '';
-    const sessionData = result.data?.[1];
+    // On success with empty key: { error: null }
+    // On success with key: { data: [htmlString, sessionData] }
+    const data = result.data;
+    let html = '';
+    let sessionData = null;
+    
+    if (Array.isArray(data)) {
+      html = data[0] || '';
+      sessionData = data[1];
+    } else if (result.error === null) {
+      // Success with no HTML returned (e.g., empty key uses env var)
+      html = 'LLM judge attached via env var';
+      sessionData = result.session_data || null;
+    }
     
     if (sessionData) setStoredGuardrail(sessionData);
     
-    const success = html.includes('✅') || html.includes('LLM judge attached') || html.includes('Attached');
+    const success = html.includes('✅') || html.includes('LLM judge attached') || html.includes('Attached') || result.error === null;
     
     return { 
       success, 

@@ -100,8 +100,10 @@ export function createByokModal() {
         const result = await onAttachCallback(provider, key, model);
         if (result.success) {
           updateKeyUI(true, { provider: result.provider, model: result.model, maskedKey: key.slice(0,4)+'…'+key.slice(-4), rateLimit: {} });
+          modal.close();
+          showToast('<strong>✦ LLM Judge attached</strong><br>Provider: ' + result.provider + '<br>Model: ' + result.model, 'success');
         } else {
-          showStatus(result.html, 'error');
+          showStatus(result.html || 'Failed to attach key', 'error');
         }
       }
     } finally {

@@ -3,114 +3,146 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Projects — Midnight Builds</title>
+  <title>Products — Midnight Builds</title>
   <meta name="description" content="Every project, in public on GitHub — security tooling, AI apps, and the occasional utility. A video and a write-up arrive with each build." />
   <link rel="stylesheet" href="assets/styles.css" />
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='16' cy='16' r='14' fill='%23000' stroke='%232997ff' stroke-width='2'/><circle cx='16' cy='16' r='5' fill='%232997ff'/></svg>" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='M63 18 A38 38 0 1 0 84 74 A30 30 0 1 1 63 18 Z' fill='%23E9C46A' stroke='%232E201B' stroke-width='6'/></svg>" />
 </head>
-<body>
+<body class="sub">
+  <div class="stage">
 
-  <nav class="nav">
-    <div class="nav__inner">
-      <a class="brand" href="index.html">
-        <svg class="brand__mark" viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="14" fill="none" stroke="#f5f5f7" stroke-width="2"/><circle cx="16" cy="16" r="5" fill="#2997ff"/></svg>
+    <header class="pageheader">
+      <a class="home" href="index.html">
+        <svg class="moon-mini" viewBox="0 0 32 32" aria-hidden="true"><path d="M20 5 A13 13 0 1 0 27 23 A10 10 0 1 1 20 5 Z" fill="#E9C46A" stroke="#2E201B" stroke-width="2"/></svg>
         Midnight Builds
       </a>
-      <div class="nav__links">
-              <a href="index.html#projects">Projects</a>
-              <a href="index.html#videos">Videos</a>
-              <a href="articles.html">Writing</a>
-              <a href="guardrail.html">Guardrail</a>
-              <a href="index.html#connect">Connect</a>
-            </div>
+      <span class="crumb">products</span>
+    </header>
+
+    <div class="titleblock">
+      <svg class="titleblock__doodle" viewBox="0 0 120 120" aria-hidden="true">
+        <rect x="22" y="62" width="76" height="34" rx="6" fill="#2D4A3D" stroke="#2E201B" stroke-width="3.5"/>
+        <line x1="22" y1="74" x2="98" y2="74" stroke="#F5EFE2" stroke-width="2.5"/>
+        <rect x="34" y="40" width="20" height="24" rx="3" fill="#E9C46A" stroke="#2E201B" stroke-width="3.5"/>
+        <line x1="44" y1="40" x2="44" y2="30" stroke="#2E201B" stroke-width="3.5" stroke-linecap="round"/>
+        <path d="M70 52 l14 -14 8 8 -14 14 Z" fill="#C9505F" stroke="#2E201B" stroke-width="3.5" stroke-linejoin="round"/>
+        <line x1="70" y1="52" x2="58" y2="64" stroke="#2E201B" stroke-width="3.5" stroke-linecap="round"/>
+      </svg>
+      <p class="dept">off the bench</p>
+      <h1>Products</h1>
+      <p class="dek">Everything I ship, in public. Each one gets a build video and a write-up as it lands.</p>
     </div>
-  </nav>
 
-  <header class="hero wrap" style="padding-bottom:64px">
-    <h1 class="hero__title" style="max-width:16ch">Projects</h1>
-    <p class="hero__sub" style="max-width:44ch">Everything I ship, in public. Each one gets a build video and a write-up as it lands.</p>
-  </header>
-
-  <section class="section section--plain">
-    <div class="wrap">
-      <div class="grid grid--projects">
-        <article class="pcard">
-          <h3 class="pcard__name">DLP_guardrail</h3>
-          <p class="pcard__desc">A guardrail layer that keeps AI features from leaking sensitive data.</p>
-          <div class="pcard__tags"><span class="tag">Python</span><span class="tag">Security</span><span class="tag">DLP</span></div>
-          <a class="pcard__link" href="https://github.com/SwatiK425/DLP_guardrail">View source &rarr;</a>
-        </article>
-        <article class="pcard">
-          <h3 class="pcard__name">soc-copilot</h3>
-          <p class="pcard__desc">GenAI SOC copilot that cuts alert noise 99.2% and generates remediation playbooks with full analyst control.</p>
-          <div class="pcard__tags"><span class="tag">TypeScript</span><span class="tag">GenAI</span><span class="tag">Security</span></div>
-          <a class="pcard__link" href="https://github.com/SwatiK425/soc-copilot">View source &rarr;</a>
-        </article>
-        <article class="pcard">
-          <h3 class="pcard__name">YT-Learn</h3>
-          <p class="pcard__desc">Turn YouTube videos into structured, searchable study notes.</p>
-          <div class="pcard__tags"><span class="tag">JavaScript</span><span class="tag">AI</span><span class="tag">Learning</span></div>
-          <a class="pcard__link" href="https://github.com/SwatiK425/YT-Learn">View source &rarr;</a>
-        </article>
-        <article class="pcard">
-          <h3 class="pcard__name">GenAI_Guardrail</h3>
-          <p class="pcard__desc">Safety guardrails for generative-AI apps.</p>
-          <div class="pcard__tags"><span class="tag">Python</span><span class="tag">GenAI</span><span class="tag">Safety</span></div>
-          <a class="pcard__link" href="https://github.com/SwatiK425/GenAI_Guardrail">View source &rarr;</a>
-        </article>
-        <article class="pcard">
-          <h3 class="pcard__name">YT-Scraper</h3>
-          <p class="pcard__desc">Pull transcripts and metadata from YouTube at scale.</p>
-          <div class="pcard__tags"><span class="tag">Python</span><span class="tag">YouTube</span><span class="tag">Data</span></div>
-          <a class="pcard__link" href="https://github.com/SwatiK425/YT-Scraper">View source &rarr;</a>
-        </article>
-        <article class="pcard">
-          <h3 class="pcard__name">company_research</h3>
-          <p class="pcard__desc">Research companies from the command line.</p>
-          <div class="pcard__tags"><span class="tag">Python</span><span class="tag">Research</span></div>
-          <a class="pcard__link" href="https://github.com/SwatiK425/company_research">View source &rarr;</a>
-        </article>
-        <article class="pcard">
-          <h3 class="pcard__name">onboarding-buddy</h3>
-          <p class="pcard__desc">Streamlines team onboarding so new hires ship faster.</p>
-          <div class="pcard__tags"><span class="tag">Python</span><span class="tag">Tooling</span></div>
-          <a class="pcard__link" href="https://github.com/SwatiK425/onboarding-buddy">View source &rarr;</a>
-        </article>
-        <article class="pcard">
-          <h3 class="pcard__name">Nourish_Meal_Planner</h3>
-          <p class="pcard__desc">Plan meals without the weekly decision fatigue.</p>
-          <div class="pcard__tags"><span class="tag">Utility</span></div>
-          <a class="pcard__link" href="https://github.com/SwatiK425/Nourish_Meal_Planner">View source &rarr;</a>
-        </article>
-        <article class="pcard">
-          <h3 class="pcard__name">project-guardian</h3>
-          <p class="pcard__desc">Keeps an eye on your projects so nothing slips.</p>
-          <div class="pcard__tags"><span class="tag">Utility</span></div>
-          <a class="pcard__link" href="https://github.com/SwatiK425/project-guardian">View source &rarr;</a>
-        </article>
-        <article class="pcard">
-          <h3 class="pcard__name">Codex-Demo</h3>
-          <p class="pcard__desc">A hands-on demo built on OpenAI Codex.</p>
-          <div class="pcard__tags"><span class="tag">Demo</span><span class="tag">AI</span></div>
-          <a class="pcard__link" href="https://github.com/SwatiK425/Codex-Demo">View source &rarr;</a>
-        </article>
-      </div>
-
-      <p class="section-lede" style="margin-top:40px;font-size:15px">Want these in your inbox as they ship? <a class="link" href="index.html#subscribe">Subscribe <span class="arr">&rarr;</span></a></p>
+    <div class="rows">
+      <a class="row" href="https://github.com/SwatiK425/DLP_guardrail">
+        <span class="row__num">01</span>
+        <span class="row__body">
+          <span class="row__name">DLP_guardrail</span>
+          <span class="row__desc">A guardrail layer that keeps AI features from leaking sensitive data — jailbreaks, injections, and exfiltration, caught before the LLM.</span>
+          <span class="row__meta">Python · Security · DLP</span>
+        </span>
+        <span class="row__cta">source →</span>
+      </a>
+      <a class="row" href="https://github.com/SwatiK425/soc-copilot">
+        <span class="row__num">02</span>
+        <span class="row__body">
+          <span class="row__name">soc-copilot</span>
+          <span class="row__desc">GenAI SOC copilot that cuts alert noise 99.2% and drafts remediation playbooks — the analyst stays in control.</span>
+          <span class="row__meta">TypeScript · GenAI · Security</span>
+        </span>
+        <span class="row__cta">source →</span>
+      </a>
+      <a class="row" href="https://github.com/SwatiK425/YT-Learn">
+        <span class="row__num">03</span>
+        <span class="row__body">
+          <span class="row__name">YT-Learn</span>
+          <span class="row__desc">Turn YouTube videos into structured, searchable study notes.</span>
+          <span class="row__meta">JavaScript · AI · Learning</span>
+        </span>
+        <span class="row__cta">source →</span>
+      </a>
+      <a class="row" href="https://github.com/SwatiK425/GenAI_Guardrail">
+        <span class="row__num">04</span>
+        <span class="row__body">
+          <span class="row__name">GenAI_Guardrail</span>
+          <span class="row__desc">Safety guardrails for generative-AI apps.</span>
+          <span class="row__meta">Python · GenAI · Safety</span>
+        </span>
+        <span class="row__cta">source →</span>
+      </a>
+      <a class="row" href="https://github.com/SwatiK425/YT-Scraper">
+        <span class="row__num">05</span>
+        <span class="row__body">
+          <span class="row__name">YT-Scraper</span>
+          <span class="row__desc">Pull transcripts and metadata from YouTube at scale.</span>
+          <span class="row__meta">Python · YouTube · Data</span>
+        </span>
+        <span class="row__cta">source →</span>
+      </a>
+      <a class="row" href="https://github.com/SwatiK425/company_research">
+        <span class="row__num">06</span>
+        <span class="row__body">
+          <span class="row__name">company_research</span>
+          <span class="row__desc">Research companies from the command line.</span>
+          <span class="row__meta">Python · Research</span>
+        </span>
+        <span class="row__cta">source →</span>
+      </a>
+      <a class="row" href="https://github.com/SwatiK425/onboarding-buddy">
+        <span class="row__num">07</span>
+        <span class="row__body">
+          <span class="row__name">onboarding-buddy</span>
+          <span class="row__desc">Streamlines team onboarding so new hires ship faster.</span>
+          <span class="row__meta">Python · Tooling</span>
+        </span>
+        <span class="row__cta">source →</span>
+      </a>
+      <a class="row" href="https://github.com/SwatiK425/Nourish_Meal_Planner">
+        <span class="row__num">08</span>
+        <span class="row__body">
+          <span class="row__name">Nourish_Meal_Planner</span>
+          <span class="row__desc">Plan meals without the weekly decision fatigue.</span>
+          <span class="row__meta">Utility</span>
+        </span>
+        <span class="row__cta">source →</span>
+      </a>
+      <a class="row" href="https://github.com/SwatiK425/project-guardian">
+        <span class="row__num">09</span>
+        <span class="row__body">
+          <span class="row__name">project-guardian</span>
+          <span class="row__desc">Keeps an eye on your projects so nothing slips.</span>
+          <span class="row__meta">Utility</span>
+        </span>
+        <span class="row__cta">source →</span>
+      </a>
+      <a class="row" href="https://github.com/SwatiK425/Codex-Demo">
+        <span class="row__num">10</span>
+        <span class="row__body">
+          <span class="row__name">Codex-Demo</span>
+          <span class="row__desc">A hands-on demo built on OpenAI Codex.</span>
+          <span class="row__meta">Demo · AI</span>
+        </span>
+        <span class="row__cta">source →</span>
+      </a>
     </div>
-  </section>
 
-  <footer class="footer">
-    <div class="wrap footer__inner">
-      <p class="footer__copy">&copy; <span id="yr"></span> Midnight Builds. Built after dark.</p>
-      <nav class="footer__nav">
-        <a href="index.html">Home</a>
-        <a href="projects.html">Projects</a>
-        <a href="articles.html">Writing</a>
-      </nav>
-    </div>
-  </footer>
+    <div class="toc-rule"><span class="label">want these as they ship?</span></div>
 
+    <section class="letter">
+      <p class="letter__text">One email per build. That's the whole deal.</p>
+      <form class="letter__form" data-subscribe>
+        <input type="email" name="email" placeholder="you@example.com" aria-label="Email address" required />
+        <button type="submit">Subscribe</button>
+      </form>
+      <p class="note">Or head <a href="index.html">home</a>.</p>
+    </section>
+
+    <footer class="footer">
+      <p>© <span id="yr"></span> Midnight Builds · built after dark</p>
+    </footer>
+
+  </div>
   <script>document.getElementById('yr').textContent = new Date().getFullYear();</script>
+  <script src="assets/site.js"></script>
 </body>
 </html>

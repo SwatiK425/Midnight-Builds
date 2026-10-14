@@ -3,78 +3,87 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Writing — Midnight Builds</title>
+  <title>Notes — Midnight Builds</title>
   <meta name="description" content="Notes from the workbench. Each piece pairs with a build as it ships — the why behind the code." />
   <link rel="stylesheet" href="assets/styles.css" />
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='16' cy='16' r='14' fill='%23000' stroke='%232997ff' stroke-width='2'/><circle cx='16' cy='16' r='5' fill='%232997ff'/></svg>" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='M63 18 A38 38 0 1 0 84 74 A30 30 0 1 1 63 18 Z' fill='%23E9C46A' stroke='%232E201B' stroke-width='6'/></svg>" />
 </head>
-<body>
+<body class="sub">
+  <div class="stage">
 
-  <nav class="nav">
-    <div class="nav__inner">
-      <a class="brand" href="index.html">
-        <svg class="brand__mark" viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="14" fill="none" stroke="#f5f5f7" stroke-width="2"/><circle cx="16" cy="16" r="5" fill="#2997ff"/></svg>
+    <header class="pageheader">
+      <a class="home" href="index.html">
+        <svg class="moon-mini" viewBox="0 0 32 32" aria-hidden="true"><path d="M20 5 A13 13 0 1 0 27 23 A10 10 0 1 1 20 5 Z" fill="#E9C46A" stroke="#2E201B" stroke-width="2"/></svg>
         Midnight Builds
       </a>
-      <div class="nav__links">
-              <a href="index.html#projects">Projects</a>
-              <a href="index.html#videos">Videos</a>
-              <a href="articles.html">Writing</a>
-              <a href="guardrail.html">Guardrail</a>
-              <a href="index.html#connect">Connect</a>
-            </div>
+      <span class="crumb">notes</span>
+    </header>
+
+    <div class="titleblock">
+      <svg class="titleblock__doodle" viewBox="0 0 120 120" aria-hidden="true">
+        <path d="M78 26 C60 40 44 62 38 92 L46 94 C70 78 84 56 88 30 Z" fill="#FBF6E9" stroke="#2E201B" stroke-width="3.5" stroke-linejoin="round"/>
+        <line x1="44" y1="86" x2="80" y2="36" stroke="#2E201B" stroke-width="2.5"/>
+        <path d="M38 92 l-6 12 12 -6 Z" fill="#2D4A3D" stroke="#2E201B" stroke-width="3" stroke-linejoin="round"/>
+        <line x1="30" y1="40" x2="58" y2="40" stroke="#C9505F" stroke-width="3" stroke-linecap="round"/>
+        <line x1="30" y1="52" x2="52" y2="52" stroke="#2E201B" stroke-width="3" stroke-linecap="round" opacity=".45"/>
+      </svg>
+      <p class="dept">thinking, in progress</p>
+      <h1>Notes</h1>
+      <p class="dek">The why behind the code. Each piece lands with its build as I ship it.</p>
     </div>
-  </nav>
 
-  <header class="hero wrap" style="padding-bottom:56px">
-    <h1 class="hero__title" style="max-width:18ch">Writing</h1>
-    <p class="hero__sub" style="max-width:44ch">The why behind the code. Each piece lands with its build as I ship it.</p>
-  </header>
-
-  <section class="section section--plain">
-    <div class="wrap">
-      <p class="eyebrow">In the pipeline</p>
-      <h2 class="section-title">Coming with the builds</h2>
-      <p class="section-lede">No filler here — these are the write-ups I'm actually working on, each tied to a real project.</p>
-
-      <div class="posts" style="margin-top:36px">
-        <a class="post" href="https://github.com/SwatiK425/soc-copilot">
-          <span class="post__date">Soon</span>
-          <span><span class="post__title">Cutting SOC alert noise 99.2%</span><span class="post__dek">How soc-copilot turns a flood of alerts into a handful of real playbooks — and where the human stays in control.</span></span>
-          <span class="post__go">Project &rarr;</span>
-        </a>
-        <a class="post" href="https://github.com/SwatiK425/DLP_guardrail">
-          <span class="post__date">Soon</span>
-          <span><span class="post__title">Stopping AI from leaking your data</span><span class="post__dek">What a data-loss guardrail actually has to catch, and the cases that surprise you.</span></span>
-          <span class="post__go">Project &rarr;</span>
-        </a>
-        <a class="post" href="https://github.com/SwatiK425/YT-Learn">
-          <span class="post__date">Soon</span>
-          <span><span class="post__title">From video to notes</span><span class="post__dek">The architecture behind YT-Learn — turning hours of video into something you can actually study.</span></span>
-          <span class="post__go">Project &rarr;</span>
-        </a>
-        <a class="post" href="https://github.com/SwatiK425/GenAI_Guardrail">
-          <span class="post__date">Soon</span>
-          <span><span class="post__title">Guardrails that don't get in the way</span><span class="post__dek">Designing safety for generative apps without burying the product in friction.</span></span>
-          <span class="post__go">Project &rarr;</span>
-        </a>
-      </div>
-
-      <p class="section-lede" style="margin-top:44px;font-size:15px">Want these the moment they land? <a class="link" href="index.html#subscribe">Subscribe <span class="arr">&rarr;</span></a></p>
+    <div class="rows">
+      <a class="row" href="https://github.com/SwatiK425/soc-copilot">
+        <span class="row__num">soon</span>
+        <span class="row__body">
+          <span class="row__name">Cutting SOC alert noise 99.2%</span>
+          <span class="row__desc">How soc-copilot turns a flood of alerts into a handful of real playbooks — and where the human stays in control.</span>
+        </span>
+        <span class="row__cta">project →</span>
+      </a>
+      <a class="row" href="https://github.com/SwatiK425/DLP_guardrail">
+        <span class="row__num">soon</span>
+        <span class="row__body">
+          <span class="row__name">Stopping AI from leaking your data</span>
+          <span class="row__desc">What a data-loss guardrail actually has to catch, and the cases that surprise you.</span>
+        </span>
+        <span class="row__cta">project →</span>
+      </a>
+      <a class="row" href="https://github.com/SwatiK425/YT-Learn">
+        <span class="row__num">soon</span>
+        <span class="row__body">
+          <span class="row__name">From video to notes</span>
+          <span class="row__desc">The architecture behind YT-Learn — turning hours of video into something you can actually study.</span>
+        </span>
+        <span class="row__cta">project →</span>
+      </a>
+      <a class="row" href="https://github.com/SwatiK425/GenAI_Guardrail">
+        <span class="row__num">soon</span>
+        <span class="row__body">
+          <span class="row__name">Guardrails that don't get in the way</span>
+          <span class="row__desc">Designing safety for generative apps without burying the product in friction.</span>
+        </span>
+        <span class="row__cta">project →</span>
+      </a>
     </div>
-  </section>
 
-  <footer class="footer">
-    <div class="wrap footer__inner">
-      <p class="footer__copy">&copy; <span id="yr"></span> Midnight Builds. Built after dark.</p>
-      <nav class="footer__nav">
-        <a href="index.html">Home</a>
-        <a href="projects.html">Projects</a>
-        <a href="articles.html">Writing</a>
-      </nav>
-    </div>
-  </footer>
+    <div class="toc-rule"><span class="label">get them the moment they land</span></div>
 
+    <section class="letter">
+      <p class="letter__text">No filler here — these exist when the builds do.</p>
+      <form class="letter__form" data-subscribe>
+        <input type="email" name="email" placeholder="you@example.com" aria-label="Email address" required />
+        <button type="submit">Subscribe</button>
+      </form>
+      <p class="note">Or head <a href="index.html">home</a>.</p>
+    </section>
+
+    <footer class="footer">
+      <p>© <span id="yr"></span> Midnight Builds · built after dark</p>
+    </footer>
+
+  </div>
   <script>document.getElementById('yr').textContent = new Date().getFullYear();</script>
+  <script src="assets/site.js"></script>
 </body>
 </html>
