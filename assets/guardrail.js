@@ -327,6 +327,9 @@ async function launchAttack() {
   // Cancel any pending request
   if (abortController) abortController.abort();
   abortController = new AbortController();
+  // Capture this attack's signal: the module-level controller may be replaced
+  // by a newer attack while we await, so the catch block must test THIS one.
+  const signal = abortController.signal;
 
   // Disable input
   promptInput.disabled = true;
@@ -347,8 +350,9 @@ async function launchAttack() {
   });
 
   try {
-    // Call API - returns structured data that adapts to guardrail changes
-    const result = await analyzePrompt(prompt);
+    // Call API - returns structured data that adapts to guardrail changes.
+    // The abort signal cancels retries too when the user fires a new attack.
+    const result = await analyzePrompt(prompt, signal);
     
     // Map to game verdict using configurable thresholds
     const gameVerdict = mapVerdictToGame(result.verdict, result.risk_score, result.llm_status);
@@ -400,6 +404,11 @@ async function launchAttack() {
     }, delay);
     
   } catch (error) {
+    // Superseded by a newer attack — that attack owns the UI now. Render
+    // nothing (previously this fell through to the demo fallback and showed
+    // a fabricated verdict for the cancelled request).
+    if (signal.aborted) return;
+
     console.error('Attack failed:', error);
     
     // Demo mode fallback

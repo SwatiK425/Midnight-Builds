@@ -9,12 +9,17 @@
 // Must be publicly accessible (HF Space with public visibility, or other host)
 const GRADIO_URL = 'https://praxis.midnightbuilds.fyi/gradio'; // Oracle VM via Caddy
 
-// Fn index mapping - from Gradio config
+// Fn index mapping — verified against the live backend config:
+// 0=attach_key, 1=clear_key, 2=analyze_individual, 3=analyze_csv.
+// NOTE: these were previously off by one (analyze pointed at analyze_csv,
+// which returns an empty {"error":null} for prompt input). discoverApiSchema()
+// re-verifies at startup via each dependency's `api_name`, so backend
+// reordering self-heals instead of silently hitting the wrong function.
 const FN_INDEX = {
   ATTACH_KEY: 0,
   CLEAR_KEY: 1,
-  ANALYZE_INDIVIDUAL: 3,
-  ANALYZE_CSV: 4
+  ANALYZE_INDIVIDUAL: 2,
+  ANALYZE_CSV: 3
 };
 
 // ===== SESSION MANAGEMENT =====
@@ -44,26 +49,72 @@ function clearStoredGuardrail() {
   localStorage.removeItem('vault_session_guardrail');
 }
 
-// ===== CORE FETCH =====
-async function callGradio(fnIndex, data) {
+// ===== CORE FETCH (retry with exponential backoff) =====
+const MAX_ATTEMPTS = 3;
+const BASE_DELAY_MS = 800;
+
+function sleep(ms, signal) {
+  return new Promise((resolve, reject) => {
+    const t = setTimeout(resolve, ms);
+    if (signal) {
+      if (signal.aborted) {
+        clearTimeout(t);
+        reject(signal.reason || new Error('aborted'));
+      } else {
+        signal.addEventListener('abort', () => {
+          clearTimeout(t);
+          reject(signal.reason || new Error('aborted'));
+        }, { once: true });
+      }
+    }
+  });
+}
+
+async function callGradio(fnIndex, data, signal) {
   const payload = {
     fn_index: fnIndex,
     data: data,
     session_hash: getSessionId()
   };
-  
-  const response = await fetch(`${GRADIO_URL}/api/predict`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload)
-  });
-  
-  if (!response.ok) {
-    const err = await response.text().catch(() => '');
-    throw new Error(`Gradio API ${response.status}: ${err || response.statusText}`);
+
+  let lastError = null;
+  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+    try {
+      const response = await fetch(`${GRADIO_URL}/api/predict`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+        signal
+      });
+
+      if (response.status === 429 || response.status >= 500) {
+        // Transient: queue overload / proxy blip — retry below.
+        lastError = new Error(`Gradio API ${response.status} (attempt ${attempt}/${MAX_ATTEMPTS})`);
+      } else if (!response.ok) {
+        // Non-retryable client error — fail fast with the body.
+        const err = await response.text().catch(() => '');
+        throw new Error(`Gradio API ${response.status}: ${err || response.statusText}`);
+      } else {
+        const body = await response.json();
+        if (!body || !Array.isArray(body.data)) {
+          // Empty success (e.g. {"error":null} with no data) means the call
+          // hit the wrong endpoint or the queue dropped the result — retry.
+          lastError = new Error(`Empty API response (attempt ${attempt}/${MAX_ATTEMPTS})`);
+        } else {
+          return body;
+        }
+      }
+    } catch (error) {
+      // User navigated away / launched a new attack — never retry an abort.
+      if (error && error.name === 'AbortError') throw error;
+      if (signal && signal.aborted) throw signal.reason || new Error('aborted');
+      lastError = error;
+    }
+
+    if (attempt < MAX_ATTEMPTS) await sleep(BASE_DELAY_MS * 2 ** (attempt - 1), signal);
   }
-  
-  return response.json();
+
+  throw lastError || new Error('Gradio API failed');
 }
 
 // ===== PUBLIC API =====
@@ -91,9 +142,24 @@ export async function attachKey(provider, apiKey, model) {
       sessionData = result.session_data || null;
     }
     
-    if (sessionData) setStoredGuardrail(sessionData);
+    // NOTE: the backend returns [htmlStatus] only; the judge lives
+    // server-side keyed by session_hash (see app.py session store).
     
     const success = html.includes('✅') || html.includes('LLM judge attached') || html.includes('Attached') || result.error === null;
+
+    if (success) {
+      // The backend keeps the judge server-side (keyed by session_hash), so
+      // record the attach locally for the key-hint UI. Never store the key.
+      setStoredGuardrail({
+        attached: true,
+        provider: extractProvider(html) || provider,
+        model: extractModel(html) || model,
+        maskedKey: (apiKey || '').length > 8
+          ? apiKey.slice(0, 4) + '…' + apiKey.slice(-4)
+          : '••••',
+        at: Date.now()
+      });
+    }
     
     return { 
       success, 
@@ -122,9 +188,9 @@ export async function clearKey() {
 /**
  * Analyze a prompt - returns structured data
  */
-export async function analyzePrompt(prompt) {
+export async function analyzePrompt(prompt, signal) {
   try {
-    const result = await callGradio(FN_INDEX.ANALYZE_INDIVIDUAL, [prompt]);
+    const result = await callGradio(FN_INDEX.ANALYZE_INDIVIDUAL, [prompt], signal);
     
     // Gradio returns tuple: [verdictHtml, detailsHtml, layersHtml, llmHtml]
     const [verdictHtml, detailsHtml, layersHtml, llmHtml] = result.data || [];
@@ -195,9 +261,10 @@ function parseVerdictHtml(html) {
     }
   }
   
-  // Risk score patterns
+  // Risk score patterns. The backend renders "Risk Score: <b>88/100</b>",
+  // so the primary pattern must tolerate the trailing "/100".
   const riskPatterns = [
-    /Risk Score:\s*<b>(\d+)<\/b>/i,
+    /Risk Score:\s*<b>(\d+)/i,
     /risk[_\s]?score["\s:]+(\d+)/i,
     /Risk:\s*(\d+)/i
   ];
@@ -369,21 +436,34 @@ export function mapVerdictToGame(verdict, riskScore, llmStatus) {
 }
 
 /**
- * Check if session has valid key
+ * Check if this browser attached a key (server holds the judge; this is the
+ * local record written by attachKey, cleared by clearKey).
  */
 export function hasValidKey() {
-  const guardrail = getStoredGuardrail();
-  return guardrail && guardrail.llm_judge && guardrail.api_key;
+  const stored = getStoredGuardrail();
+  if (!stored) return false;
+  // Legacy shape (pre-session-store backend) or current {attached:true} shape.
+  return !!(stored.attached || (stored.llm_judge && stored.api_key));
 }
 
 /**
  * Get stored key info for UI
  */
 export function getKeyInfo() {
-  const guardrail = getStoredGuardrail();
-  if (!guardrail || !guardrail.llm_judge) return null;
-  
-  const judge = guardrail.llm_judge;
+  const stored = getStoredGuardrail();
+  if (!stored) return null;
+
+  if (stored.attached) {
+    return {
+      provider: stored.provider,
+      model: stored.model,
+      maskedKey: stored.maskedKey || '••••',
+      rateLimit: {}
+    };
+  }
+  if (!stored.llm_judge) return null;
+
+  const judge = stored.llm_judge;
   return {
     provider: judge.provider,
     model: judge.model,
@@ -399,11 +479,23 @@ function maskKey(key) {
 }
 
 /**
- * Test connection
+ * Test connection with a lightweight config fetch — NOT a real analysis.
+ * (Previously every page load burned one guardrail analysis on the string
+ * "health check", polluting rate-limit budgets and backend metrics.)
  */
 export async function testConnection() {
   try {
-    await analyzePrompt('health check');
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 10000);
+    let response;
+    try {
+      response = await fetch(`${GRADIO_URL}/config`, { signal: controller.signal });
+    } finally {
+      clearTimeout(timer);
+    }
+    if (!response.ok) throw new Error(`config HTTP ${response.status}`);
+    const config = await response.json();
+    if (!config || !Array.isArray(config.dependencies)) throw new Error('unexpected config shape');
     return { success: true };
   } catch (error) {
     return { success: false, error: error.message };
@@ -419,13 +511,28 @@ export async function discoverApiSchema() {
     const response = await fetch(`${GRADIO_URL}/config`);
     if (!response.ok) return null;
     const config = await response.json();
-    
-    // Map function names to indices
+
+    // Map function names to indices. The config field is `api_name`
+    // (e.g. "analyze_individual") — older code read `dep.name`, which does
+    // not exist, so discovery silently never fired and a stale hardcoded
+    // index could hit the wrong backend function.
+    // Match exact api_names first: naive substring matching misfires
+    // (e.g. "clear_key" contains "key", which an attach-branch would claim).
+    const EXACT_API_NAMES = {
+      attach_key: 'ATTACH_KEY',
+      clear_key: 'CLEAR_KEY',
+      analyze_individual: 'ANALYZE_INDIVIDUAL',
+      analyze_csv: 'ANALYZE_CSV'
+    };
     const dependencies = config.dependencies || [];
     const fnMap = {};
     dependencies.forEach((dep, idx) => {
-      const name = dep.name || dep.fn_name || '';
-      if (name.includes('attach') || name.includes('key')) fnMap.ATTACH_KEY = idx;
+      const name = dep.api_name || dep.name || dep.fn_name || '';
+      if (EXACT_API_NAMES[name]) {
+        fnMap[EXACT_API_NAMES[name]] = idx;
+        return;
+      }
+      if (name.includes('attach')) fnMap.ATTACH_KEY = idx;
       else if (name.includes('clear')) fnMap.CLEAR_KEY = idx;
       else if (name.includes('analyze') && name.includes('individual')) fnMap.ANALYZE_INDIVIDUAL = idx;
       else if (name.includes('analyze') && name.includes('csv')) fnMap.ANALYZE_CSV = idx;
