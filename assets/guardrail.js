@@ -383,6 +383,7 @@ async function launchAttack() {
     
     // Set final verdict state
     setVaultState(gameVerdict, riskScore);
+    scrollVaultIntoView();
     
     // Re-enable input
     promptInput.disabled = false;
@@ -433,6 +434,7 @@ async function launchAttack() {
     const dots = layerIndicators.querySelectorAll('.layer-dot');
     animateLayerDots(dots, verdict, hasKey);
     setVaultState(verdict, risk);
+    scrollVaultIntoView();
     
     promptInput.disabled = false;
     promptInput.classList.remove('testing');
@@ -451,6 +453,16 @@ async function launchAttack() {
 }
 
 launchBtn.addEventListener('click', launchAttack);
+
+// On stacked (narrow) layouts the vault sits below the input — bring the
+// verdict into view so the result is never missed. No-op side-by-side.
+function scrollVaultIntoView() {
+  try {
+    if (window.matchMedia('(max-width: 900px)').matches) {
+      document.getElementById('vault-arena')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  } catch {}
+}
 
 // ===== SHARE =====
 shareCopy.addEventListener('click', async () => {

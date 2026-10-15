@@ -34,39 +34,55 @@
   <main class="game-stage">
     <header class="game-header">
       <h1 class="game-title">Guard the Vault</h1>
-      <p class="game-subtitle">You are the <span class="role">attacker</span>. The vault holds your data. <span class="target">Try to breach it.</span></p>
+      <p class="game-subtitle">You are the <span class="role">attacker</span>. <span class="target">Breach the vault.</span></p>
+      <ol class="how-to" aria-label="How to play">
+        <li><strong>1.</strong> Pick an attack below <em>or</em> write your own</li>
+        <li><strong>2.</strong> Hit <strong>Launch Attack</strong></li>
+        <li><strong>3.</strong> Fool all 4 layers to crack the vault</li>
+      </ol>
     </header>
 
-    <div class="vault-arena" id="vault-arena">
-      <div id="vault-container" class="vault-state-locked">
-        <!-- Vault SVG injected by JS module -->
-      </div>
-      <div id="result-banner" class="result-banner result-banner--locked" role="status" aria-live="polite">
-        <span class="result-icon" id="result-icon">🔒</span>
-        <span class="result-text" id="result-text">Vault Locked</span>
-      </div>
-      <div id="risk-meter" class="risk-meter" hidden>
-        <div class="risk-bar"><div id="risk-fill" class="risk-fill"></div></div>
-        <span class="risk-label" id="risk-label">—</span>
-      </div>
-      <div class="layer-indicators" id="layer-indicators" role="group" aria-label="Security layers" hidden>
-        <!-- 5 dots injected by JS -->
-      </div>
-    </div>
+    <div class="game-layout">
+      <section class="attack-panel" aria-label="Attack controls">
+        <div class="attack-zone" id="attack-zone">
+          <div class="attack-label">
+            <span class="attack-label__text">Your Attack Prompt</span>
+            <span class="attack-label__hint" id="key-hint">No LLM key attached — heuristic layers only</span>
+          </div>
+          <div class="prompt-input-wrapper">
+            <textarea id="prompt-input" placeholder="Craft your attack… jailbreak, injection, data theft, tool hijack" aria-label="Attack prompt" spellcheck="false"></textarea>
+          </div>
+          <div class="attack-actions">
+            <button class="btn btn-launch" id="launch-btn" disabled><span class="btn-spinner" aria-hidden="true"></span><span class="btn-text">Launch Attack</span></button>
+            <button class="btn btn-key" id="key-btn">Attach LLM Key</button>
+          </div>
+          <div class="arsenal" id="arsenal" role="list" aria-label="Attack templates"></div>
+        </div>
+      </section>
 
-    <div class="attack-zone" id="attack-zone">
-      <div class="attack-label">
-        <span class="attack-label__text">Your Attack Prompt</span>
-        <span class="attack-label__hint" id="key-hint">No LLM key attached — heuristic layers only</span>
-      </div>
-      <div class="prompt-input-wrapper">
-        <textarea id="prompt-input" placeholder="Craft your attack… jailbreak, injection, data theft, tool hijack" aria-label="Attack prompt" spellcheck="false"></textarea>
-      </div>
-      <div class="attack-actions">
-        <button class="btn btn-launch" id="launch-btn" disabled><span class="btn-spinner" aria-hidden="true"></span><span class="btn-text">Launch Attack</span></button>
-        <button class="btn btn-key" id="key-btn">Attach LLM Key</button>
-      </div>
-      <div class="arsenal" id="arsenal" role="list" aria-label="Attack templates"></div>
+      <section class="vault-panel" aria-label="Vault status">
+        <div class="vault-arena" id="vault-arena">
+          <div id="vault-container" class="vault-state-locked">
+            <!-- Vault SVG injected by JS module -->
+          </div>
+          <div id="result-banner" class="result-banner result-banner--locked" role="status" aria-live="polite">
+            <span class="result-icon" id="result-icon">🔒</span>
+            <span class="result-text" id="result-text">Vault Locked</span>
+          </div>
+          <div id="risk-meter" class="risk-meter" hidden>
+            <div class="risk-bar"><div id="risk-fill" class="risk-fill"></div></div>
+            <span class="risk-label" id="risk-label">—</span>
+          </div>
+          <div class="layer-indicators" id="layer-indicators" role="group" aria-label="Security layers" hidden>
+            <!-- 5 dots injected by JS -->
+          </div>
+        </div>
+
+        <div class="share-moment" id="share-moment" hidden>
+          <button class="share-btn share-btn--primary" id="share-copy" data-text="">Share Breach</button>
+          <button class="share-btn" id="share-again">Try Another Attack</button>
+        </div>
+      </section>
     </div>
 
     <details class="disclosure" id="disclosure">
@@ -83,11 +99,6 @@
         <p style="margin-top:12px"><strong>Green dot</strong> = layer passed. <strong>Red dot</strong> = layer caught it. <strong>Gold dot</strong> = layer missed it (breach). <strong>Blue pulse</strong> = layer analyzing.</p>
       </div>
     </details>
-
-    <div class="share-moment" id="share-moment" hidden>
-      <button class="share-btn share-btn--primary" id="share-copy" data-text="">Share Breach</button>
-      <button class="share-btn" id="share-again">Try Another Attack</button>
-    </div>
   </main>
 
   <footer class="footer">
