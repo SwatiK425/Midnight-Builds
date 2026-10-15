@@ -10,11 +10,8 @@
 const GRADIO_URL = 'https://praxis.midnightbuilds.fyi/gradio'; // Oracle VM via Caddy
 
 // Fn index mapping — verified against the live backend config:
-// 0=attach_key, 1=clear_key, 2=analyze_individual, 3=analyze_csv.
-// NOTE: these were previously off by one (analyze pointed at analyze_csv,
-// which returns an empty {"error":null} for prompt input). discoverApiSchema()
-// re-verifies at startup via each dependency's `api_name`, so backend
-// reordering self-heals instead of silently hitting the wrong function.
+// 0=attach_key, 1=clear_key, 2=analyze_individual
+// analyze_csv (fn_index 3) is disabled in current deployment
 const FN_INDEX = {
   ATTACH_KEY: 0,
   CLEAR_KEY: 1,
