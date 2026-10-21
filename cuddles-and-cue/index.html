@@ -3,6 +3,15 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Cuddles & Cue: one small play idea a day for your baby or toddler, matched to their age. No account, no subscription, no milestones, nothing uploaded.">
+<meta property="og:title" content="Cuddles & Cue">
+<meta property="og:description" content="One small play idea a day for ages 0 to 36 months. No account, no subscription, no streaks, nothing uploaded.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://midnightbuilds.fyi/cuddles-and-cue/">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Cuddles & Cue">
+<meta name="twitter:description" content="One small play idea a day for ages 0 to 36 months. No account, no subscription, no streaks, nothing uploaded.">
+
 <meta name="theme-color" content="#FAF7F1">
 <title>Cuddles &amp; Cue</title>
 <style>
@@ -134,7 +143,7 @@ h1.scr-title{font-family:Georgia,"Times New Roman",serif; font-size:34px; margin
     <input type="date" id="dob" max="">
     <div class="err" id="dob-err"></div>
     <button class="btn" id="dob-go">Show today&rsquo;s cue</button>
-    <p class="priv">You only enter this once, so it can pick the right ideas for your child&rsquo;s age.<br>It is saved only in this browser, nothing is uploaded, and there is no account.</p>
+    <p class="priv">You only enter this once, so it can pick the right ideas for your child&rsquo;s age.<br>It is saved only in this browser and never uploaded, and there is no account.</p>
   </section>
 
   <section id="screen-cue" hidden>
@@ -273,10 +282,29 @@ var REPLIES = {
   easy:["Noted — stretchier adventures ahead.","A natural! Leveling it up a little."]
 };
 
-/* Telemetry: events are stored on this phone only. If GC_CODE is set to a
-   GoatCounter site code, anonymous event counts are also sent there. */
+/* Telemetry: events are stored on this phone. If TELEM_URL is set (a Google
+   Apps Script web app), anonymous event counts are also sent to a private
+   spreadsheet: event name, activity id, age band, rating, the date on this
+   phone, and a random anonymous device id made up on this phone. Never sent:
+   the birthday, names, or emails. If a parent writes feedback in the Tell us
+   more box, those words are sent with the rating, as the Send button says. If GC_CODE is set to a
+   GoatCounter site code, anonymous page counts are also sent there. */
 var GC_CODE = "";
+var TELEM_URL = "";
 function ping(path){ if(!GC_CODE) return; try{ var i=new Image(); i.src="https://"+GC_CODE+".goatcounter.com/count?p="+encodeURIComponent(path); }catch(e){} }
+function telemDid(){
+  var d=load("did","");
+  if(!d){ d="d"+Math.random().toString(36).slice(2,10)+Date.now().toString(36); save("did",d); }
+  return d;
+}
+function bandFromId(id){ var m=/^(\d+-\d+)-/.exec(id||""); return m?m[1]:""; }
+function sendTelem(t,e){
+  if(!TELEM_URL) return;
+  try{
+    var body=JSON.stringify({did:telemDid(),t:t,d:e.d||"",id:e.id||"",b:e.b||bandFromId(e.id),r:(typeof e.r!=="undefined"?e.r:""),note:(typeof e.note!=="undefined"?e.note:"")});
+    fetch(TELEM_URL,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain"},body:body});
+  }catch(err){}
+}
 function logEvent(t,data){
   var ev=load("events",[]);
   var e={ts:Date.now(),d:todayKey(),t:t};
@@ -285,6 +313,7 @@ function logEvent(t,data){
   if(ev.length>3000) ev=ev.slice(ev.length-3000);
   save("events",ev);
   ping("/e/"+t);
+  sendTelem(t,e);
 }
 function feedbackFor(id){
   var fb=load("feedback",[]);
@@ -568,7 +597,7 @@ function submitFeedback(){
     var notes=load("notes",[]);
     notes.push({d:todayKey(),id:current?current.id:"",text:txt});
     save("notes",notes);
-    logEvent("note",{id:current?current.id:""});
+    logEvent("note",{id:current?current.id:"",note:txt});
     $("fb-note").value="";
   }
   showActivityCard();
