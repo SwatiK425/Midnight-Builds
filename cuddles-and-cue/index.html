@@ -290,7 +290,7 @@ var REPLIES = {
    more box, those words are sent with the rating, as the Send button says. If GC_CODE is set to a
    GoatCounter site code, anonymous page counts are also sent there. */
 var GC_CODE = "";
-var TELEM_URL = "";
+var TELEM_URL = "https://script.google.com/macros/s/AKfycbx9ELgzY1hmfahzcsIcTzlcEZsZC6oNIHc1-sUO0t0jalpzIzFvuOfDN_ebr1QQss_t/exec";
 function ping(path){ if(!GC_CODE) return; try{ var i=new Image(); i.src="https://"+GC_CODE+".goatcounter.com/count?p="+encodeURIComponent(path); }catch(e){} }
 function telemDid(){
   var d=load("did","");
