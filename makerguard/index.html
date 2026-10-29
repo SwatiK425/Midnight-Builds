@@ -1,0 +1,889 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MakerGuard: Can a stranger read your users' data?</title>
+<style>
+/* One typeface. Three sizes: 28 display, 17 text, 13 caption. Two weights: 400 and 600. Nothing else. */
+*{box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,system-ui,sans-serif;font-size:17px;font-weight:400;line-height:1.47;max-width:640px;margin:0 auto;padding:56px 20px 64px;color:#1d1d1f;background:#fff;-webkit-font-smoothing:antialiased}
+strong{font-weight:600}
+h1,.verdict,.issuePage h3{font-size:28px;line-height:1.15;font-weight:600;letter-spacing:-0.015em}
+h1{text-align:center;margin:0 0 12px}
+.topbar{display:flex;justify-content:space-between;align-items:baseline;gap:16px;border-bottom:1px solid #e5e5e5;padding-bottom:16px;margin:0 0 44px}
+.brandmark{font-weight:600}
+.topnote{font-size:13px;color:#86868b;text-align:right}
+h2,h3{font-size:17px;font-weight:600;margin:32px 0 4px}
+p{margin:8px 0}
+.sub,.verdictsub{text-align:center;color:#6e6e73;margin:0 auto 8px}
+.free,.small,.hostline,.issueno,.restline,footer,.log,.proof summary{font-size:13px}
+.free{text-align:center;color:#86868b;margin:0 0 40px}
+.small{color:#6e6e73}
+.hostline{color:#86868b;text-align:center;margin:0 0 24px}
+.issueno{font-weight:600;color:#6e6e73;margin:0}
+.restline{text-align:center;color:#6e6e73;margin:28px 0 0}
+footer{color:#86868b;text-align:center;margin-top:48px}
+footer p{margin:4px 0}
+label{display:block;font-weight:600;margin:20px 0 6px}
+input[type=text],input[type=password]{width:100%;height:48px;padding:0 16px;font-size:17px;font-family:inherit;border:1px solid #d2d2d7;border-radius:12px;background:#fff;appearance:none}
+input:focus{outline:none;border-color:#0071e3;box-shadow:0 0 0 4px rgba(0,113,227,.15)}
+.check{display:flex;gap:8px;align-items:flex-start;font-weight:400;color:#424245;margin:12px 0}
+.check input{margin-top:4px}
+button{font-family:inherit;font-size:17px}
+button.primary{width:100%;height:52px;margin:32px 0 8px;font-weight:600;border:none;border-radius:980px;background:#000;color:#fff;cursor:pointer}
+button.primary:disabled{opacity:.4}
+.links{text-align:center;margin:4px 0 8px}
+button.link{background:none;border:none;color:#0066cc;cursor:pointer;padding:6px 10px}
+button.secondary,.navbtn{height:44px;padding:0 22px;border-radius:980px;border:1px solid #1d1d1f;background:#fff;color:#1d1d1f;cursor:pointer;margin:8px 0}
+button.secondary:disabled,.navbtn:disabled{opacity:.25;cursor:default}
+#downloadBtn{width:100%;height:48px;border-radius:980px;border:1px solid #1d1d1f;background:#fff;color:#1d1d1f;cursor:pointer;margin:16px 0}
+#downloadBtn:disabled{display:none}
+details{margin:28px 0}
+summary{cursor:pointer;color:#0066cc;list-style:none}
+summary::-webkit-details-marker{display:none}
+summary:before{content:"+ "}
+details[open] summary:before{content:"- "}
+.card{background:#f5f5f7;border-radius:16px;padding:20px;margin:12px 0}
+.card p{margin:4px 0}
+.log{background:#f5f5f7;border-radius:12px;padding:14px;white-space:pre-wrap;word-break:break-all}
+.hidden{display:none}
+#errorMsg{color:#b3261e;font-weight:600;text-align:center}
+#progress{text-align:center}
+.verdict{text-align:center;margin:48px 0 6px}
+.sampleNotice{background:#f5f5f7;border-radius:12px;padding:14px 16px;text-align:center;margin:32px 0 0}
+.issue{border-top:1px solid #d2d2d7;padding:24px 4px 8px;margin:8px 0}
+.lbl{font-weight:600;margin:18px 0 2px}
+ol.steps{margin:6px 0 6px 20px;padding:0}
+ol.steps li{margin:6px 0}
+.rowline{padding:12px 4px;border-top:1px solid #e5e5e5}
+.qsec{margin:22px 0 0;background:#f5f5f7;border-radius:18px;padding:22px 18px 12px}
+.qhead{font-weight:600;margin:0 0 8px}
+.arow{padding:10px 2px;border-top:1px solid #e3e3e7}
+.qsec .arow:first-of-type{border-top:none}
+.qsec .fixbox{background:#ffffff}
+details.passed{margin:16px 0}
+.issuePage{display:none}
+.issuePage.active{display:block}
+.dot{color:#d70015}
+.dotG{color:#1a7f37}
+.dotGrey{color:#86868b}
+.stWord{font-weight:600}
+.story{margin:10px 0 4px}
+.atrisk{color:#424245;margin:8px 0}
+.fixbox{background:#f5f5f7;border-radius:16px;padding:6px 20px 12px;margin:20px 0}
+.fixbox .lbl{margin-top:10px}
+.navRow{display:flex;justify-content:space-between;align-items:center;margin:10px 0 0}
+.dots{font-size:13px;color:#86868b;letter-spacing:4px}
+details.proof{margin:6px 0}
+
+.step{background:#f5f5f7;border-radius:18px;padding:8px 20px 20px;margin:20px 0}
+.step .tipText,.step input[type=text],.step input[type=password]{background:#fff}
+.stepHead{display:flex;align-items:center;gap:10px;margin:16px 0 0}
+.stepNum{width:26px;height:26px;border-radius:50%;background:#1d1d1f;color:#fff;font-size:13px;font-weight:600;display:flex;align-items:center;justify-content:center;flex:none}
+.stepHead h2{margin:0}
+.badge{font-size:13px;color:#6e6e73;border:1px solid #d2d2d7;border-radius:980px;padding:2px 10px;background:#fff}
+.labRow{display:flex;justify-content:flex-start;align-items:center;gap:6px;margin:20px 0 6px}
+.labRow label{margin:0}
+.labRow .opt{color:#86868b;font-weight:400}
+.tipBtn{width:18px;height:18px;border-radius:50%;border:1px solid #c7c7cc;background:#fff;color:#6e6e73;font-size:13px;cursor:pointer;flex:none;padding:0;line-height:1}
+.tipWrap{position:relative;display:inline-flex}
+.tipText{position:absolute;left:26px;top:-6px;width:min(280px,72vw);background:#fff;box-shadow:0 10px 34px rgba(0,0,0,.14);font-size:13px;color:#6e6e73;border:1px solid #e5e5e5;border-radius:12px;padding:10px 12px;margin:0;z-index:60}
+@media (max-width:520px){.tipText{left:auto;right:-8px;top:24px}}
+
+.optWrap{border:1px solid #e5e5e5;border-radius:18px;padding:8px 20px 20px;margin:20px 0}
+.optWrap h2{margin:16px 0 0}
+.optWrap h3{margin:0 0 4px}
+.subdiv{border-top:1px solid #e5e5e5;margin-top:28px;padding-top:20px}
+.optTag{font-weight:600;margin:20px 0 0}
+.ordiv{text-align:center;color:#86868b;font-size:13px;margin:20px 0 0}
+
+.radioRow{display:flex;gap:8px;align-items:center;margin:10px 0;font-weight:400}
+.radioRow input{width:auto;margin:0}
+
+.personRow{display:flex;gap:10px;align-items:center;margin:24px 0 0}
+.who{width:26px;height:26px;border-radius:50%;background:#1d1d1f;color:#fff;font-size:13px;font-weight:600;display:flex;align-items:center;justify-content:center;flex:none}
+.whoTitle{font-weight:600;margin:0}
+.needBoth{background:#f5f5f7;border-radius:12px;padding:10px 12px;font-size:13px;color:#424245;margin:12px 0 0}
+
+.drop{border-top:1px solid #e5e5e5;margin:0;padding:18px 0 8px}
+.drop summary{color:#1d1d1f;font-weight:600}
+.drop summary:before{color:#86868b}
+</style>
+</head>
+<body>
+
+<div class="topbar"><span class="brandmark">MakerGuard</span><span class="topnote">Security for one-person empires</span></div>
+<h1>Can a stranger read your users&rsquo; data?</h1>
+<p class="sub">A 60 second check for your Supabase product.</p>
+<p class="free">Free. Read only. Nothing is stored.</p>
+
+<div class="step">
+<p class="small">Essential, the only two you must fill</p>
+<p>Every table in your project gets checked for one question: can a stranger, with no login at all, read your users&rsquo; data?</p>
+<p class="small">Find both values in Supabase, Settings, API. Both are already public inside your app, they are not secrets.</p>
+<div class="labRow"><label for="supabaseUrl">Supabase URL</label><span class="tipWrap"><button type="button" class="tipBtn" data-tip="tip-supabaseUrl" aria-label="Help for Supabase URL">!</button><p class="tipText hidden" id="tip-supabaseUrl">Where to find it: Supabase, Settings, API, Project URL. It is the public address of your database, already inside your app's code. Requests from this check go only to this address.</p></span></div>
+<input id="supabaseUrl" type="text" placeholder="https://your-project.supabase.co" autocomplete="off" spellcheck="false"><div class="labRow"><label for="anonKey">Anon key</label><span class="tipWrap"><button type="button" class="tipBtn" data-tip="tip-anonKey" aria-label="Help for Anon key">!</button><p class="tipText hidden" id="tip-anonKey">Where to find it: Supabase, Settings, API, the anon or publishable key. It is the public key every visitor's browser already uses. Never the service_role key, it is refused here because it can bypass all your protection. Your key stays in your browser, is never stored, and never appears in your report.</p></span></div>
+<input id="anonKey" type="password" placeholder="Anon / publishable key only" autocomplete="off" spellcheck="false">
+<label class="check"><input id="showKey" type="checkbox"> Show key</label>
+</div>
+
+<div class="optWrap">
+<h2>Optional checks</h2>
+<p class="small">Open only the ones you care about. Closed ones are skipped.</p>
+
+<details class="drop"><summary>Check a single table instead of all of them</summary>
+<div class="labRow"><label for="tableName">Table name</label><span class="tipWrap"><button type="button" class="tipBtn" data-tip="tip-tableName" aria-label="Help for Table name">!</button><p class="tipText hidden" id="tip-tableName">One table, like profiles, if you only want that one checked. Or leave this blank: every table your key can see gets found and checked, all of them.</p></span></div>
+<input id="tableName" type="text" placeholder="Leave blank to check all tables" autocomplete="off" spellcheck="false">
+</details>
+<details class="drop"><summary>Find out if one user can read another user&rsquo;s data</summary>
+
+<div class="personRow"><span class="who">A</span><p class="whoTitle">Test user A, signs in</p></div>
+<p class="small">No test user yet? Create one in your Supabase: Authentication, Users, Add user, tick Auto Confirm. Make up the email and password.</p>
+<p class="optTag">How do you want to sign in as A? Pick one.</p>
+<label class="radioRow"><input type="radio" name="signinMethod" id="methodCreds" value="creds" checked> With A&rsquo;s email and password</label>
+<label class="radioRow"><input type="radio" name="signinMethod" id="methodToken" value="token"> With A&rsquo;s token instead</label>
+<div id="credFields">
+<div class="labRow"><label for="testEmail">Test user A email</label><span class="tipWrap"><button type="button" class="tipBtn" data-tip="tip-testEmail" aria-label="Help for Test user A email">!</button><p class="tipText hidden" id="tip-testEmail">The fake test account you created for testing, in your own product. Never a real customer's email.</p></span></div>
+<input id="testEmail" type="text" placeholder="test-a@example.com" autocomplete="off" spellcheck="false"><div class="labRow"><label for="testPassword">Test user A password</label><span class="tipWrap"><button type="button" class="tipBtn" data-tip="tip-testPassword" aria-label="Help for Test user A password">!</button><p class="tipText hidden" id="tip-testPassword">The throwaway password of that fake account. It goes only to your own Supabase login, this field is cleared right away, and it is never stored or shown.</p></span></div>
+<input id="testPassword" type="password" placeholder="Throwaway password for that test account only" autocomplete="off" spellcheck="false">
+<p><button id="signInBtn" class="secondary" type="button">Sign in as test user A</button></p>
+<p id="signInStatus" class="small">Not signed in yet. Sign in here, or pick the token option above.</p>
+</div>
+<div id="tokenFields" class="hidden">
+<div class="labRow"><label for="userToken">Test user A token</label><span class="tipWrap"><button type="button" class="tipBtn" data-tip="tip-userToken" aria-label="Help for Test user A token">!</button><p class="tipText hidden" id="tip-userToken">Only if you already have a token for a test user from your own tools and prefer pasting it instead of signing in. You do not need both options. Never a real customer's token.</p></span></div>
+<input id="userToken" type="password" placeholder="Only a token for a TEST user" autocomplete="off" spellcheck="false">
+</div>
+
+<div class="personRow"><span class="who">B</span><p class="whoTitle">Test user B, never signs in</p></div>
+<p class="small">Create B the same way as A. Then add one fake row owned by B in your table. Only that row&rsquo;s number is needed, find it in the id column in Table Editor. The check then signs in as A and tries to read B&rsquo;s row.</p>
+<div class="labRow"><label for="rowId">Row number of B&rsquo;s fake row</label><span class="tipWrap"><button type="button" class="tipBtn" data-tip="tip-rowId" aria-label="Help for Row number of B&rsquo;s fake row">!</button><p class="tipText hidden" id="tip-rowId">The number in the id column of the fake row that belongs to test user B, in your table in Table Editor. If that row lives in one table, name that table in Which tables above, so the check aims at the right one. Test rows only, never a real customer's row, the id-only design means no personal values are ever fetched with it.</p></span></div>
+<input id="rowId" type="text" placeholder="2" autocomplete="off" spellcheck="false">
+</details>
+<details class="drop"><summary>Find out if anyone can open your files without logging in</summary>
+<div class="labRow"><label for="bucketName">Storage bucket</label><span class="tipWrap"><button type="button" class="tipBtn" data-tip="tip-bucketName" aria-label="Help for Storage bucket">!</button><p class="tipText hidden" id="tip-bucketName">The name of a storage bucket, in Supabase under Storage, like avatars. Buckets cannot be listed with an anon key, so this name has to come from you.</p></span></div>
+<input id="bucketName" type="text" placeholder="avatars" autocomplete="off" spellcheck="false"><div class="labRow"><label for="objectName">File in that bucket</label><span class="tipWrap"><button type="button" class="tipBtn" data-tip="tip-objectName" aria-label="Help for File in that bucket">!</button><p class="tipText hidden" id="tip-objectName">The exact name of one file inside that bucket, like test.png, exactly as it appears in Storage.</p></span></div>
+<input id="objectName" type="text" placeholder="test.png" autocomplete="off" spellcheck="false">
+</details>
+<details class="drop"><summary>Find out if a secret master key is hiding in your website code</summary>
+<div class="labRow"><label for="productUrl">Product homepage URL</label><span class="tipWrap"><button type="button" class="tipBtn" data-tip="tip-productUrl" aria-label="Help for Product homepage URL">!</button><p class="tipText hidden" id="tip-productUrl">Your app's homepage address. Its public code files get read, the same files any visitor's browser downloads, looking only for a master key pattern. A key value is never shown. Browsers sometimes block this read; then this question stays unanswered, which is not a pass.</p></span></div>
+<input id="productUrl" type="text" placeholder="https://your-app.com" autocomplete="off" spellcheck="false">
+</details>
+</div>
+
+<p style="text-align:center">Run with just the essentials, or open any check below first to add it.</p>
+<p class="small" style="text-align:center">Your browser talks directly to your Supabase, and to nothing else except the homepage you give it. Your project address, key, table names and results never leave your browser.</p>
+
+<button id="runBtn" class="primary">Run check</button>
+<p class="small" style="text-align:center">Runs everything you filled in. Anything left blank is skipped, not an error.</p>
+<p id="errorMsg" class="hidden"></p>
+<p id="progress" class="small"></p>
+<div class="links">
+<button id="sampleBtn" class="link" type="button">See a sample report</button>
+<button id="clearBtn" class="link" type="button">Clear</button>
+</div>
+
+<div id="results"></div>
+<button id="downloadBtn" class="secondary" disabled>Download this report</button>
+<div id="emailCap" hidden style="margin-top:34px">
+<p>Want a nudge to fix this and run the check again in 7 days?</p>
+<label for="emailAddr">Your email</label>
+<input id="emailAddr" type="email" autocomplete="email" placeholder="you@example.com">
+<button class="btn" id="emailBtn" type="button">Remind me in 7 days</button>
+<p class="small" id="emailStatus">One email, nothing else. Stored separately from the anonymous usage counts, never linked to this check.</p>
+</div>
+
+<details id="logWrap" class="hidden">
+<summary>What was checked</summary>
+<pre id="probeLog" class="log"></pre>
+</details>
+
+<footer>
+<p>This checks only the tables, bucket, and homepage you gave it. It is not a complete security audit.</p>
+<p>Fix the top finding, then run it again with the same inputs to prove the fix.</p>
+</footer>
+
+<script>
+/* ---------- Anonymous usage counts (Plan A) ----------
+   Counts only: event name, an anonymous visitor id kept in this browser,
+   how many fields were filled (a number), and result totals (numbers).
+   Never sent: any value typed into this form, any address, key, table or
+   bucket name, or any finding. A guard below aborts a send if a typed
+   value ever appears in the payload. Email capture is a separate send
+   with no visitor id, so the two can never be joined. */
+const TELEMETRY_ENDPOINT = "https://script.google.com/macros/s/AKfycbxY6BGRFgZ4meAPAZYw9OlZu3toxJCpgq0sOyOA5HwZTjBKvJN7bQwSSONde6CmXjhS/exec";
+function telId() {
+  try {
+    let v = localStorage.getItem("sbscVid");
+    if (!v) { v = "v" + Math.random().toString(36).slice(2) + Date.now().toString(36); localStorage.setItem("sbscVid", v); }
+    return v;
+  } catch (e) { return "novid"; }
+}
+function telSend(payload) {
+  if (!TELEMETRY_ENDPOINT) return;
+  try {
+    const body = JSON.stringify(payload);
+    const typed = ["supabaseUrl", "anonKey", "tableName", "testEmail", "testPassword", "userToken", "bucketName", "objectName", "productUrl"];
+    for (const id of typed) {
+      const el = document.getElementById(id);
+      const val = el && el.value ? el.value.trim() : "";
+      if (val && val.length >= 4 && body.indexOf(val) >= 0) return;
+    }
+    fetch(TELEMETRY_ENDPOINT, { method: "POST", mode: "no-cors", headers: { "Content-Type": "text/plain" }, body: body }).catch(function () {});
+  } catch (e) {}
+}
+function telEvent(name, extra) {
+  const base = { type: "event", event: name, vid: telId(), device: (window.innerWidth <= 700 ? "mobile" : "desktop"), day: new Date().toISOString().slice(0, 10) };
+  telSend(Object.assign(base, extra || {}));
+}
+function telReturnedCheck() {
+  try {
+    const today = new Date().toISOString().slice(0, 10);
+    const last = localStorage.getItem("sbscLast");
+    if (last && last !== today) {
+      const days = Math.round((new Date(today) - new Date(last)) / 86400000);
+      if (days >= 1 && days <= 14) telEvent("returned", { days: days });
+    }
+    localStorage.setItem("sbscLast", today);
+  } catch (e) {}
+}
+function countFilled() {
+  const ids = ["supabaseUrl", "anonKey", "tableName", "testEmail", "userToken", "rowId", "bucketName", "objectName", "productUrl"];
+  let n = 0;
+  for (const id of ids) { const el = document.getElementById(id); if (el && el.value && el.value.trim()) n++; }
+  return n;
+}
+telReturnedCheck();
+telEvent("visited", {});
+function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
+function $(id){return document.getElementById(id);}
+function cleanUrl(u){return u.trim().replace(/\/+$/,"");}
+function levelRank(l){return ["LOW","MEDIUM","ELEVATED","HIGH","CRITICAL"].indexOf(l);}
+function maxLevel(a,b){return levelRank(a)>=levelRank(b)?a:b;}
+
+let lastResults = null;
+let memoryToken = "";
+let memoryTokenEmail = "";
+let memoryUserId = "";
+let lastOverall = null;
+let lastHost = "";
+
+function showError(msg){let e=$("errorMsg"); e.textContent=msg; e.classList.remove("hidden");}
+function clearError(){$("errorMsg").classList.add("hidden"); $("errorMsg").textContent="";}
+
+$("showKey").addEventListener("change", function(){ $("anonKey").type = this.checked ? "text" : "password"; });
+
+const EXPLAIN = {
+  P1: {headline: "Anyone can read this table",
+       story: "Anyone can ask this table for rows using only your public key. No login needed. The rows are handed over.",
+       risk: "A stranger is not limited to the id column this check asked for. They can ask for every column and copy your users' data."},
+  P2: {headline: "One user can read another user's data",
+       story: "Signed in as test user A, this check asked for test user B's row, and your project handed it over.",
+       risk: "Anyone with a free account could do the same to your real customers."},
+  P3: {headline: "Anyone can open this file",
+       story: "This file opens for anyone who has its address. No login, no account, nothing.",
+       risk: "Anyone who gets the link can open it. Links get shared and leaked."},
+  P4: {headline: "Your master key is in your website code",
+       story: "Your homepage code is public, any visitor can download it. Your master key is sitting inside it.",
+       risk: "Whoever takes that key owns your whole project. They can read, change, or delete everything."}
+};
+const FIXSTEPS = {
+  P1: ["Supabase, Table Editor, this table: turn ON Row Level Security.",
+       "Add a policy: users see only their own rows (user_id = auth.uid()).",
+       "Run this check again."],
+  P2: ["Supabase, Authentication, Policies, this table.",
+       "Keep only policies where the row owner is the user (user_id = auth.uid()). Delete any policy that lets everyone in.",
+       "Run this check again, same test users."],
+  P3: ["Supabase, Storage: make this bucket Private.",
+       "Share files only inside your app, after checking the owner.",
+       "Run this check again."],
+  P4: ["Rotate the key now. Supabase, Settings, API.",
+       "Delete it from your website code and any public repo.",
+       "Keep it only on a server. Then run this check again."]
+};
+const PASSLINE = {
+  P1: "a stranger with only your public key could not read this table",
+  P2: "test user A could not read test user B's row",
+  P3: "this file could not be opened without logging in",
+  P4: "no master key showed up in your website's public files"
+};
+
+function issuePageHTML(item, n, total){
+  let ex = EXPLAIN[item.probe] || {headline: item.title, story: item.findings.join(" "), risk: ""};
+  let steps = (FIXSTEPS[item.probe] || item.fixes).map(function(f){return "<li>"+esc(f)+"</li>";}).join("");
+  let proof = item.findings.map(function(f){return esc(f);}).join(" ");
+  let h = "<div class='issuePage"+(n === 1 ? " active" : "")+"' data-idx='"+n+"'>";
+  h += "<p class='issueno' style='color:#d70015'>Issue "+n+" of "+total+", needs fixing</p>";
+  h += "<h3><span class='dot'>\u25CF</span> "+esc(ex.headline)+"</h3>";
+  h += "<p class='story'>"+esc(ex.story)+"</p>";
+  let subj = item.title.indexOf(": ") > -1 ? item.title.split(": ").slice(1).join(": ") : "";
+  let subjLabel = item.probe === "P3" ? "Bucket: " : (item.probe === "P4" ? "" : "Table: ");
+  if(subj && subjLabel) h += "<p class='small'>"+subjLabel+esc(subj)+"</p>";
+  h += "<div class='fixbox'><p class='lbl'>Fix it, 3 steps</p><ol class='steps'>"+steps+"</ol></div>";
+  h += "<details class='proof'><summary>Why it matters, and the proof</summary>";
+  if(ex.risk) h += "<p><strong>At risk:</strong> "+esc(ex.risk)+"</p>";
+  h += "<p class='small'>Proof: "+proof+"</p></details>";
+  h += "</div>";
+  return h;
+}
+
+function navHTML(total){
+  if(total < 2) return "";
+  let dots = "";
+  for(let i = 1; i <= total; i++){ dots += (i === 1 ? "\u25CF" : "\u25CB"); }
+  return "<div class='navRow'><button type='button' class='navbtn' data-nav='prev' disabled>Back</button><span class='dots'>"+dots+"</span><button type='button' class='navbtn' data-nav='next'>Next issue</button></div>";
+}
+
+function wireNav(){
+  let pages = document.querySelectorAll("#results .issuePage");
+  if(pages.length < 2) return;
+  let cur = 1;
+  function show(n){
+    cur = Math.max(1, Math.min(pages.length, n));
+    pages.forEach(function(pg, i){ pg.classList.toggle("active", i === cur - 1); });
+    let prev = document.querySelector("#results [data-nav='prev']");
+    let next = document.querySelector("#results [data-nav='next']");
+    let dotsEl = document.querySelector("#results .dots");
+    if(prev) prev.disabled = (cur === 1);
+    if(next) next.textContent = (cur === pages.length) ? "Last issue" : "Next issue";
+    if(next) next.disabled = (cur === pages.length);
+    if(dotsEl){ let d = ""; for(let i = 1; i <= pages.length; i++){ d += (i === cur ? "\u25CF" : "\u25CB"); } dotsEl.textContent = d; }
+  }
+  let prev = document.querySelector("#results [data-nav='prev']");
+  let next = document.querySelector("#results [data-nav='next']");
+  if(prev) prev.addEventListener("click", function(){ show(cur - 1); });
+  if(next) next.addEventListener("click", function(){ show(cur + 1); });
+}
+
+const QUESTIONS = {
+  P1: "Can a stranger read your users' data?",
+  P2: "Can one user read another user's data?",
+  P3: "Can anyone open your files without logging in?",
+  P4: "Is a secret master key hiding in your website code?"
+};
+const CAVEAT = {
+  P1: "Nothing came back when a stranger asked. Either your protection stopped the request, or the table is empty. From outside there is no way to tell which, so this is not a guaranteed pass.",
+  P2: "Test user A could not see another user's rows in this table. Reassuring, but not a guarantee for every single row.",
+  P3: "The file did not open, but it did not clearly refuse either. Treat this as unproven, not as safe.",
+  P4: "No master key pattern showed up in the files that could be read. If some of your site's files could not be read, this stays unproven."
+};
+function chipHTML(st){
+  if(st === "PROVEN") return "<span class='dot'>\u25CF</span> <span class='stWord'>Issue.</span>";
+  if(st === "BLOCKED") return "<span class='dotG'>\u25CF</span> <span class='stWord'>Protected.</span>";
+  if(st === "NOT_PROVEN") return "<span class='dotG'>\u25CF</span> <span class='stWord'>No issue found.</span>";
+  return "<span class='dotGrey'>\u25CF</span> <span class='stWord'>Not checked.</span>";
+}
+function subjectOf(it){
+  if(it.title.indexOf(": ") > -1){ let s = it.title.split(": ").slice(1).join(": "); return s.charAt(0).toUpperCase() + s.slice(1); }
+  if(it.probe === "P4") return "Your website code";
+  if(it.title.indexOf("exact row") > -1) return "Test user B's row";
+  return it.title;
+}
+function answerRowHTML(it){
+  let sent;
+  if(it.status === "PROVEN") sent = (EXPLAIN[it.probe] || {}).story || it.findings.join(" ");
+  else if(it.status === "BLOCKED") sent = (PASSLINE[it.probe] || "The attempt was made and your project stopped it") + ".";
+  else if(it.status === "NOT_PROVEN") sent = CAVEAT[it.probe] || "The check ran and found nothing, but could not prove this either way.";
+  else sent = it.findings.join(" ");
+  let h = "<div class='arow'>" + chipHTML(it.status) + " <strong>" + esc(subjectOf(it)) + ":</strong> " + esc(sent);
+  if(it.status === "NOT_CHECKED" && it.fixes.length) h += " <strong>To check it:</strong> " + esc(it.fixes[0]);
+  h += "</div>";
+  if(it.status === "PROVEN"){
+    let ex = EXPLAIN[it.probe] || {risk: ""};
+    let steps = (FIXSTEPS[it.probe] || it.fixes).map(function(f){ return "<li>" + esc(f) + "</li>"; }).join("");
+    if(ex.risk) h += "<p class='small' style='margin:6px 4px 0'><strong>Why it matters:</strong> " + esc(ex.risk) + "</p>";
+    h += "<div class='fixbox'><p class='lbl'>Fix it</p><ol class='steps'>" + steps + "</ol></div>";
+  }
+  return h;
+}
+function reportBodyHTML(results, overall, host, sampleLabel){
+  let issues = results.filter(function(it){ return it.status === "PROVEN"; });
+  let notChecked = results.filter(function(it){ return it.status === "NOT_CHECKED"; });
+  let notProven = results.filter(function(it){ return it.status === "NOT_PROVEN"; });
+  let html = "";
+  html += "<p class='brandline'>MakerGuard</p>";
+  if(sampleLabel){ html += "<div class='sampleNotice'><strong>Sample.</strong> Fake data. No real product was checked.</div>"; }
+  if(issues.length > 0){
+    html += "<p class='verdict'>" + issues.length + (issues.length === 1 ? " issue to fix." : " issues to fix.") + "</p>";
+    html += "<p class='verdictsub'>Fix one at a time. Start with the first one.</p>";
+  } else if(notChecked.length > 0){
+    html += "<p class='verdict'>No issues found.</p>";
+    html += "<p class='verdictsub'>But " + notChecked.length + (notChecked.length === 1 ? " question" : " questions") + " could not be answered, each with its reason below. This is not a full pass.</p>";
+  } else if(notProven.length > 0){
+    html += "<p class='verdict'>No issues found.</p>";
+    html += "<p class='verdictsub'>Nothing leaked in the answers below. " + notProven.length + (notProven.length === 1 ? " answer" : " answers") + " could not be proven either way, explained below.</p>";
+  } else {
+    html += "<p class='verdict'>All clear.</p>";
+    html += "<p class='verdictsub'>In these 4 questions only. Not your whole product.</p>";
+  }
+  html += "<p class='hostline'>Checked: " + esc(host) + "</p>";
+  const order = {PROVEN: 0, BLOCKED: 1, NOT_PROVEN: 2, NOT_CHECKED: 3};
+  ["P1", "P2", "P3", "P4"].forEach(function(probe){
+    let items = results.filter(function(it){ return it.probe === probe; });
+    items.sort(function(a, b){ return (order[a.status] || 9) - (order[b.status] || 9); });
+    if(!items.length) items = [{probe: probe, title: "", status: "NOT_CHECKED", level: "MEDIUM", findings: ["This part of the check did not run."], fixes: []}];
+    html += "<div class='qsec'><p class='qhead'>" + QUESTIONS[probe] + "</p>";
+    items.forEach(function(it){ html += answerRowHTML(it); });
+    html += "</div>";
+  });
+  return html;
+}
+
+function render(results, overall, host, sampleLabel){
+  lastResults = results; lastOverall = overall; lastHost = host;
+  $("results").innerHTML = reportBodyHTML(results, overall, host, sampleLabel);
+  wireNav();
+  $("downloadBtn").disabled = false;
+  if (!sampleLabel)   telEvent("completed", { proven: results.filter(function(r){return r.status === "PROVEN";}).length, notChecked: results.filter(function(r){return r.status === "NOT_CHECKED";}).length, blocked: results.filter(function(r){return r.status === "BLOCKED";}).length });
+  $("emailCap").hidden = !(TELEMETRY_ENDPOINT && !sampleLabel);
+  window.scrollTo({top: $("results").offsetTop - 10, behavior: "smooth"});
+}
+
+function addLog(line){
+  let el = $("probeLog");
+  el.textContent += line + "\n";
+  $("logWrap").classList.remove("hidden");
+}
+
+async function fetchJson(url, anonKey, userToken){
+  let headers = {"apikey": anonKey, "Authorization": "Bearer " + (userToken || anonKey), "Accept": "application/json"};
+  let resp = await fetch(url, {method: "GET", headers: headers});
+  let text = await resp.text();
+  let data = null;
+  try{ data = text ? JSON.parse(text) : null; }catch(e){ data = null; }
+  return {status: resp.status, data: data};
+}
+
+async function probeAnon(base, anonKey, table){
+  let item = {probe:"P1", title:"Anon table read: "+table, status:"NOT_CHECKED", level:"MEDIUM", findings:[], fixes:[]};
+  let url = base + "/rest/v1/" + encodeURIComponent(table) + "?select=id&limit=5";
+  addLog("GET " + base + "/rest/v1/" + table + " (key redacted)");
+  try{
+    let r = await fetchJson(url, anonKey, null);
+    if(r.status === 200 && Array.isArray(r.data) && r.data.length > 0){
+      item.status = "PROVEN"; item.level = "HIGH";
+      item.findings.push("Anyone using only your public anon key could read " + r.data.length + " row(s) from this table. Only the id column was asked for, on purpose, so no names, emails, or other personal values were touched.");
+      item.fixes.push("In Supabase, turn on Row Level Security for this table and add a policy that only allows the owner to read their own rows. Then run this check again. Do not rely on hiding the table name.");
+    } else if(r.status === 200){
+      item.status = "NOT_PROVEN"; item.level = "MEDIUM";
+      item.findings.push("No rows came back when a stranger asked. That could mean your row level security is working, or it could mean the table is empty. From outside, there is no way to tell, so this table is not proven safe.");
+      item.fixes.push("Test again with a table and row you know exists, or check the table's policies in Supabase > Authentication > Policies.");
+    } else if(r.status === 401 || r.status === 403){
+      item.status = "BLOCKED"; item.level = "LOW";
+      item.findings.push("Your project refused the stranger's request (401 or 403). That is exactly what a protected table does.");
+    } else if(r.status === 400){
+      let counted = -1;
+      try{
+        let cresp = await fetch(base + "/rest/v1/" + encodeURIComponent(table) + "?select=*&limit=0", {method: "GET", headers: {"apikey": anonKey, "Authorization": "Bearer " + anonKey, "Prefer": "count=exact"}});
+        let cr = cresp.headers.get("content-range") || "";
+        let total = parseInt((cr.split("/")[1] || ""), 10);
+        if(!isNaN(total)) counted = total;
+      }catch(e){ counted = -1; }
+      if(counted > 0){
+        item.status = "PROVEN"; item.level = "HIGH";
+        item.findings.push("Anyone using only your public anon key could count " + counted + " row(s) in this table, which means row level security is letting a stranger see into it (this table has no id column, so the check counted rows instead of reading them). No row values were fetched.");
+        item.fixes.push("In Supabase, turn on Row Level Security for this table and add a policy that only allows the owner to read their own rows. Then run this check again.");
+      } else {
+        item.status = "NOT_CHECKED"; item.level = "MEDIUM";
+        item.findings.push("The stranger's request did not return a clear answer (status: 400, and counting rows did not settle it). This table may have no id column. Treat this as unknown, not safe.");
+        item.fixes.push("Check the table name is correct, then run again. If the table has no id column, check its policies in Supabase > Authentication > Policies by hand.");
+      }
+    } else {
+      item.status = "NOT_CHECKED"; item.level = "MEDIUM";
+      item.findings.push("The stranger's request did not return a clear answer (status: " + r.status + "). Treat this as unknown, not safe.");
+      item.fixes.push("Check that your Supabase address and the table name are correct, then run again.");
+    }
+  }catch(e){
+    item.status = "NOT_CHECKED"; item.level = "MEDIUM";
+    item.findings.push("The stranger's request could not be completed from this browser. This can happen if Supabase blocks this origin, or if the address is wrong. Treat this as unknown, not safe.");
+  }
+  return item;
+}
+
+async function probeCrossUser(base, anonKey, table, userToken, rowId){
+  let item = {probe:"P2", title:"Cross-user row read: "+table, status:"NOT_CHECKED", level:"MEDIUM", findings:[], fixes:[]};
+  if(!userToken || !rowId){
+    item.findings.push("Not checked: this needs test user A signed in and one row owned by test user B. Without both, cross-user access can neither be proven nor ruled out. Do not read this as safe.");
+    item.fixes.push("Create two test users and one row owned by user B, sign in as user A, then run again.");
+    return item;
+  }
+  let url = base + "/rest/v1/" + encodeURIComponent(table) + "?id=eq." + encodeURIComponent(rowId) + "&select=id";
+  addLog("GET " + base + "/rest/v1/" + table + " with user A token (token redacted)");
+  try{
+    let r = await fetchJson(url, anonKey, userToken);
+    if(r.status === 200 && Array.isArray(r.data) && r.data.length > 0){
+      item.status = "PROVEN"; item.level = "HIGH";
+      item.findings.push("Test user A could read a row owned by test user B. That is cross-user data exposure: any signed-in user can reach another user's data. Only the id column was asked for, the id you typed in, so none of that row's personal values were touched.");
+      item.fixes.push("Add a row level security policy that checks the row owner against the logged-in user, for example owner = auth.uid(), for select, update, and delete. Then run again with the same test users.");
+    } else if(r.status === 200 || r.status === 401 || r.status === 403){
+      item.status = "BLOCKED"; item.level = "LOW";
+      item.findings.push("Test user A could not read test user B's row. That is exactly what working row level security looks like.");
+    } else {
+      item.status = "NOT_CHECKED"; item.level = "MEDIUM";
+      item.findings.push("The signed-in request did not return a clear answer (status: " + r.status + "). Treat this as unknown, not safe.");
+    }
+  }catch(e){
+    item.status = "NOT_CHECKED"; item.level = "MEDIUM";
+    item.findings.push("The signed-in request could not be completed from this browser. Treat this as unknown, not safe.");
+  }
+  return item;
+}
+
+async function probeBucket(base, bucket, objectName){
+  let item = {probe:"P3", title:"Public storage bucket: "+bucket, status:"NOT_CHECKED", level:"MEDIUM", findings:[], fixes:[]};
+  if(!bucket || !objectName){
+    item.findings.push("Not checked: this needs a bucket name and a file name. Without both, your files cannot be tested. Do not read this as safe.");
+    item.fixes.push("Give a bucket and a file name you know exists, then run again.");
+    return item;
+  }
+  let url = base + "/storage/v1/object/public/" + encodeURIComponent(bucket) + "/" + encodeURIComponent(objectName);
+  addLog("GET " + base + "/storage/v1/object/public/" + bucket + "/" + objectName + " (no login)");
+  try{
+    let resp = await fetch(url, {method: "GET"});
+    if(resp.status === 200){
+      item.status = "PROVEN"; item.level = "HIGH";
+      item.findings.push("Anyone without a login could fetch this file from a public bucket. The file itself was not opened or shown.");
+      item.fixes.push("Make the bucket private, or move the file to a private bucket and serve it only after checking the user owns it. Then run again.");
+    } else if(resp.status === 401 || resp.status === 403){
+      item.status = "BLOCKED"; item.level = "LOW";
+      item.findings.push("Your storage refused the no-login request (401 or 403). That is exactly what a private bucket does.");
+    } else if(resp.status === 404){
+      item.status = "NOT_PROVEN"; item.level = "MEDIUM";
+      item.findings.push("The file was not found (404). That could mean the file does not exist, or the bucket is private. Either way, this bucket is not proven safe by this result.");
+      item.fixes.push("Test again with a file name you know exists, then run again.");
+    } else {
+      item.status = "NOT_CHECKED"; item.level = "MEDIUM";
+      item.findings.push("The no-login file request did not return a clear answer (status: " + resp.status + "). Treat this as unknown, not safe.");
+    }
+  }catch(e){
+    item.status = "NOT_CHECKED"; item.level = "MEDIUM";
+    item.findings.push("The no-login file request could not be completed from this browser. Treat this as unknown, not safe.");
+  }
+  return item;
+}
+
+async function probeBundle(productUrl){
+  let item = {probe:"P4", title:"Key in client bundle", status:"NOT_CHECKED", level:"MEDIUM", findings:[], fixes:[]};
+  if(!productUrl){
+    item.findings.push("Not checked: no homepage address was given, so your website code was not read. Do not read this as safe.");
+    item.fixes.push("Give your homepage address, then run again.");
+    return item;
+  }
+  let clean = cleanUrl(productUrl);
+  try{
+    let resp = await fetch(clean, {method: "GET"});
+    if(!resp.ok){
+      item.findings.push("Your homepage could not be fetched (status: " + resp.status + "). Treat this as unknown, not safe.");
+      return item;
+    }
+    let htmlText = await resp.text();
+    let productOrigin = new URL(clean).origin;
+    let scripts = [];
+    let re = /<script[^>]+src="([^"]+)"/g;
+    let m;
+    while((m = re.exec(htmlText)) !== null){
+      let src = m[1];
+      try{
+        let full = new URL(src, clean).href;
+        if(new URL(full).origin === productOrigin && scripts.indexOf(full) === -1) scripts.push(full);
+      }catch(e){}
+    }
+    let found = [];
+    for(let i=0; i<Math.min(scripts.length, 5); i++){
+      addLog("GET " + scripts[i] + " (same site only)");
+      try{
+        let sresp = await fetch(scripts[i], {method: "GET"});
+        if(!sresp.ok) continue;
+        let js = await sresp.text();
+        if(/sbp_[A-Za-z0-9]{20,}/.test(js)) found.push([scripts[i], "service_role-like key pattern (sbp_)"]);
+        else if(/sk-live-[A-Za-z0-9]{8,}/.test(js)) found.push([scripts[i], "live secret key pattern (sk-live)"]);
+        else if(/-----BEGIN [A-Z ]*PRIVATE KEY-----/.test(js)) found.push([scripts[i], "private key block"]);
+      }catch(e){}
+    }
+    if(found.length > 0){
+      item.status = "PROVEN"; item.level = "HIGH";
+      found.forEach(function(f){ item.findings.push("A master key pattern was found in one of your website's public code files: " + f[0] + ". Pattern type: " + f[1] + ". The key itself is never shown."); });
+      item.fixes.push("Remove the key from your website code, rotate it immediately, and keep it only on a server. Never ship a master key in code a browser can download.");
+    } else {
+      item.status = "BLOCKED"; item.level = "LOW";
+      item.findings.push("No master key pattern showed up in the " + Math.min(scripts.length, 5) + " of your website's code files that were read. That covers only those files, not your whole site.");
+    }
+  }catch(e){
+    item.status = "NOT_CHECKED"; item.level = "MEDIUM";
+    item.findings.push("Your homepage or its code files could not be read from this browser. Browsers block reading another site's pages unless that site allows it, which is normal. This question stays unanswered, it is not a pass. To answer it yourself, search your built JavaScript files for a master key pattern, or open this check page from your own website, where the read is allowed.");
+    item.fixes.push("Search your built JavaScript for sbp_ and service_role, and rotate anything you find. Or open this check page from your own website and run again.");
+  }
+  return item;
+}
+
+function userIdFromToken(token){
+  try{
+    let parts = String(token || "").split(".");
+    if(parts.length < 2) return "";
+    let payload = JSON.parse(decodeURIComponent(escape(atob(parts[1].replace(/-/g, "+").replace(/_/g, "/")))));
+    return payload.sub || "";
+  }catch(e){ return ""; }
+}
+
+async function discoverTables(base, anonKey, bearer){
+  let url = base + "/rest/v1/";
+  addLog("GET " + url + " table list (key redacted)");
+  let resp = await fetch(url, {method: "GET", headers: {"apikey": anonKey, "Authorization": "Bearer " + (bearer || anonKey), "Accept": "application/json"}});
+  if(!resp.ok) throw new Error("spec status " + resp.status);
+  let spec = await resp.json();
+  let tables = [];
+  let columns = {};
+  if(spec && spec.definitions){
+    Object.keys(spec.definitions).forEach(function(name){
+      tables.push(name);
+      let props = (spec.definitions[name] && spec.definitions[name].properties) || {};
+      columns[name] = Object.keys(props);
+    });
+  } else if(spec && spec.paths){
+    Object.keys(spec.paths).forEach(function(path){
+      if(path === "/" || path.indexOf("/rpc/") === 0) return;
+      tables.push(path.replace(/^\//, ""));
+    });
+  }
+  return {tables: tables, columns: columns};
+}
+
+async function probeCrossAuto(base, anonKey, token, myId, table, columns){
+  let item = {probe:"P2", title:"Cross-user row read: "+table, status:"NOT_CHECKED", level:"MEDIUM", findings:[], fixes:[]};
+  if(!token || !myId){
+    item.findings.push("Not checked: sign in as test user A first. Signed in as you, the check can tell your rows from someone else's. Do not read this as safe.");
+    item.fixes.push("Sign in as test user A in the form above, then run again.");
+    return item;
+  }
+  let ownerCols = ["user_id","owner_id","owner","created_by","author_id","profile_id","account_id","uid"];
+  let ownerCol = ownerCols.filter(function(c){ return (columns || []).indexOf(c) > -1; })[0] || "";
+  if(!ownerCol){
+    item.findings.push("Not proven either way: this table has no owner column the check recognises, so your rows cannot be told apart from someone else's automatically. Use the exact row below for this table: test user B's row number, with test user A signed in. Do not read this as safe.");
+    item.fixes.push("Use the exact row for this table: a row owned by test user B, with test user A signed in.");
+    return item;
+  }
+  let url = base + "/rest/v1/" + encodeURIComponent(table) + "?select=id," + encodeURIComponent(ownerCol) + "&limit=25";
+  addLog("GET " + base + "/rest/v1/" + table + " as test user A, automatic cross-user (token redacted)");
+  try{
+    let r = await fetchJson(url, anonKey, token);
+    if(r.status === 200 && Array.isArray(r.data)){
+      let others = r.data.filter(function(row){ return row && row[ownerCol] && String(row[ownerCol]) !== String(myId); });
+      if(others.length > 0){
+        item.status = "PROVEN"; item.level = "HIGH";
+        item.findings.push("Signed in as test user A, your project handed over " + others.length + " row(s) in this table whose owner is not user A. That is cross-user data exposure. Only the id and owner columns were asked for, no other personal values.");
+        item.fixes.push("Add a row level security policy that checks the row owner against the logged-in user, for select, update, and delete. Then run again.");
+      } else {
+        item.status = "BLOCKED"; item.level = "LOW";
+        item.findings.push("Signed in as test user A, none of the rows visible in this table belonged to someone else.");
+      }
+    } else if(r.status === 401 || r.status === 403){
+      item.status = "BLOCKED"; item.level = "LOW";
+      item.findings.push("Your project refused the signed-in request for this table.");
+    } else {
+      item.findings.push("The signed-in request did not return a clear answer (status: " + r.status + "). Treat this as unknown, not safe.");
+    }
+  }catch(e){
+    item.findings.push("The signed-in request could not be completed from this browser. Treat this as unknown, not safe.");
+  }
+  return item;
+}
+
+$("signInBtn").addEventListener("click", async function(){
+  clearError();
+  let base = cleanUrl($("supabaseUrl").value);
+  let anonKey = $("anonKey").value.trim();
+  let email = $("testEmail").value.trim();
+  let password = $("testPassword").value;
+  if(!base || !anonKey){ showError("Fill in Supabase URL and anon key first, above, then sign in as your test user."); return; }
+  if(anonKey.indexOf("sbp_") === 0 && anonKey.length > 20){ showError("STOP: That key looks like a service_role key (sbp_). Only use an anon / publishable key."); return; }
+  if(!email || !password){ showError("Fill in your TEST user A email and its throwaway password, then sign in."); return; }
+  $("signInBtn").disabled = true;
+  $("signInStatus").textContent = "Signing in as your test user, directly to your Supabase.";
+  try{
+    let resp = await fetch(base + "/auth/v1/token?grant_type=password", {method: "POST", headers: {"apikey": anonKey, "Content-Type": "application/json"}, body: JSON.stringify({email: email, password: password})});
+    let data = null;
+    try{ data = await resp.json(); }catch(e){ data = null; }
+    password = "";
+    $("testPassword").value = "";
+    if(resp.ok && data && data.access_token){
+      memoryToken = data.access_token;
+      memoryUserId = (data.user && data.user.id) ? data.user.id : "";
+      memoryTokenEmail = email;
+      $("signInStatus").textContent = "Signed in as test user " + email + ". Token is in this page's memory only, it is not shown or stored, and it expires in about 1 hour. You can now run the check.";
+      addLog("POST " + base + "/auth/v1/token sign-in as test user (password and token redacted)");
+    } else {
+      memoryToken = ""; memoryTokenEmail = ""; memoryUserId = "";
+      $("signInStatus").textContent = "Sign-in failed. Check that the test user exists, that it is confirmed, and that the password matches that test account. The cross-user question will stay unanswered until a sign-in works.";
+    }
+  }catch(e){
+    $("testPassword").value = "";
+    $("signInStatus").textContent = "Sign-in could not be completed from this browser. The cross-user question will stay unanswered until a sign-in works, or a test token is pasted below.";
+  }
+  $("signInBtn").disabled = false;
+});
+
+$("runBtn").addEventListener("click", async function(){
+  telEvent("started", { fields: countFilled() });
+  telEvent("ran", {});
+  clearError();
+  let base = cleanUrl($("supabaseUrl").value);
+  let anonKey = $("anonKey").value.trim();
+  let table = $("tableName").value.trim();
+  if(!base || !anonKey){ showError("Please fill in Supabase URL and anon key. Table name can stay blank, to check all tables."); return; }
+  if(anonKey.indexOf("sbp_") === 0 && anonKey.length > 20){ showError("STOP: That key looks like a service_role key (sbp_). Only paste an anon / publishable key. Never paste a service key here."); return; }
+  if(/service/i.test(anonKey)){ showError("STOP: That key looks like it may be a service key. Only paste an anon / publishable key."); return; }
+  $("runBtn").disabled = true;
+  $("probeLog").textContent = "";
+  $("progress").textContent = "Running the check. Read only, talking only to your Supabase.";
+  let host = "";
+  try{ host = new URL(base).host; }catch(e){ host = base; }
+  let results = [];
+  let methodEl = document.querySelector('input[name="signinMethod"]:checked');
+  let effectiveToken = (methodEl && methodEl.value === "token") ? $("userToken").value.trim() : memoryToken;
+  if(table){
+    $("progress").textContent = "Question 1 of 4: can a stranger read your tables?";
+    results.push(await probeAnon(base, anonKey, table));
+    $("progress").textContent = "Question 2 of 4: can one user read another user's data?";
+    let rowIdVal = $("rowId").value.trim();
+    if(effectiveToken && !rowIdVal){
+      let cols = [];
+      try{ let fd = await discoverTables(base, anonKey, effectiveToken); cols = fd.columns[table] || []; }catch(e){ cols = []; }
+      let autoItem = await probeCrossAuto(base, anonKey, effectiveToken, memoryUserId || userIdFromToken(effectiveToken), table, cols);
+      if(autoItem.status === "BLOCKED"){
+        autoItem.status = "NOT_PROVEN"; autoItem.level = "MEDIUM";
+        autoItem.findings = ["Nearly, but this test is not finished: test user A could not see anyone else's rows in an automatic look, and the test also needs test user B's row number to be complete. Add B's row number in the cross-user test section and run again. Do not read this as a pass yet."];
+        autoItem.fixes = ["Add the row number of test user B's fake row in this table, then run again."];
+      }
+      results.push(autoItem);
+    } else {
+      results.push(await probeCrossUser(base, anonKey, table, effectiveToken, rowIdVal));
+    }
+  } else {
+    $("progress").textContent = "Finding every table your key can see.";
+    let found = null;
+    try{ found = await discoverTables(base, anonKey, null); }catch(e){ found = null; }
+    let columnsByTable = found ? found.columns : {};
+    let tableNames = found ? found.tables.slice() : [];
+    if(effectiveToken){
+      try{
+        let foundAuth = await discoverTables(base, anonKey, effectiveToken);
+        foundAuth.tables.forEach(function(tn){ if(tableNames.indexOf(tn) === -1) tableNames.push(tn); });
+        Object.keys(foundAuth.columns).forEach(function(tn){ columnsByTable[tn] = foundAuth.columns[tn]; });
+      }catch(e){}
+    }
+    if(!tableNames.length){
+      showError("The list of tables could not be read from that address and key. Your project may have its data API off, or the key may be wrong. Type one table name above and run again, or fix the address and key.");
+      $("progress").textContent = "";
+      $("runBtn").disabled = false;
+      return;
+    }
+    let capped = tableNames.slice(0, 50);
+    addLog("Discovered " + tableNames.length + " table(s) and view(s) from the API list" + (tableNames.length > 50 ? ", checking the first 50" : "") + ".");
+    let myId = memoryUserId || userIdFromToken(effectiveToken);
+    let crossMissingPushed = false;
+    for(let ti = 0; ti < capped.length; ti++){
+      let tn = capped[ti];
+      $("progress").textContent = "Checking table " + (ti + 1) + " of " + capped.length + ": " + tn;
+      results.push(await probeAnon(base, anonKey, tn));
+      if(effectiveToken){
+        results.push(await probeCrossAuto(base, anonKey, effectiveToken, myId, tn, columnsByTable[tn] || []));
+      } else if(!crossMissingPushed){
+        crossMissingPushed = true;
+        let skip = {probe:"P2", title:"Cross-user row read: all tables", status:"NOT_CHECKED", level:"MEDIUM", findings:["Not checked for any table: no test user sign-in. Sign in as test user A in the form and the cross-user check runs automatically on every table. Do not read this as safe."], fixes:["Sign in as test user A, then run again with the table name blank."]};
+        results.push(skip);
+      }
+    }
+  }
+  if(!table && $("rowId").value.trim()){
+    results.push({probe:"P2", title:"Cross-user exact row read", status:"NOT_CHECKED", level:"MEDIUM", findings:["Test user B's row number was given, but no single table was named, so the exact row could not be aimed at the right table. The automatic cross-user test above still ran. To try that exact row, type its table name in Which tables and run again."], fixes:["Type the table that holds test user B's row in Which tables, keep the row number, and run again."]});
+  }
+  $("progress").textContent = "Question 3 of 4: can anyone open your files without logging in?";
+  results.push(await probeBucket(base, $("bucketName").value.trim(), $("objectName").value.trim()));
+  $("progress").textContent = "Question 4 of 4: is a master key hiding in your website code?";
+  results.push(await probeBundle($("productUrl").value.trim()));
+  let overall = "LOW";
+  results.forEach(function(it){ overall = maxLevel(overall, it.level); });
+  render(results, overall, host, false);
+  $("progress").textContent = "Done. Fix the first issue, then run again with the same details to prove the fix.";
+  $("runBtn").disabled = false;
+  anonKey = "";
+});
+
+$("sampleBtn").addEventListener("click", function(){
+  clearError();
+  let results = [
+    {probe:"P1", title:"Anon table read: profiles", status:"PROVEN", level:"HIGH", findings:["Sample: anyone using only the public anon key could read rows from this table. Only the id column was asked for, so no personal values were touched."], fixes:["Turn on Row Level Security for this table in Supabase and add a policy so users read only their own rows. Then run this check again."]},
+    {probe:"P2", title:"Cross-user row read: profiles", status:"PROVEN", level:"HIGH", findings:["Sample: test user A could read a row owned by test user B."], fixes:["Add a policy that checks the row owner against the signed-in user. Then run again with the same test users."]},
+    {probe:"P1", title:"Anon table read: orders", status:"BLOCKED", level:"LOW", findings:["Sample: your project refused the stranger's request."], fixes:[]},
+    {probe:"P1", title:"Anon table read: invoices", status:"NOT_PROVEN", level:"MEDIUM", findings:["Sample: no rows came back when a stranger asked."], fixes:[]},
+    {probe:"P3", title:"Public storage bucket: avatars", status:"BLOCKED", level:"LOW", findings:["Sample: your storage refused the no-login request."], fixes:[]},
+    {probe:"P4", title:"Key in client bundle", status:"NOT_CHECKED", level:"MEDIUM", findings:["Sample: your homepage code could not be read from this browser, so this question is unanswered. Browsers often block this read, which is normal."], fixes:["Search your built JavaScript for a master key pattern, or open this check page from your own website and run again."]}
+  ];
+  $("probeLog").textContent = "Sample only: nothing was checked and no request was made.";
+  $("logWrap").classList.remove("hidden");
+  render(results, "HIGH", "sample.example (fake data only)", true);
+  $("progress").textContent = "Sample report only. No real product was checked.";
+});
+
+$("emailBtn").addEventListener("click", function(){
+  const em = $("emailAddr").value.trim();
+  if (!em || em.indexOf("@") < 0) { $("emailStatus").textContent = "That email does not look complete yet."; return; }
+  if (!TELEMETRY_ENDPOINT) { $("emailStatus").textContent = "Reminders are not switched on yet."; return; }
+  try {
+    fetch(TELEMETRY_ENDPOINT, { method: "POST", mode: "no-cors", headers: { "Content-Type": "text/plain" }, body: JSON.stringify({ type: "email", email: em, day: new Date().toISOString().slice(0, 10) }) }).catch(function () {});
+    $("emailStatus").textContent = "Done. One reminder, in 7 days.";
+    $("emailBtn").disabled = true;
+  } catch (e) { $("emailStatus").textContent = "That did not send. Try once more."; }
+});
+$("clearBtn").addEventListener("click", function(){
+  ["supabaseUrl","anonKey","tableName","testEmail","testPassword","userToken","rowId","bucketName","objectName","productUrl"].forEach(function(id){ $(id).value = ""; });
+  $("results").innerHTML = ""; $("probeLog").textContent = ""; $("logWrap").classList.add("hidden");
+  $("progress").textContent = ""; lastResults = null; lastOverall = null; lastHost = ""; memoryToken = ""; memoryTokenEmail = ""; $("signInStatus").textContent = "Not signed in. The cross-user question needs a sign-in, or a pasted test token, before it can be answered.";
+  $("downloadBtn").disabled = true; clearError();
+  let mc = $("methodCreds"); if(mc){ mc.checked = true; applyMethod(); }
+});
+
+$("downloadBtn").addEventListener("click", function(){
+  telEvent("acted", {});
+  if(!lastResults) return;
+  let reportCss = "body{font-family:-apple-system,system-ui,sans-serif;font-size:17px;font-weight:400;line-height:1.47;max-width:640px;margin:40px auto;padding:0 20px;color:#1d1d1f}strong{font-weight:600}.brandline{text-align:center;font-weight:600;margin:0 0 10px}.verdict{font-size:28px;font-weight:600;letter-spacing:-0.015em;text-align:center;margin:24px 0 6px}.verdictsub{text-align:center;color:#6e6e73;margin:0}.hostline,.issueno,.restline,.small{font-size:13px}.hostline{color:#86868b;text-align:center}.issueno{font-weight:600;color:#6e6e73}.issuePage{display:none}.issuePage.active{display:block}.issuePage h3{font-size:28px;font-weight:600;letter-spacing:-0.015em;margin:2px 0}.dot{color:#d70015}.dotG{color:#1a7f37}.dotGrey{color:#86868b}.stWord{font-weight:600}.story{margin:10px 0 4px}.atrisk{color:#424245}.fixbox{background:#f5f5f7;border-radius:16px;padding:6px 20px 12px;margin:20px 0}.lbl{font-weight:600;margin:10px 0 2px}ol.steps{margin:6px 0 6px 20px;padding:0}ol.steps li{margin:6px 0}.navRow{display:flex;justify-content:space-between;align-items:center}.navbtn{height:44px;padding:0 20px;border-radius:980px;border:1px solid #1d1d1f;background:#fff;font-size:17px;cursor:pointer}.navbtn:disabled{opacity:.25}.dots{font-size:13px;color:#86868b;letter-spacing:4px}.restline{text-align:center;color:#6e6e73}.rowline{padding:10px 4px;border-top:1px solid #e5e5e5}.qsec{margin:22px 0 0;background:#f5f5f7;border-radius:18px;padding:22px 18px 12px}.qhead{font-weight:600;margin:0 0 8px}.arow{padding:10px 2px;border-top:1px solid #e3e3e7}.qsec .fixbox{background:#ffffff}.small{color:#6e6e73}.sampleNotice{background:#f5f5f7;border-radius:12px;padding:12px;text-align:center}details.proof summary,summary{font-size:13px;color:#0066cc;cursor:pointer}";
+  let navJs = "<script>var P=document.querySelectorAll('.issuePage');var C=1;function S(n){C=Math.max(1,Math.min(P.length,n));P.forEach(function(p,i){p.classList.toggle('active',i===C-1)});var v=document.querySelector('[data-nav=prev]');var x=document.querySelector('[data-nav=next]');if(v)v.disabled=(C===1);if(x){x.disabled=(C===P.length);x.textContent=(C===P.length)?'Last issue':'Next issue';}}document.addEventListener('click',function(e){if(e.target.dataset&&e.target.dataset.nav==='next')S(C+1);if(e.target.dataset&&e.target.dataset.nav==='prev')S(C-1);});<\/script>";
+  let doc = "<!doctype html><html><head><meta charset='utf-8'><title>MakerGuard report</title><style>" + reportCss + "</style></head><body>" + reportBodyHTML(lastResults, lastOverall, lastHost, false) + navJs + "</body></html>";
+  let parts = [doc];
+  let blob = new Blob([parts.join("\n")], {type: "text/html"});
+  let a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "makerguard-report.html";
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(function(){ URL.revokeObjectURL(a.href); }, 1000);
+});
+
+document.querySelectorAll(".tipBtn").forEach(function(b){
+  b.addEventListener("click", function(){
+    let t = document.getElementById(b.getAttribute("data-tip"));
+    if(t) t.classList.toggle("hidden");
+  });
+});
+
+function applyMethod(){
+  let mt = document.getElementById("methodToken");
+  let isToken = !!(mt && mt.checked);
+  let cf = document.getElementById("credFields");
+  let tf = document.getElementById("tokenFields");
+  if(cf) cf.classList.toggle("hidden", isToken);
+  if(tf) tf.classList.toggle("hidden", !isToken);
+}
+["methodCreds","methodToken"].forEach(function(id){
+  let el = document.getElementById(id);
+  if(el) el.addEventListener("change", applyMethod);
+});
+applyMethod();
+
+document.addEventListener("click", function(e){
+  if(e.target.closest && !e.target.closest(".tipWrap")){
+    document.querySelectorAll(".tipText").forEach(function(t){ t.classList.add("hidden"); });
+  }
+});
+</script>
+</body>
+</html>
