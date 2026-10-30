@@ -119,24 +119,21 @@ details.proof{margin:6px 0}
 <p class="free">Free. Read only. Nothing is stored.</p>
 
 <div class="step">
-<p class="small">Essential, the only two you must fill</p>
-<p>Every table in your project gets checked for one question: can a stranger, with no login at all, read your users&rsquo; data?</p>
-<p class="small">Find both values in Supabase, Settings, API. Both are already public inside your app, they are not secrets.</p>
 <div class="labRow"><label for="supabaseUrl">Supabase URL</label><span class="tipWrap"><button type="button" class="tipBtn" data-tip="tip-supabaseUrl" aria-label="Help for Supabase URL">!</button><p class="tipText hidden" id="tip-supabaseUrl">Where to find it: Supabase, Settings, API, Project URL. It is the public address of your database, already inside your app's code. Requests from this check go only to this address.</p></span></div>
 <input id="supabaseUrl" type="text" placeholder="https://your-project.supabase.co" autocomplete="off" spellcheck="false"><div class="labRow"><label for="anonKey">Anon key</label><span class="tipWrap"><button type="button" class="tipBtn" data-tip="tip-anonKey" aria-label="Help for Anon key">!</button><p class="tipText hidden" id="tip-anonKey">Where to find it: Supabase, Settings, API, the anon or publishable key. It is the public key every visitor's browser already uses. Never the service_role key, it is refused here because it can bypass all your protection. Your key stays in your browser, is never stored, and never appears in your report.</p></span></div>
 <input id="anonKey" type="password" placeholder="Anon / publishable key only" autocomplete="off" spellcheck="false">
 <label class="check"><input id="showKey" type="checkbox"> Show key</label>
+<div class="labRow"><label for="tableName">Table names</label><span class="tipWrap"><button type="button" class="tipBtn" data-tip="tip-tableName" aria-label="Help for Table names">!</button><p class="tipText hidden" id="tip-tableName">The tables you want checked, as many as you like, separated by commas, like profiles, orders. The names are listed in Supabase, under Table Editor.</p></span></div>
+<input id="tableName" type="text" placeholder="Your table names, separated by commas" autocomplete="off" spellcheck="false">
+<p>Every table named here gets checked for one question: can a stranger, with no login at all, read your users&rsquo; data?</p>
 </div>
 
 <div class="optWrap">
 <h2>Optional checks</h2>
 <p class="small">Open only the ones you care about. Closed ones are skipped.</p>
 
-<details class="drop"><summary>Check a single table instead of all of them</summary>
-<div class="labRow"><label for="tableName">Table name</label><span class="tipWrap"><button type="button" class="tipBtn" data-tip="tip-tableName" aria-label="Help for Table name">!</button><p class="tipText hidden" id="tip-tableName">One table, like profiles, if you only want that one checked. Or leave this blank: every table your key can see gets found and checked, all of them.</p></span></div>
-<input id="tableName" type="text" placeholder="Leave blank to check all tables" autocomplete="off" spellcheck="false">
-</details>
-<details class="drop"><summary>Find out if one user can read another user&rsquo;s data</summary>
+<details class="drop"><summary>Find out if a signed-in user can read another user&rsquo;s data</summary>
+<p class="small">This is the second door into the same data. The check at the top of this page tests a stranger with no login. This one tests a signed-in user reaching for rows that are not theirs.</p>
 
 <div class="personRow"><span class="who">A</span><p class="whoTitle">Test user A, signs in</p></div>
 <p class="small">No test user yet? Create one in your Supabase: Authentication, Users, Add user, tick Auto Confirm. Make up the email and password.</p>
@@ -157,8 +154,8 @@ details.proof{margin:6px 0}
 
 <div class="personRow"><span class="who">B</span><p class="whoTitle">Test user B, never signs in</p></div>
 <p class="small">Create B the same way as A. Then add one fake row owned by B in your table. Only that row&rsquo;s number is needed, find it in the id column in Table Editor. The check then signs in as A and tries to read B&rsquo;s row.</p>
-<div class="labRow"><label for="rowId">Row number of B&rsquo;s fake row</label><span class="tipWrap"><button type="button" class="tipBtn" data-tip="tip-rowId" aria-label="Help for Row number of B&rsquo;s fake row">!</button><p class="tipText hidden" id="tip-rowId">The number in the id column of the fake row that belongs to test user B, in your table in Table Editor. If that row lives in one table, name that table in Which tables above, so the check aims at the right one. Test rows only, never a real customer's row, the id-only design means no personal values are ever fetched with it.</p></span></div>
-<input id="rowId" type="text" placeholder="2" autocomplete="off" spellcheck="false">
+<div class="labRow"><label for="rowId">Row number of B&rsquo;s fake row</label><span class="tipWrap"><button type="button" class="tipBtn" data-tip="tip-rowId" aria-label="Help for Row number of B&rsquo;s fake row">!</button><p class="tipText hidden" id="tip-rowId">The number in the id column of the fake row that belongs to test user B, from Table Editor. Not A's number: A can always read A's own row, so aiming at A's row shows an Issue on every table, even a protected one. For one table, just that number. For several tables, give the numbers in the same order as your table names at the top, separated by commas. Each number is that table's own fact, nothing to do with the others, and in a fresh test setup it is often the same number every time, like 2, 2, 2. Leave a gap for a table you want to skip, like 2, , 2. Test rows only, never a real customer's row.</p></span></div>
+<input id="rowId" type="text" placeholder="Same order as your table names" autocomplete="off" spellcheck="false">
 </details>
 <details class="drop"><summary>Find out if anyone can open your files without logging in</summary>
 <div class="labRow"><label for="bucketName">Storage bucket</label><span class="tipWrap"><button type="button" class="tipBtn" data-tip="tip-bucketName" aria-label="Help for Storage bucket">!</button><p class="tipText hidden" id="tip-bucketName">The name of a storage bucket, in Supabase under Storage, like avatars. Buckets cannot be listed with an anon key, so this name has to come from you.</p></span></div>
@@ -288,11 +285,11 @@ const EXPLAIN = {
        risk: "Whoever takes that key owns your whole project. They can read, change, or delete everything."}
 };
 const FIXSTEPS = {
-  P1: ["Supabase, Table Editor, this table: turn ON Row Level Security.",
-       "Add a policy: users see only their own rows (user_id = auth.uid()).",
+  P1: ["Supabase, Table Editor, this table. If Row Level Security is off, turn it ON. If it is already on, the policies are the problem, next step.",
+       "Open the table's policies. Delete any policy that lets everyone in, or that lets any signed-in user read. Keep or add only the owner policy: users see only their own rows (user_id = auth.uid()).",
        "Run this check again."],
-  P2: ["Supabase, Authentication, Policies, this table.",
-       "Keep only policies where the row owner is the user (user_id = auth.uid()). Delete any policy that lets everyone in.",
+  P2: ["Supabase, Authentication, Policies, this table. If Row Level Security is off for this table, turn it ON first in Table Editor. Policies do nothing while it is off.",
+       "Keep only policies where the row owner is the user (user_id = auth.uid()). Delete any policy that lets everyone in, or that lets in anyone who is merely signed in.",
        "Run this check again, same test users."],
   P3: ["Supabase, Storage: make this bucket Private.",
        "Share files only inside your app, after checking the owner.",
@@ -357,7 +354,7 @@ function wireNav(){
 
 const QUESTIONS = {
   P1: "Can a stranger read your users' data?",
-  P2: "Can one user read another user's data?",
+  P2: "Can a signed-in user read another user's data?",
   P3: "Can anyone open your files without logging in?",
   P4: "Is a secret master key hiding in your website code?"
 };
@@ -417,10 +414,8 @@ function reportBodyHTML(results, overall, host, sampleLabel){
     html += "<p class='verdictsub'>In these 4 questions only. Not your whole product.</p>";
   }
   html += "<p class='hostline'>Checked: " + esc(host) + "</p>";
-  const order = {PROVEN: 0, BLOCKED: 1, NOT_PROVEN: 2, NOT_CHECKED: 3};
   ["P1", "P2", "P3", "P4"].forEach(function(probe){
     let items = results.filter(function(it){ return it.probe === probe; });
-    items.sort(function(a, b){ return (order[a.status] || 9) - (order[b.status] || 9); });
     if(!items.length) items = [{probe: probe, title: "", status: "NOT_CHECKED", level: "MEDIUM", findings: ["This part of the check did not run."], fixes: []}];
     html += "<div class='qsec'><p class='qhead'>" + QUESTIONS[probe] + "</p>";
     items.forEach(function(it){ html += answerRowHTML(it); });
@@ -445,16 +440,37 @@ function addLog(line){
   $("logWrap").classList.remove("hidden");
 }
 
+function fetchT(url, opts, ms){
+  let ctrl = new AbortController();
+  let t = setTimeout(function(){ ctrl.abort(); }, ms || 15000);
+  let o = {};
+  if(opts){ for(let k in opts) o[k] = opts[k]; }
+  o.signal = ctrl.signal;
+  return fetch(url, o).finally(function(){ clearTimeout(t); });
+}
+function masterKeyProblem(k){
+  if(!k) return "";
+  if(k.indexOf("sbp_") === 0 && k.length > 20) return "master";
+  if(k.indexOf("sb_secret_") === 0) return "master";
+  let parts = k.split(".");
+  if(parts.length === 3){
+    try{
+      let payload = JSON.parse(decodeURIComponent(escape(atob(parts[1].replace(/-/g, "+").replace(/_/g, "/")))));
+      if(payload && payload.role === "service_role") return "master";
+    }catch(e){}
+  }
+  return "";
+}
 async function fetchJson(url, anonKey, userToken){
   let headers = {"apikey": anonKey, "Authorization": "Bearer " + (userToken || anonKey), "Accept": "application/json"};
-  let resp = await fetch(url, {method: "GET", headers: headers});
+  let resp = await fetchT(url, {method: "GET", headers: headers});
   let text = await resp.text();
   let data = null;
   try{ data = text ? JSON.parse(text) : null; }catch(e){ data = null; }
   return {status: resp.status, data: data};
 }
 
-async function probeAnon(base, anonKey, table){
+async function probeAnon(base, anonKey, table, token){
   let item = {probe:"P1", title:"Anon table read: "+table, status:"NOT_CHECKED", level:"MEDIUM", findings:[], fixes:[]};
   let url = base + "/rest/v1/" + encodeURIComponent(table) + "?select=id&limit=5";
   addLog("GET " + base + "/rest/v1/" + table + " (key redacted)");
@@ -462,19 +478,37 @@ async function probeAnon(base, anonKey, table){
     let r = await fetchJson(url, anonKey, null);
     if(r.status === 200 && Array.isArray(r.data) && r.data.length > 0){
       item.status = "PROVEN"; item.level = "HIGH";
-      item.findings.push("Anyone using only your public anon key could read " + r.data.length + " row(s) from this table. Only the id column was asked for, on purpose, so no names, emails, or other personal values were touched.");
-      item.fixes.push("In Supabase, turn on Row Level Security for this table and add a policy that only allows the owner to read their own rows. Then run this check again. Do not rely on hiding the table name.");
+      item.findings.push("Anyone using only your public anon key could read " + r.data.length + " row(s) from this table. Only the id column was asked for, on purpose, so no names, emails, or other personal values were touched. A table answers a stranger like this for one of two reasons: row level security is off for it, or it is on but a policy lets everyone through. From outside, the two look the same.");
+      item.fixes.push("Open this table in Supabase, under Table Editor, and match the step to what you see. If Row Level Security is off, turn it on. Then open the table's policies: if any policy lets everyone read, or lets any signed-in user read, delete it or narrow it. The read policy that should remain lets each user read only their own rows. Then run this check again.");
     } else if(r.status === 200){
-      item.status = "NOT_PROVEN"; item.level = "MEDIUM";
-      item.findings.push("No rows came back when a stranger asked. That could mean your row level security is working, or it could mean the table is empty. From outside, there is no way to tell, so this table is not proven safe.");
-      item.fixes.push("Test again with a table and row you know exists, or check the table's policies in Supabase > Authentication > Policies.");
+      let settled = false;
+      if(token){
+        try{
+          let ra = await fetchJson(url, anonKey, token);
+          if(ra.status === 200 && Array.isArray(ra.data) && ra.data.length > 0){
+            item.status = "BLOCKED"; item.level = "LOW";
+            item.findings.push("A stranger asking for this table got nothing back, while your signed-in test user can see rows in it. So the table is not empty: your protection is what stopped the stranger.");
+            settled = true;
+          } else if(ra.status === 200){
+            item.status = "NOT_PROVEN"; item.level = "MEDIUM";
+            item.findings.push("Nothing came back when a stranger asked, and nothing came back for your signed-in test user either. The table may be empty, or its rules may be hiding every row from both of them. From outside those look the same, so this is not a guaranteed pass.");
+            item.fixes.push("If you know this table holds rows your test user should be able to see, check the table's policies in Supabase > Authentication > Policies.");
+            settled = true;
+          }
+        }catch(e){ settled = false; }
+      }
+      if(!settled){
+        item.status = "NOT_PROVEN"; item.level = "MEDIUM";
+        item.findings.push("No rows came back when a stranger asked. That could mean your row level security is working, or it could mean the table is empty. From outside, there is no way to tell, so this table is not proven safe.");
+        item.fixes.push("Sign in as test user A and run again: if the test user can see rows while a stranger cannot, that proves the protection and this answer becomes Protected. A table you know is empty is also fine.");
+      }
     } else if(r.status === 401 || r.status === 403){
       item.status = "BLOCKED"; item.level = "LOW";
       item.findings.push("Your project refused the stranger's request (401 or 403). That is exactly what a protected table does.");
     } else if(r.status === 400){
       let counted = -1;
       try{
-        let cresp = await fetch(base + "/rest/v1/" + encodeURIComponent(table) + "?select=*&limit=0", {method: "GET", headers: {"apikey": anonKey, "Authorization": "Bearer " + anonKey, "Prefer": "count=exact"}});
+        let cresp = await fetchT(base + "/rest/v1/" + encodeURIComponent(table) + "?select=*&limit=0", {method: "GET", headers: {"apikey": anonKey, "Authorization": "Bearer " + anonKey, "Prefer": "count=exact"}});
         let cr = cresp.headers.get("content-range") || "";
         let total = parseInt((cr.split("/")[1] || ""), 10);
         if(!isNaN(total)) counted = total;
@@ -482,12 +516,16 @@ async function probeAnon(base, anonKey, table){
       if(counted > 0){
         item.status = "PROVEN"; item.level = "HIGH";
         item.findings.push("Anyone using only your public anon key could count " + counted + " row(s) in this table, which means row level security is letting a stranger see into it (this table has no id column, so the check counted rows instead of reading them). No row values were fetched.");
-        item.fixes.push("In Supabase, turn on Row Level Security for this table and add a policy that only allows the owner to read their own rows. Then run this check again.");
+        item.fixes.push("Open this table in Supabase, under Table Editor, and match the step to what you see. If Row Level Security is off, turn it on. Then open the table's policies: if any policy lets everyone read, or lets any signed-in user read, delete it or narrow it. The read policy that should remain lets each user read only their own rows. Then run this check again.");
       } else {
         item.status = "NOT_CHECKED"; item.level = "MEDIUM";
         item.findings.push("The stranger's request did not return a clear answer (status: 400, and counting rows did not settle it). This table may have no id column. Treat this as unknown, not safe.");
         item.fixes.push("Check the table name is correct, then run again. If the table has no id column, check its policies in Supabase > Authentication > Policies by hand.");
       }
+    } else if(r.status === 404){
+      item.status = "NOT_CHECKED"; item.level = "MEDIUM";
+      item.findings.push("No table answered to that name (404). The name may be spelled differently in your project, or this table may not be open to the data API at all. Treat this as unknown, not safe.");
+      item.fixes.push("Check the name letter for letter in Supabase, under Table Editor, then run again.");
     } else {
       item.status = "NOT_CHECKED"; item.level = "MEDIUM";
       item.findings.push("The stranger's request did not return a clear answer (status: " + r.status + "). Treat this as unknown, not safe.");
@@ -513,11 +551,11 @@ async function probeCrossUser(base, anonKey, table, userToken, rowId){
     let r = await fetchJson(url, anonKey, userToken);
     if(r.status === 200 && Array.isArray(r.data) && r.data.length > 0){
       item.status = "PROVEN"; item.level = "HIGH";
-      item.findings.push("Test user A could read a row owned by test user B. That is cross-user data exposure: any signed-in user can reach another user's data. Only the id column was asked for, the id you typed in, so none of that row's personal values were touched.");
-      item.fixes.push("Add a row level security policy that checks the row owner against the logged-in user, for example owner = auth.uid(), for select, update, and delete. Then run again with the same test users.");
+      item.findings.push("Test user A could read row " + rowId + " in this table, the row you pointed at as test user B's. That is cross-user data exposure: any signed-in user can reach another user's data. Only the id column was asked for, so none of that row's personal values were touched. The number aimed at is printed here on purpose: if it is not B's row number in this table, this verdict is about the wrong row.");
+      item.fixes.push("Open this table in Supabase, under Table Editor, and match the step to what you see. If Row Level Security is off, turn it on. Then open the table's policies: if any policy lets everyone read, or lets any signed-in user read (a rule that only asks whether someone is logged in still lets every user read every row), delete it or narrow it. The read policy that should remain checks the row's owner against the signed-in user, for example owner = auth.uid(). Then run again with the same test users.");
     } else if(r.status === 200 || r.status === 401 || r.status === 403){
       item.status = "BLOCKED"; item.level = "LOW";
-      item.findings.push("Test user A could not read test user B's row. That is exactly what working row level security looks like.");
+      item.findings.push("Test user A could not read row " + rowId + " in this table, the row you pointed at as test user B's. That is exactly what working row level security looks like. The number aimed at is printed here on purpose: if it is not B's row number in this table, this verdict is about the wrong row.");
     } else {
       item.status = "NOT_CHECKED"; item.level = "MEDIUM";
       item.findings.push("The signed-in request did not return a clear answer (status: " + r.status + "). Treat this as unknown, not safe.");
@@ -539,8 +577,8 @@ async function probeBucket(base, bucket, objectName){
   let url = base + "/storage/v1/object/public/" + encodeURIComponent(bucket) + "/" + encodeURIComponent(objectName);
   addLog("GET " + base + "/storage/v1/object/public/" + bucket + "/" + objectName + " (no login)");
   try{
-    let resp = await fetch(url, {method: "GET"});
-    if(resp.status === 200){
+    let resp = await fetchT(url, {method: "GET", headers: {"Range": "bytes=0-0"}});
+    if(resp.status === 200 || resp.status === 206){
       item.status = "PROVEN"; item.level = "HIGH";
       item.findings.push("Anyone without a login could fetch this file from a public bucket. The file itself was not opened or shown.");
       item.fixes.push("Make the bucket private, or move the file to a private bucket and serve it only after checking the user owns it. Then run again.");
@@ -548,9 +586,24 @@ async function probeBucket(base, bucket, objectName){
       item.status = "BLOCKED"; item.level = "LOW";
       item.findings.push("Your storage refused the no-login request (401 or 403). That is exactly what a private bucket does.");
     } else if(resp.status === 404){
-      item.status = "NOT_PROVEN"; item.level = "MEDIUM";
-      item.findings.push("The file was not found (404). That could mean the file does not exist, or the bucket is private. Either way, this bucket is not proven safe by this result.");
-      item.fixes.push("Test again with a file name you know exists, then run again.");
+      item.status = "BLOCKED"; item.level = "LOW";
+      item.findings.push("Your storage refused the no-login request for this file (404). A private bucket answers exactly this way: to a stranger, the file is simply not there. This answer rests on the file name you gave being exactly right, because a wrong name would get the same answer.");
+      item.fixes.push("If that file name is not exactly right, correct it and run again. A correct name with this answer means the file is not open to strangers.");
+    } else if(resp.status === 400){
+      let emsg = "";
+      try{ let ej = await resp.json(); emsg = ((ej && (ej.message || ej.error)) || "") + ""; addLog("Storage answered 400: " + emsg); }catch(e2){ emsg = ""; }
+      if(/bucket not found/i.test(emsg)){
+        item.status = "BLOCKED"; item.level = "LOW";
+        item.findings.push("Your storage refused the no-login request. Supabase answers for a private bucket exactly as if the bucket was not there at all, the same answer a bucket that does not exist would get, so from outside there is no way in: a stranger cannot open this file, or even confirm the bucket exists. This answer covers the bucket named above; a bucket with a different name was not tested.");
+        item.fixes.push("If your bucket's real name is different from the one above, run again with its exact name. A correct name with this answer means your files are not open to strangers.");
+      } else if(/not found/i.test(emsg)){
+        item.status = "PROVEN"; item.level = "HIGH";
+        item.findings.push("Your bucket is public. That is proven, not guessed: Supabase gives this object not found answer only for a bucket it serves to strangers, while a private bucket answers as if it was not there at all, whatever file name is asked for. No file matched the name above, so this exact file was not the one fetched, but the bucket itself is open: anyone can fetch any file in it if they know or can guess its name.");
+        item.fixes.push("Make the bucket private if its files are not meant for everyone, then run again. To test one exact file, use its name letter for letter as it appears in Supabase, under Storage.");
+      } else {
+        item.status = "NOT_CHECKED"; item.level = "MEDIUM";
+        item.findings.push("The no-login file request did not return a clear answer (status: 400). Treat this as unknown, not safe.");
+      }
     } else {
       item.status = "NOT_CHECKED"; item.level = "MEDIUM";
       item.findings.push("The no-login file request did not return a clear answer (status: " + resp.status + "). Treat this as unknown, not safe.");
@@ -571,7 +624,7 @@ async function probeBundle(productUrl){
   }
   let clean = cleanUrl(productUrl);
   try{
-    let resp = await fetch(clean, {method: "GET"});
+    let resp = await fetchT(clean, {method: "GET"});
     if(!resp.ok){
       item.findings.push("Your homepage could not be fetched (status: " + resp.status + "). Treat this as unknown, not safe.");
       return item;
@@ -592,7 +645,7 @@ async function probeBundle(productUrl){
     for(let i=0; i<Math.min(scripts.length, 5); i++){
       addLog("GET " + scripts[i] + " (same site only)");
       try{
-        let sresp = await fetch(scripts[i], {method: "GET"});
+        let sresp = await fetchT(scripts[i], {method: "GET"});
         if(!sresp.ok) continue;
         let js = await sresp.text();
         if(/sbp_[A-Za-z0-9]{20,}/.test(js)) found.push([scripts[i], "service_role-like key pattern (sbp_)"]);
@@ -628,7 +681,8 @@ function userIdFromToken(token){
 async function discoverTables(base, anonKey, bearer){
   let url = base + "/rest/v1/";
   addLog("GET " + url + " table list (key redacted)");
-  let resp = await fetch(url, {method: "GET", headers: {"apikey": anonKey, "Authorization": "Bearer " + (bearer || anonKey), "Accept": "application/json"}});
+  let resp = await fetchT(url, {method: "GET", headers: {"apikey": anonKey, "Authorization": "Bearer " + (bearer || anonKey), "Accept": "application/openapi+json"}});
+  if(!resp.ok){ resp = await fetchT(url, {method: "GET", headers: {"apikey": anonKey, "Authorization": "Bearer " + (bearer || anonKey), "Accept": "*/*"}}); }
   if(!resp.ok) throw new Error("spec status " + resp.status);
   let spec = await resp.json();
   let tables = [];
@@ -671,7 +725,7 @@ async function probeCrossAuto(base, anonKey, token, myId, table, columns){
       if(others.length > 0){
         item.status = "PROVEN"; item.level = "HIGH";
         item.findings.push("Signed in as test user A, your project handed over " + others.length + " row(s) in this table whose owner is not user A. That is cross-user data exposure. Only the id and owner columns were asked for, no other personal values.");
-        item.fixes.push("Add a row level security policy that checks the row owner against the logged-in user, for select, update, and delete. Then run again.");
+        item.fixes.push("Open this table in Supabase, under Table Editor, and match the step to what you see. If Row Level Security is off, turn it on. Then open the table's policies: if any policy lets everyone read, or lets any signed-in user read (a rule that only asks whether someone is logged in still lets every user read every row), delete it or narrow it. The read policy that should remain checks the row's owner against the signed-in user, for example owner = auth.uid(). Then run again.");
       } else {
         item.status = "BLOCKED"; item.level = "LOW";
         item.findings.push("Signed in as test user A, none of the rows visible in this table belonged to someone else.");
@@ -695,12 +749,12 @@ $("signInBtn").addEventListener("click", async function(){
   let email = $("testEmail").value.trim();
   let password = $("testPassword").value;
   if(!base || !anonKey){ showError("Fill in Supabase URL and anon key first, above, then sign in as your test user."); return; }
-  if(anonKey.indexOf("sbp_") === 0 && anonKey.length > 20){ showError("STOP: That key looks like a service_role key (sbp_). Only use an anon / publishable key."); return; }
+  if(masterKeyProblem(anonKey)){ showError("STOP: That looks like a master (service) key, not the public anon key. A master key bypasses all protection, so this check refuses it. Paste the anon / publishable key instead."); return; }
   if(!email || !password){ showError("Fill in your TEST user A email and its throwaway password, then sign in."); return; }
   $("signInBtn").disabled = true;
   $("signInStatus").textContent = "Signing in as your test user, directly to your Supabase.";
   try{
-    let resp = await fetch(base + "/auth/v1/token?grant_type=password", {method: "POST", headers: {"apikey": anonKey, "Content-Type": "application/json"}, body: JSON.stringify({email: email, password: password})});
+    let resp = await fetchT(base + "/auth/v1/token?grant_type=password", {method: "POST", headers: {"apikey": anonKey, "Content-Type": "application/json"}, body: JSON.stringify({email: email, password: password})});
     let data = null;
     try{ data = await resp.json(); }catch(e){ data = null; }
     password = "";
@@ -724,59 +778,88 @@ $("signInBtn").addEventListener("click", async function(){
 
 $("runBtn").addEventListener("click", async function(){
   telEvent("started", { fields: countFilled() });
-  telEvent("ran", {});
   clearError();
   let base = cleanUrl($("supabaseUrl").value);
   let anonKey = $("anonKey").value.trim();
   let table = $("tableName").value.trim();
-  if(!base || !anonKey){ showError("Please fill in Supabase URL and anon key. Table name can stay blank, to check all tables."); return; }
-  if(anonKey.indexOf("sbp_") === 0 && anonKey.length > 20){ showError("STOP: That key looks like a service_role key (sbp_). Only paste an anon / publishable key. Never paste a service key here."); return; }
+  let tableNamesIn = table ? table.split(/[,\n]/).map(function(s){ return s.trim(); }).filter(function(s, ix, arr){ return s.length && arr.indexOf(s) === ix; }) : [];
+  if(!base || !anonKey){ showError("Please fill in your Supabase URL, anon key, and at least one table name."); return; }
+  if(masterKeyProblem(anonKey)){ showError("STOP: That looks like a master (service) key, not the public anon key. A master key bypasses all protection, so this check refuses it. Paste the anon / publishable key instead."); return; }
   if(/service/i.test(anonKey)){ showError("STOP: That key looks like it may be a service key. Only paste an anon / publishable key."); return; }
   $("runBtn").disabled = true;
   $("probeLog").textContent = "";
+  telEvent("ran", {});
   $("progress").textContent = "Running the check. Read only, talking only to your Supabase.";
   let host = "";
   try{ host = new URL(base).host; }catch(e){ host = base; }
   let results = [];
   let methodEl = document.querySelector('input[name="signinMethod"]:checked');
   let effectiveToken = (methodEl && methodEl.value === "token") ? $("userToken").value.trim() : memoryToken;
-  if(table){
+  if(methodEl && methodEl.value === "token" && masterKeyProblem(effectiveToken)){ showError("STOP: The token you pasted is a master (service) key, not a test user's sign-in token. It can read every row, so it would fake a leak on every table. Paste a test user's token, or use the email and password option instead."); $("runBtn").disabled = false; $("progress").textContent = ""; return; }
+  if(tableNamesIn.length){
     $("progress").textContent = "Question 1 of 4: can a stranger read your tables?";
-    results.push(await probeAnon(base, anonKey, table));
-    $("progress").textContent = "Question 2 of 4: can one user read another user's data?";
     let rowIdVal = $("rowId").value.trim();
-    if(effectiveToken && !rowIdVal){
-      let cols = [];
-      try{ let fd = await discoverTables(base, anonKey, effectiveToken); cols = fd.columns[table] || []; }catch(e){ cols = []; }
-      let autoItem = await probeCrossAuto(base, anonKey, effectiveToken, memoryUserId || userIdFromToken(effectiveToken), table, cols);
-      if(autoItem.status === "BLOCKED"){
-        autoItem.status = "NOT_PROVEN"; autoItem.level = "MEDIUM";
-        autoItem.findings = ["Nearly, but this test is not finished: test user A could not see anyone else's rows in an automatic look, and the test also needs test user B's row number to be complete. Add B's row number in the cross-user test section and run again. Do not read this as a pass yet."];
-        autoItem.fixes = ["Add the row number of test user B's fake row in this table, then run again."];
+    for(let tix = 0; tix < tableNamesIn.length; tix++){
+      results.push(await probeAnon(base, anonKey, tableNamesIn[tix], effectiveToken));
+    }
+    $("progress").textContent = "Question 2 of 4: can a signed-in user read another user's data?";
+    let rowParts = rowIdVal ? rowIdVal.split(",").map(function(s){ return s.trim(); }) : [];
+    let rowsMisaligned = !!(rowIdVal && tableNamesIn.length > 1 && rowParts.length !== tableNamesIn.length);
+    for(let tix2 = 0; tix2 < tableNamesIn.length; tix2++){
+      let tname2 = tableNamesIn[tix2];
+      let rowFor = "";
+      if(rowIdVal){
+        if(tableNamesIn.length === 1) rowFor = rowParts[0] || "";
+        else if(!rowsMisaligned) rowFor = rowParts[tix2] || "";
       }
-      results.push(autoItem);
-    } else {
-      results.push(await probeCrossUser(base, anonKey, table, effectiveToken, rowIdVal));
+      if(rowsMisaligned){
+        results.push({probe:"P2", title:"Cross-user row read: " + tname2, status:"NOT_CHECKED", level:"MEDIUM", findings:["Row numbers are matched to tables by their order: the first number goes with the first table named, and so on. " + tableNamesIn.length + " tables were named but " + rowParts.length + " row number(s) were given, so the numbers could not be matched safely, and nothing was guessed."], fixes:["Give one row number per table, in the same order as the table names at the top, separated by commas. Leave a gap (two commas in a row) for a table you want to skip, then run again."]});
+      } else if(effectiveToken && !rowFor){
+        let cols = null;
+        try{ let fd = await discoverTables(base, anonKey, effectiveToken); cols = fd.columns[tname2] || []; }catch(e){ cols = null; }
+        if(cols === null){
+          results.push({probe:"P2", title:"Cross-user row read: " + tname2, status:"NOT_CHECKED", level:"MEDIUM", findings:["The automatic cross-user check needs this table's column list, and Supabase no longer shows that list to a public key, so it cannot run this way. The exact row check still works: give test user B's row number for this table and run again. Do not read this as safe."], fixes:["Add the row number of test user B's fake row in this table, then run again."]});
+        } else {
+          let autoItem = await probeCrossAuto(base, anonKey, effectiveToken, memoryUserId || userIdFromToken(effectiveToken), tname2, cols);
+          if(autoItem.status === "BLOCKED"){
+            autoItem.status = "NOT_PROVEN"; autoItem.level = "MEDIUM";
+            autoItem.findings = ["Nearly, but this test is not finished: test user A could not see anyone else's rows in an automatic look, and the test also needs test user B's row number to be complete. Add B's row number in the cross-user test section and run again. Do not read this as a pass yet."];
+            autoItem.fixes = ["Add the row number of test user B's fake row in this table, then run again."];
+          }
+          results.push(autoItem);
+        }
+      } else {
+        results.push(await probeCrossUser(base, anonKey, tname2, effectiveToken, rowFor));
+      }
     }
   } else {
-    $("progress").textContent = "Finding every table your key can see.";
+    $("progress").textContent = "Trying to read the list of your tables.";
     let found = null;
-    try{ found = await discoverTables(base, anonKey, null); }catch(e){ found = null; }
+    let specRead = false;
+    try{ found = await discoverTables(base, anonKey, null); specRead = true; }catch(e){ found = null; addLog("Table list request failed: " + e.message); }
     let columnsByTable = found ? found.columns : {};
     let tableNames = found ? found.tables.slice() : [];
+    let authSpecRead = false;
     if(effectiveToken){
       try{
         let foundAuth = await discoverTables(base, anonKey, effectiveToken);
+        authSpecRead = true;
         foundAuth.tables.forEach(function(tn){ if(tableNames.indexOf(tn) === -1) tableNames.push(tn); });
         Object.keys(foundAuth.columns).forEach(function(tn){ columnsByTable[tn] = foundAuth.columns[tn]; });
       }catch(e){}
     }
-    if(!tableNames.length){
-      showError("The list of tables could not be read from that address and key. Your project may have its data API off, or the key may be wrong. Type one table name above and run again, or fix the address and key.");
+    if(!tableNames.length && !specRead && !authSpecRead){
+      showError("The list of tables could not be read from that address and key. Two possible reasons: the address and key do not match this project, or Supabase's new rule is at work, it no longer shows the table list to a public key, to protect your database structure. Either way, name your tables in the fields at the top of this page, several at once separated by commas, and run again. The names are listed in Supabase, under Table Editor.");
       $("progress").textContent = "";
       $("runBtn").disabled = false;
       return;
     }
+    if(!tableNames.length){
+      results.push({probe:"P1", title:"Anon table read: every table", status:"NOT_PROVEN", level:"LOW", findings:["Your project answered the table list request, and the list it shows is empty. No table is visible to a stranger, so a stranger read could not even be attempted. That is the protected shape for this question, but it only covers the tables your project shows in its list, and it says nothing about signed-in users reading each other's data."], fixes:["To check one specific table anyway, name it in Which tables above and run again."]});
+      if(!effectiveToken){
+        results.push({probe:"P2", title:"Cross-user row read: all tables", status:"NOT_CHECKED", level:"MEDIUM", findings:["Not checked for any table: no test user sign-in. Sign in as test user A in the form, name your tables above, and give test user B's row number for the exact check. Do not read this as safe."], fixes:["Sign in as test user A, name your tables above, then run again."]});
+      }
+    } else {
     let capped = tableNames.slice(0, 50);
     addLog("Discovered " + tableNames.length + " table(s) and view(s) from the API list" + (tableNames.length > 50 ? ", checking the first 50" : "") + ".");
     let myId = memoryUserId || userIdFromToken(effectiveToken);
@@ -784,14 +867,15 @@ $("runBtn").addEventListener("click", async function(){
     for(let ti = 0; ti < capped.length; ti++){
       let tn = capped[ti];
       $("progress").textContent = "Checking table " + (ti + 1) + " of " + capped.length + ": " + tn;
-      results.push(await probeAnon(base, anonKey, tn));
+      results.push(await probeAnon(base, anonKey, tn, effectiveToken));
       if(effectiveToken){
         results.push(await probeCrossAuto(base, anonKey, effectiveToken, myId, tn, columnsByTable[tn] || []));
       } else if(!crossMissingPushed){
         crossMissingPushed = true;
-        let skip = {probe:"P2", title:"Cross-user row read: all tables", status:"NOT_CHECKED", level:"MEDIUM", findings:["Not checked for any table: no test user sign-in. Sign in as test user A in the form and the cross-user check runs automatically on every table. Do not read this as safe."], fixes:["Sign in as test user A, then run again with the table name blank."]};
+        let skip = {probe:"P2", title:"Cross-user row read: all tables", status:"NOT_CHECKED", level:"MEDIUM", findings:["Not checked for any table: no test user sign-in. Sign in as test user A in the form, name your tables above, and give test user B's row number for the exact check. Do not read this as safe."], fixes:["Sign in as test user A, name your tables above, then run again."]};
         results.push(skip);
       }
+    }
     }
   }
   if(!table && $("rowId").value.trim()){
