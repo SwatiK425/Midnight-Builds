@@ -62,6 +62,11 @@ ol.steps li{margin:6px 0}
 .arow{padding:10px 2px;border-top:1px solid #e3e3e7}
 .qsec .arow:first-of-type{border-top:none}
 .qsec .fixbox{background:#ffffff}
+.acard{background:#fff;border:1px solid #e3e3e7;border-radius:14px;padding:12px 14px;margin:10px 0}
+.asum{display:flex;justify-content:space-between;align-items:flex-start;width:100%;background:none;border:0;padding:0;font:inherit;color:inherit;text-align:left;cursor:pointer}
+.aexp{font-size:13px;color:#0066cc;white-space:nowrap;margin-left:10px;padding-top:2px}
+.adet{border-top:1px solid #eee;margin-top:10px;padding-top:10px}
+.acard .fixbox{background:#f5f5f7}
 details.passed{margin:16px 0}
 .issuePage{display:none}
 .issuePage.active{display:block}
@@ -254,11 +259,12 @@ telReturnedCheck();
 telEvent("visited", {});
 function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
 function $(id){return document.getElementById(id);}
-function cleanUrl(u){return u.trim().replace(/\/+$/,"");}
+function cleanUrl(u){ let v = u.trim().replace(/\/+$/,""); if(v.endsWith("/rest/v1")) v = v.slice(0, v.length - 8).replace(/\/+$/,""); return v; }
 function levelRank(l){return ["LOW","MEDIUM","ELEVATED","HIGH","CRITICAL"].indexOf(l);}
 function maxLevel(a,b){return levelRank(a)>=levelRank(b)?a:b;}
 
 let lastResults = null;
+let lastRunLabel = "";
 let memoryToken = "";
 let memoryTokenEmail = "";
 let memoryUserId = "";
@@ -308,7 +314,7 @@ const PASSLINE = {
 function issuePageHTML(item, n, total){
   let ex = EXPLAIN[item.probe] || {headline: item.title, story: item.findings.join(" "), risk: ""};
   let steps = (FIXSTEPS[item.probe] || item.fixes).map(function(f){return "<li>"+esc(f)+"</li>";}).join("");
-  let proof = item.findings.map(function(f){return esc(f);}).join(" ");
+  let proof = item.findings.map(function(f){return esc(f);}).join(" ") + (item.control ? " Why you can trust this: " + esc(item.control) : "");
   let h = "<div class='issuePage"+(n === 1 ? " active" : "")+"' data-idx='"+n+"'>";
   h += "<p class='issueno' style='color:#d70015'>Issue "+n+" of "+total+", needs fixing</p>";
   h += "<h3><span class='dot'>\u25CF</span> "+esc(ex.headline)+"</h3>";
@@ -331,25 +337,17 @@ function navHTML(total){
   return "<div class='navRow'><button type='button' class='navbtn' data-nav='prev' disabled>Back</button><span class='dots'>"+dots+"</span><button type='button' class='navbtn' data-nav='next'>Next issue</button></div>";
 }
 
-function wireNav(){
-  let pages = document.querySelectorAll("#results .issuePage");
-  if(pages.length < 2) return;
-  let cur = 1;
-  function show(n){
-    cur = Math.max(1, Math.min(pages.length, n));
-    pages.forEach(function(pg, i){ pg.classList.toggle("active", i === cur - 1); });
-    let prev = document.querySelector("#results [data-nav='prev']");
-    let next = document.querySelector("#results [data-nav='next']");
-    let dotsEl = document.querySelector("#results .dots");
-    if(prev) prev.disabled = (cur === 1);
-    if(next) next.textContent = (cur === pages.length) ? "Last issue" : "Next issue";
-    if(next) next.disabled = (cur === pages.length);
-    if(dotsEl){ let d = ""; for(let i = 1; i <= pages.length; i++){ d += (i === cur ? "\u25CF" : "\u25CB"); } dotsEl.textContent = d; }
-  }
-  let prev = document.querySelector("#results [data-nav='prev']");
-  let next = document.querySelector("#results [data-nav='next']");
-  if(prev) prev.addEventListener("click", function(){ show(cur - 1); });
-  if(next) next.addEventListener("click", function(){ show(cur + 1); });
+function wireCards(){
+  document.querySelectorAll("#results .asum").forEach(function(btn){
+    btn.addEventListener("click", function(){
+      let det = btn.parentElement.querySelector(".adet");
+      let exp = btn.querySelector(".aexp");
+      let open = det.hidden;
+      det.hidden = !open;
+      btn.setAttribute("aria-expanded", open ? "true" : "false");
+      if(exp) exp.textContent = open ? "Hide \u25B4" : "Details \u25BE";
+    });
+  });
 }
 
 const QUESTIONS = {
@@ -376,21 +374,28 @@ function subjectOf(it){
   if(it.title.indexOf("exact row") > -1) return "Test user B's row";
   return it.title;
 }
+function firstSent(t){ let i = t.indexOf(". "); return i > 0 ? t.slice(0, i + 1) : t; }
 function answerRowHTML(it){
-  let sent;
-  if(it.status === "PROVEN") sent = (EXPLAIN[it.probe] || {}).story || it.findings.join(" ");
-  else if(it.status === "BLOCKED") sent = (PASSLINE[it.probe] || "The attempt was made and your project stopped it") + ".";
-  else if(it.status === "NOT_PROVEN") sent = CAVEAT[it.probe] || "The check ran and found nothing, but could not prove this either way.";
-  else sent = it.findings.join(" ");
-  let h = "<div class='arow'>" + chipHTML(it.status) + " <strong>" + esc(subjectOf(it)) + ":</strong> " + esc(sent);
-  if(it.status === "NOT_CHECKED" && it.fixes.length) h += " <strong>To check it:</strong> " + esc(it.fixes[0]);
-  h += "</div>";
+  let ex = EXPLAIN[it.probe] || {};
+  let sum;
+  if(it.status === "PROVEN") sum = firstSent(ex.story || it.findings.join(" "));
+  else if(it.status === "BLOCKED") sum = (PASSLINE[it.probe] || "The attempt was made and your project stopped it") + ".";
+  else if(it.status === "NOT_PROVEN") sum = CAVEAT[it.probe] || "The check ran and found nothing, but could not prove this either way.";
+  else sum = firstSent(it.findings.join(" "));
+  let h = "<div class='acard'><button type='button' class='asum' aria-expanded='false'><span class='asumt'>" + chipHTML(it.status) + " <strong>" + esc(subjectOf(it)) + ":</strong> " + esc(sum) + "</span><span class='aexp'>Details \u25BE</span></button>";
+  h += "<div class='adet' hidden>";
+  let body = it.findings.join(" ");
+  if(body && body !== sum) h += "<p style='margin:2px 0 0'>" + esc(body) + "</p>";
   if(it.status === "PROVEN"){
-    let ex = EXPLAIN[it.probe] || {risk: ""};
     let steps = (FIXSTEPS[it.probe] || it.fixes).map(function(f){ return "<li>" + esc(f) + "</li>"; }).join("");
-    if(ex.risk) h += "<p class='small' style='margin:6px 4px 0'><strong>Why it matters:</strong> " + esc(ex.risk) + "</p>";
+    if(ex.risk) h += "<p class='small' style='margin:8px 0 0'><strong>Why it matters:</strong> " + esc(ex.risk) + "</p>";
+    if(it.control) h += "<p class='small' style='margin:6px 0 0'><strong>Why you can trust this:</strong> " + esc(it.control) + "</p>";
     h += "<div class='fixbox'><p class='lbl'>Fix it</p><ol class='steps'>" + steps + "</ol></div>";
+  } else {
+    if(it.control) h += "<p class='small' style='margin:8px 0 0'><strong>Why you can trust this:</strong> " + esc(it.control) + "</p>";
+    if(it.status === "NOT_CHECKED" && it.fixes.length) h += "<p class='small' style='margin:8px 0 0'><strong>To check it:</strong> " + esc(it.fixes[0]) + "</p>";
   }
+  h += "</div></div>";
   return h;
 }
 function reportBodyHTML(results, overall, host, sampleLabel){
@@ -413,7 +418,7 @@ function reportBodyHTML(results, overall, host, sampleLabel){
     html += "<p class='verdict'>All clear.</p>";
     html += "<p class='verdictsub'>In these 4 questions only. Not your whole product.</p>";
   }
-  html += "<p class='hostline'>Checked: " + esc(host) + "</p>";
+  html += "<p class='hostline'>Checked: " + esc(host) + (lastRunLabel ? " &middot; " + esc(lastRunLabel) : "") + "</p>";
   ["P1", "P2", "P3", "P4"].forEach(function(probe){
     let items = results.filter(function(it){ return it.probe === probe; });
     if(!items.length) items = [{probe: probe, title: "", status: "NOT_CHECKED", level: "MEDIUM", findings: ["This part of the check did not run."], fixes: []}];
@@ -424,10 +429,19 @@ function reportBodyHTML(results, overall, host, sampleLabel){
   return html;
 }
 
+function stampRun(sample){
+  let t = new Date().toLocaleString(undefined, {weekday: "short", month: "short", day: "numeric", year: "numeric", hour: "numeric", minute: "2-digit", timeZoneName: "short"});
+  if(sample){ lastRunLabel = "Sample run \u00B7 " + t; return; }
+  let A = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
+  let id = "MG-";
+  for(let i = 0; i < 5; i++) id += A[Math.floor(Math.random() * A.length)];
+  lastRunLabel = "Run " + id + " \u00B7 " + t;
+}
 function render(results, overall, host, sampleLabel){
+  stampRun(!!sampleLabel);
   lastResults = results; lastOverall = overall; lastHost = host;
   $("results").innerHTML = reportBodyHTML(results, overall, host, sampleLabel);
-  wireNav();
+  wireCards();
   $("downloadBtn").disabled = false;
   if (!sampleLabel)   telEvent("completed", { proven: results.filter(function(r){return r.status === "PROVEN";}).length, notChecked: results.filter(function(r){return r.status === "NOT_CHECKED";}).length, blocked: results.filter(function(r){return r.status === "BLOCKED";}).length });
   $("emailCap").hidden = !(TELEMETRY_ENDPOINT && !sampleLabel);
@@ -545,17 +559,36 @@ async function probeCrossUser(base, anonKey, table, userToken, rowId){
     item.fixes.push("Create two test users and one row owned by user B, sign in as user A, then run again.");
     return item;
   }
-  let url = base + "/rest/v1/" + encodeURIComponent(table) + "?id=eq." + encodeURIComponent(rowId) + "&select=id";
-  addLog("GET " + base + "/rest/v1/" + table + " with user A token (token redacted)");
   try{
+    addLog("GET " + base + "/rest/v1/" + table + "?select=id&limit=1 with user A token (control ask, token redacted)");
+    let cr = await fetchJson(base + "/rest/v1/" + encodeURIComponent(table) + "?select=id&limit=1", anonKey, userToken);
+    let control = "inconclusive";
+    if(cr.status === 401) control = "dead";
+    else if(cr.status === 200 && Array.isArray(cr.data) && cr.data.length > 0) control = "live";
+    else if(cr.status === 200 || cr.status === 403) control = "blind";
+    if(control === "dead"){
+      item.findings.push("This test could not run properly: signed in as test user A, the check first asked this table for any row at all, and the request was refused as unauthorised (401). The test sign-in is not working, for example a token that has expired (they last about an hour). A test that could not run is not a pass, so no verdict is shown for this table.");
+      item.fixes.push("Sign in as test user A again, or paste a fresh token, then run again.");
+      return item;
+    }
+    let url = base + "/rest/v1/" + encodeURIComponent(table) + "?id=eq." + encodeURIComponent(rowId) + "&select=id";
+    addLog("GET " + base + "/rest/v1/" + table + " with user A token (token redacted)");
     let r = await fetchJson(url, anonKey, userToken);
     if(r.status === 200 && Array.isArray(r.data) && r.data.length > 0){
       item.status = "PROVEN"; item.level = "HIGH";
       item.findings.push("Test user A could read row " + rowId + " in this table, the row you pointed at as test user B's. That is cross-user data exposure: any signed-in user can reach another user's data. Only the id column was asked for, so none of that row's personal values were touched. The number aimed at is printed here on purpose: if it is not B's row number in this table, this verdict is about the wrong row.");
+      if(control === "live") item.control = "the check first made sure the test itself was working. Signed in as A, it asked this table for any row and got rows back, so the sign-in was live when B's row was handed over.";
+      else if(control === "blind") item.control = "signed in as A, the check asked this table for any row and got nothing back, yet B's row was handed over when asked for by its number. Strange, and the leak is real either way.";
       item.fixes.push("Open this table in Supabase, under Table Editor, and match the step to what you see. If Row Level Security is off, turn it on. Then open the table's policies: if any policy lets everyone read, or lets any signed-in user read (a rule that only asks whether someone is logged in still lets every user read every row), delete it or narrow it. The read policy that should remain checks the row's owner against the signed-in user, for example owner = auth.uid(). Then run again with the same test users.");
-    } else if(r.status === 200 || r.status === 401 || r.status === 403){
+    } else if(r.status === 401){
+      item.status = "NOT_CHECKED"; item.level = "MEDIUM";
+      item.findings.push("The signed-in request was refused as unauthorised (401), which means the test sign-in itself did not work for this request, for example a token that has expired (they last about an hour) or a token from a different project. A test that could not run is not a pass, so this question stays unanswered rather than showing as protected.");
+      item.fixes.push("Sign in as test user A again, or paste a fresh token, then run again.");
+    } else if(r.status === 200 || r.status === 403){
       item.status = "BLOCKED"; item.level = "LOW";
       item.findings.push("Test user A could not read row " + rowId + " in this table, the row you pointed at as test user B's. That is exactly what working row level security looks like. The number aimed at is printed here on purpose: if it is not B's row number in this table, this verdict is about the wrong row.");
+      if(control === "live") item.control = "the check first made sure the test itself was working. Signed in as A, it asked this table for any row and got rows back, then asked for B's row and was refused. A working test was refused, and that is what protection looks like.";
+      else if(control === "blind") item.control = "signed in as A, the check asked this table for any row and got nothing back. This table shows a signed-in user nothing at all, which also covers B's row.";
     } else {
       item.status = "NOT_CHECKED"; item.level = "MEDIUM";
       item.findings.push("The signed-in request did not return a clear answer (status: " + r.status + "). Treat this as unknown, not safe.");
@@ -574,7 +607,7 @@ async function probeBucket(base, bucket, objectName){
     item.fixes.push("Give a bucket and a file name you know exists, then run again.");
     return item;
   }
-  let url = base + "/storage/v1/object/public/" + encodeURIComponent(bucket) + "/" + encodeURIComponent(objectName);
+  let url = base + "/storage/v1/object/public/" + encodeURIComponent(bucket) + "/" + objectName.split("/").map(function(seg){ return encodeURIComponent(seg); }).join("/");
   addLog("GET " + base + "/storage/v1/object/public/" + bucket + "/" + objectName + " (no login)");
   try{
     let resp = await fetchT(url, {method: "GET", headers: {"Range": "bytes=0-0"}});
@@ -615,6 +648,17 @@ async function probeBucket(base, bucket, objectName){
   return item;
 }
 
+function scanForMasterKey(text){
+  if(/sbp_[A-Za-z0-9]{20,}/.test(text)) return "service key pattern (sbp_)";
+  if(/sb_secret_[A-Za-z0-9_\-]{8,}/.test(text)) return "secret key pattern (sb_secret_)";
+  if(/sk-live-[A-Za-z0-9]{8,}/.test(text)) return "live secret key pattern (sk-live)";
+  if(/-----BEGIN [A-Z ]*PRIVATE KEY-----/.test(text)) return "private key block";
+  let jm = text.match(/eyJ[A-Za-z0-9_\-]+\.eyJ[A-Za-z0-9_\-]+\.[A-Za-z0-9_\-]+/g) || [];
+  for(let i = 0; i < jm.length; i++){
+    if(masterKeyProblem(jm[i]) === "master") return "master key (a service_role token)";
+  }
+  return "";
+}
 async function probeBundle(productUrl){
   let item = {probe:"P4", title:"Key in client bundle", status:"NOT_CHECKED", level:"MEDIUM", findings:[], fixes:[]};
   if(!productUrl){
@@ -642,15 +686,18 @@ async function probeBundle(productUrl){
       }catch(e){}
     }
     let found = [];
+    let homeHit = scanForMasterKey(htmlText);
+    if(homeHit) found.push([clean, homeHit]);
+    let read = 0;
     for(let i=0; i<Math.min(scripts.length, 5); i++){
       addLog("GET " + scripts[i] + " (same site only)");
       try{
         let sresp = await fetchT(scripts[i], {method: "GET"});
         if(!sresp.ok) continue;
+        read++;
         let js = await sresp.text();
-        if(/sbp_[A-Za-z0-9]{20,}/.test(js)) found.push([scripts[i], "service_role-like key pattern (sbp_)"]);
-        else if(/sk-live-[A-Za-z0-9]{8,}/.test(js)) found.push([scripts[i], "live secret key pattern (sk-live)"]);
-        else if(/-----BEGIN [A-Z ]*PRIVATE KEY-----/.test(js)) found.push([scripts[i], "private key block"]);
+        let hit = scanForMasterKey(js);
+        if(hit) found.push([scripts[i], hit]);
       }catch(e){}
     }
     if(found.length > 0){
@@ -659,7 +706,7 @@ async function probeBundle(productUrl){
       item.fixes.push("Remove the key from your website code, rotate it immediately, and keep it only on a server. Never ship a master key in code a browser can download.");
     } else {
       item.status = "BLOCKED"; item.level = "LOW";
-      item.findings.push("No master key pattern showed up in the " + Math.min(scripts.length, 5) + " of your website's code files that were read. That covers only those files, not your whole site.");
+      item.findings.push("No master key pattern showed up in your homepage or in the " + read + " of its code files that were read. That covers only those files, not your whole site.");
     }
   }catch(e){
     item.status = "NOT_CHECKED"; item.level = "MEDIUM";
@@ -922,7 +969,7 @@ $("emailBtn").addEventListener("click", function(){
 $("clearBtn").addEventListener("click", function(){
   ["supabaseUrl","anonKey","tableName","testEmail","testPassword","userToken","rowId","bucketName","objectName","productUrl"].forEach(function(id){ $(id).value = ""; });
   $("results").innerHTML = ""; $("probeLog").textContent = ""; $("logWrap").classList.add("hidden");
-  $("progress").textContent = ""; lastResults = null; lastOverall = null; lastHost = ""; memoryToken = ""; memoryTokenEmail = ""; $("signInStatus").textContent = "Not signed in. The cross-user question needs a sign-in, or a pasted test token, before it can be answered.";
+  $("progress").textContent = ""; lastResults = null; lastOverall = null; lastHost = ""; lastRunLabel = ""; memoryToken = ""; memoryTokenEmail = ""; $("signInStatus").textContent = "Not signed in. The cross-user question needs a sign-in, or a pasted test token, before it can be answered.";
   $("downloadBtn").disabled = true; clearError();
   let mc = $("methodCreds"); if(mc){ mc.checked = true; applyMethod(); }
 });
@@ -930,8 +977,8 @@ $("clearBtn").addEventListener("click", function(){
 $("downloadBtn").addEventListener("click", function(){
   telEvent("acted", {});
   if(!lastResults) return;
-  let reportCss = "body{font-family:-apple-system,system-ui,sans-serif;font-size:17px;font-weight:400;line-height:1.47;max-width:640px;margin:40px auto;padding:0 20px;color:#1d1d1f}strong{font-weight:600}.brandline{text-align:center;font-weight:600;margin:0 0 10px}.verdict{font-size:28px;font-weight:600;letter-spacing:-0.015em;text-align:center;margin:24px 0 6px}.verdictsub{text-align:center;color:#6e6e73;margin:0}.hostline,.issueno,.restline,.small{font-size:13px}.hostline{color:#86868b;text-align:center}.issueno{font-weight:600;color:#6e6e73}.issuePage{display:none}.issuePage.active{display:block}.issuePage h3{font-size:28px;font-weight:600;letter-spacing:-0.015em;margin:2px 0}.dot{color:#d70015}.dotG{color:#1a7f37}.dotGrey{color:#86868b}.stWord{font-weight:600}.story{margin:10px 0 4px}.atrisk{color:#424245}.fixbox{background:#f5f5f7;border-radius:16px;padding:6px 20px 12px;margin:20px 0}.lbl{font-weight:600;margin:10px 0 2px}ol.steps{margin:6px 0 6px 20px;padding:0}ol.steps li{margin:6px 0}.navRow{display:flex;justify-content:space-between;align-items:center}.navbtn{height:44px;padding:0 20px;border-radius:980px;border:1px solid #1d1d1f;background:#fff;font-size:17px;cursor:pointer}.navbtn:disabled{opacity:.25}.dots{font-size:13px;color:#86868b;letter-spacing:4px}.restline{text-align:center;color:#6e6e73}.rowline{padding:10px 4px;border-top:1px solid #e5e5e5}.qsec{margin:22px 0 0;background:#f5f5f7;border-radius:18px;padding:22px 18px 12px}.qhead{font-weight:600;margin:0 0 8px}.arow{padding:10px 2px;border-top:1px solid #e3e3e7}.qsec .fixbox{background:#ffffff}.small{color:#6e6e73}.sampleNotice{background:#f5f5f7;border-radius:12px;padding:12px;text-align:center}details.proof summary,summary{font-size:13px;color:#0066cc;cursor:pointer}";
-  let navJs = "<script>var P=document.querySelectorAll('.issuePage');var C=1;function S(n){C=Math.max(1,Math.min(P.length,n));P.forEach(function(p,i){p.classList.toggle('active',i===C-1)});var v=document.querySelector('[data-nav=prev]');var x=document.querySelector('[data-nav=next]');if(v)v.disabled=(C===1);if(x){x.disabled=(C===P.length);x.textContent=(C===P.length)?'Last issue':'Next issue';}}document.addEventListener('click',function(e){if(e.target.dataset&&e.target.dataset.nav==='next')S(C+1);if(e.target.dataset&&e.target.dataset.nav==='prev')S(C-1);});<\/script>";
+  let reportCss = "body{font-family:-apple-system,system-ui,sans-serif;font-size:17px;font-weight:400;line-height:1.47;max-width:640px;margin:40px auto;padding:0 20px;color:#1d1d1f}strong{font-weight:600}.brandline{text-align:center;font-weight:600;margin:0 0 10px}.verdict{font-size:28px;font-weight:600;letter-spacing:-0.015em;text-align:center;margin:24px 0 6px}.verdictsub{text-align:center;color:#6e6e73;margin:0}.hostline,.issueno,.restline,.small{font-size:13px}.hostline{color:#86868b;text-align:center}.issueno{font-weight:600;color:#6e6e73}.issuePage{display:none}.issuePage.active{display:block}.issuePage h3{font-size:28px;font-weight:600;letter-spacing:-0.015em;margin:2px 0}.dot{color:#d70015}.dotG{color:#1a7f37}.dotGrey{color:#86868b}.stWord{font-weight:600}.story{margin:10px 0 4px}.atrisk{color:#424245}.fixbox{background:#f5f5f7;border-radius:16px;padding:6px 20px 12px;margin:20px 0}.lbl{font-weight:600;margin:10px 0 2px}ol.steps{margin:6px 0 6px 20px;padding:0}ol.steps li{margin:6px 0}.navRow{display:flex;justify-content:space-between;align-items:center}.navbtn{height:44px;padding:0 20px;border-radius:980px;border:1px solid #1d1d1f;background:#fff;font-size:17px;cursor:pointer}.navbtn:disabled{opacity:.25}.dots{font-size:13px;color:#86868b;letter-spacing:4px}.restline{text-align:center;color:#6e6e73}.rowline{padding:10px 4px;border-top:1px solid #e5e5e5}.qsec{margin:22px 0 0;background:#f5f5f7;border-radius:18px;padding:22px 18px 12px}.qhead{font-weight:600;margin:0 0 8px}.arow{padding:10px 2px;border-top:1px solid #e3e3e7}.qsec .fixbox{background:#ffffff}.acard{background:#fff;border:1px solid #e3e3e7;border-radius:14px;padding:12px 14px;margin:10px 0}.asum{display:flex;justify-content:space-between;align-items:flex-start;width:100%;background:none;border:0;padding:0;font:inherit;color:inherit;text-align:left;cursor:pointer}.aexp{font-size:13px;color:#0066cc;white-space:nowrap;margin-left:10px;padding-top:2px}.adet{border-top:1px solid #eee;margin-top:10px;padding-top:10px}.acard .fixbox{background:#f5f5f7}.small{color:#6e6e73}.sampleNotice{background:#f5f5f7;border-radius:12px;padding:12px;text-align:center}details.proof summary,summary{font-size:13px;color:#0066cc;cursor:pointer}";
+  let navJs = "<script>document.addEventListener('click',function(e){var b=e.target.closest('.asum');if(!b)return;var d=b.parentElement.querySelector('.adet');var x=b.querySelector('.aexp');var o=d.hidden;d.hidden=!o;b.setAttribute('aria-expanded',o?'true':'false');if(x)x.textContent=o?'Hide \u25B4':'Details \u25BE';});<\/script>";
   let doc = "<!doctype html><html><head><meta charset='utf-8'><title>MakerGuard report</title><style>" + reportCss + "</style></head><body>" + reportBodyHTML(lastResults, lastOverall, lastHost, false) + navJs + "</body></html>";
   let parts = [doc];
   let blob = new Blob([parts.join("\n")], {type: "text/html"});
