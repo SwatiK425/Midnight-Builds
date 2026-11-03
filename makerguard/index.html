@@ -124,6 +124,17 @@ details.proof{margin:6px 0}
 <p class="free">Free. Read only. Nothing is stored.</p>
 
 <div class="step">
+
+<section id="frontDoor" style="border:1px solid #ddd;border-radius:12px;padding:18px;margin:0 0 22px">
+<p style="font-weight:600;margin:0 0 6px">Start with your app link</p>
+<input id="appLink" type="text" placeholder="https://your-app.lovable.app" aria-label="Your app link" autocomplete="off" spellcheck="false">
+<p><button id="discoverBtn" class="primary" type="button">Examine my app</button></p>
+<p id="discoverStatus" class="small"></p>
+<div id="discoveryCard" class="hidden"></div>
+<p class="small" style="margin:12px 0 0"><button id="manualToggle" class="link" type="button">No link? Enter your backend details yourself</button></p>
+</section>
+<div id="manualWrap" class="hidden">
+<p style="font-weight:600;margin:0 0 6px">Your backend details</p>
 <div class="labRow"><label for="supabaseUrl">Supabase URL</label><span class="tipWrap"><button type="button" class="tipBtn" data-tip="tip-supabaseUrl" aria-label="Help for Supabase URL">!</button><p class="tipText hidden" id="tip-supabaseUrl">Where to find it: Supabase, Settings, API, Project URL. It is the public address of your database, already inside your app's code. Requests from this check go only to this address.</p></span></div>
 <input id="supabaseUrl" type="text" placeholder="https://your-project.supabase.co" autocomplete="off" spellcheck="false"><div class="labRow"><label for="anonKey">Anon key</label><span class="tipWrap"><button type="button" class="tipBtn" data-tip="tip-anonKey" aria-label="Help for Anon key">!</button><p class="tipText hidden" id="tip-anonKey">Where to find it: Supabase, Settings, API, the anon or publishable key. It is the public key every visitor's browser already uses. Never the service_role key, it is refused here because it can bypass all your protection. Your key stays in your browser, is never stored, and never appears in your report.</p></span></div>
 <input id="anonKey" type="password" placeholder="Anon / publishable key only" autocomplete="off" spellcheck="false">
@@ -173,9 +184,9 @@ details.proof{margin:6px 0}
 </details>
 </div>
 
-<p style="text-align:center">Run with just the essentials, or open any check below first to add it.</p>
 <p class="small" style="text-align:center">Your browser talks directly to your Supabase, and to nothing else except the homepage you give it. Your project address, key, table names and results never leave your browser.</p>
 
+</div>
 <button id="runBtn" class="primary">Run check</button>
 <p class="small" style="text-align:center">Runs everything you filled in. Anything left blank is skipped, not an error.</p>
 <p id="errorMsg" class="hidden"></p>
@@ -1015,6 +1026,84 @@ document.addEventListener("click", function(e){
     document.querySelectorAll(".tipText").forEach(function(t){ t.classList.add("hidden"); });
   }
 });
+</script>
+
+<script>
+// MakerGuard front door (link-first beta, 2026-11-03). One link in,
+// discovery card out, then the check above runs on what was found.
+// The reader service reads public pages only and stores nothing;
+// the check itself runs here in the builder's browser.
+// DEPLOY STEP: replace the address below with the live reader
+// address (the Render service URL, ending in /fetch).
+var MG_FETCHER = 'https://reader.midnightbuilds.fyi/fetch';
+(function(){
+  var btn = document.getElementById('discoverBtn');
+  var status = document.getElementById('discoverStatus');
+  var card = document.getElementById('discoveryCard');
+  var wrap = document.getElementById('manualWrap');
+  function reveal(){ wrap.classList.remove('hidden'); }
+  document.getElementById('manualToggle').addEventListener('click', function(){
+    reveal();
+    wrap.scrollIntoView({behavior:'smooth', block:'start'});
+    document.getElementById('supabaseUrl').focus();
+  });
+  function esc(t){ var d = document.createElement('div'); d.textContent = t; return d.innerHTML; }
+  btn.addEventListener('click', function(){
+    var link = document.getElementById('appLink').value.trim();
+    if(!/^https?:\/\//i.test(link)){ status.textContent = 'Paste the full link to your live app, starting with https://'; return; }
+    btn.disabled = true; card.classList.add('hidden'); card.innerHTML = '';
+    status.textContent = 'Reading your app\u2019s public code now. This can take a little while.';
+    var ctl = ('AbortController' in window) ? new AbortController() : null;
+    var timer = ctl ? setTimeout(function(){ ctl.abort(); }, 240000) : null;
+    fetch(MG_FETCHER + '?url=' + encodeURIComponent(link), ctl ? { signal: ctl.signal } : {})
+      .then(function(r){ return r.json(); })
+      .then(function(d){
+        if(timer) clearTimeout(timer);
+        btn.disabled = false;
+        if(d.error){ status.textContent = d.error; return; }
+        if(d.reachable === false){ status.textContent = d.note || 'The app did not answer.'; return; }
+        if(!d.projects || !d.projects.length){
+          status.textContent = 'No Supabase backend found in this app\u2019s public code. MakerGuard today checks Supabase products. If your backend is Supabase, type your details in the form opened below.';
+          reveal();
+          return;
+        }
+        var ref = d.projects[0];
+        document.getElementById('supabaseUrl').value = 'https://' + ref + '.supabase.co';
+        if(d.public_key){ document.getElementById('anonKey').value = d.public_key; }
+        var confirmed = d.tables || [];
+        var inferred = (d.tables_inferred || []).filter(function(t){ return confirmed.indexOf(t) === -1; });
+        var all = confirmed.concat(inferred).slice(0, 40);
+        document.getElementById('tableName').value = all.join(', ');
+        document.getElementById('productUrl').value = link;
+        if(d.buckets && d.buckets.length === 1){ document.getElementById('bucketName').value = d.buckets[0]; }
+        var keyLine = d.public_key ? ('Public key found (' + esc(d.key_type || 'public') + '). It ships in your app\u2019s code for every visitor to see, which is normal.') : 'No public key found in the code, so the table questions cannot run yet.';
+        var html = '<p style="font-weight:600;margin:0 0 6px">Found your backend</p>'
+          + '<p class="small">Supabase project: ' + esc(ref) + '<br>' + keyLine + '<br>'
+          + (confirmed.length ? ('Tables your app talks to (' + confirmed.length + '): ' + esc(confirmed.join(', ')) + '<br>') : 'No table names were confirmed in the code.<br>')
+          + (inferred.length ? ('Likely tables (' + inferred.length + '): ' + esc(inferred.join(', ')) + '. Your code passes these names as it runs, so each one is tested below. A name that is not a real table is reported as unknown, never as safe and never as a problem.<br>') : '')
+          + (d.buckets && d.buckets.length ? ('File stores found: ' + esc(d.buckets.join(', ')) + '. To check one, type a file name in the files section below.') : '')
+          + '</p>'
+          + (d.projects.length > 1 ? '<p class="small">More than one backend was found in this app (' + esc(d.projects.join(', ')) + '). The check below is set to the first one. The others are not covered by this run.</p>' : '')
+          + (d.master_key_found ? '<p><strong>First finding: a master key pattern is sitting in your app\u2019s public code.</strong> That is the most serious thing this check looks for. The report below covers it in full.</p>' : '')
+          + '<p class="small">Covered means the tables your app\u2019s code talks to. A table your code never touches is not covered, and the report will not pretend otherwise.</p>'
+          + '<p><button id="runDiscovered" class="primary" type="button">Run the check</button></p>';
+        card.innerHTML = html;
+        card.classList.remove('hidden');
+        status.textContent = '';
+        document.getElementById('runDiscovered').addEventListener('click', function(){
+          reveal();
+          document.getElementById('runBtn').click();
+          document.getElementById('results').scrollIntoView({behavior:'smooth', block:'start'});
+        });
+      })
+      .catch(function(){
+        if(timer) clearTimeout(timer);
+        btn.disabled = false;
+        status.textContent = 'The examination could not be completed. Type your details in the form opened below instead.';
+        reveal();
+      });
+  });
+})();
 </script>
 </body>
 </html>
