@@ -3,7 +3,22 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<script>/* Frame protection (LB5b): this page is not meant to be embedded in another site. If it is framed, break out to the top window; if the breakout is blocked (for example a sandboxed frame), render nothing instead of becoming interactive inside the frame. A no-op when the page is opened normally. */
+if(window.top!==window.self){try{window.top.location=window.self.location;}catch(e){}if(window.top!==window.self){document.documentElement.style.display="none";}}</script>
 <title>MakerGuard: Can a stranger read your users' data?</title>
+<style>
+/* Fonts are served from this site's own fonts folder (2026-11-04):
+   no visitor address is sent to Google Fonts. Latin subset, which
+   covers everything this page prints; anything outside it falls
+   back to the system font in the stacks below. */
+@font-face{font-family:'IBM Plex Sans';src:url('fonts/ibm-plex-sans-400.woff2') format('woff2');font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:'IBM Plex Sans';src:url('fonts/ibm-plex-sans-500.woff2') format('woff2');font-weight:500;font-style:normal;font-display:swap}
+@font-face{font-family:'IBM Plex Sans';src:url('fonts/ibm-plex-sans-600.woff2') format('woff2');font-weight:600;font-style:normal;font-display:swap}
+@font-face{font-family:'IBM Plex Sans';src:url('fonts/ibm-plex-sans-700.woff2') format('woff2');font-weight:700;font-style:normal;font-display:swap}
+@font-face{font-family:'IBM Plex Mono';src:url('fonts/ibm-plex-mono-400.woff2') format('woff2');font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:'IBM Plex Mono';src:url('fonts/ibm-plex-mono-500.woff2') format('woff2');font-weight:500;font-style:normal;font-display:swap}
+@font-face{font-family:'IBM Plex Mono';src:url('fonts/ibm-plex-mono-600.woff2') format('woff2');font-weight:600;font-style:normal;font-display:swap}
+</style>
 <style>
 /* One typeface. Three sizes: 28 display, 17 text, 13 caption. Two weights: 400 and 600. Nothing else. */
 *{box-sizing:border-box}
@@ -39,6 +54,17 @@ button.secondary,.navbtn{height:44px;padding:0 22px;border-radius:980px;border:1
 button.secondary:disabled,.navbtn:disabled{opacity:.25;cursor:default}
 #downloadBtn{width:100%;height:48px;border-radius:980px;border:1px solid #1d1d1f;background:#fff;color:#1d1d1f;cursor:pointer;margin:16px 0}
 #downloadBtn:disabled{display:none}
+#viewReportBtn{width:100%;height:48px;border-radius:980px;border:1px solid #1d1d1f;background:#fff;color:#1d1d1f;cursor:pointer;margin:0 0 16px;font-weight:600}
+#viewReportBtn[hidden]{display:none}
+.reportOverlay{position:fixed;inset:0;background:rgba(29,29,31,.48);z-index:1000;display:flex;align-items:center;justify-content:center;padding:18px}
+.reportOverlay[hidden]{display:none}
+.reportPanel{background:#fff;border-radius:20px;width:100%;max-width:880px;max-height:calc(100vh - 36px);max-height:calc(100dvh - 36px);display:flex;flex-direction:column;overflow:hidden;box-shadow:0 24px 70px rgba(0,0,0,.3)}
+.reportBar{display:flex;justify-content:space-between;align-items:center;padding:10px 12px 10px 20px;border-bottom:1px solid #e5e5e5;background:#fff}
+.reportBarTitle{font-weight:600}
+.reportBarBtns{display:flex;gap:8px;align-items:center}
+.iconBtn{width:40px;height:40px;border-radius:50%;border:1px solid #1d1d1f;background:#fff;color:#1d1d1f;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;font-size:22px;line-height:1;padding:0}
+.iconBtn:hover{background:#f5f5f7}
+.reportSlot{overflow-y:auto;padding:4px 22px 26px;-webkit-overflow-scrolling:touch}
 details{margin:28px 0}
 summary{cursor:pointer;color:#0066cc;list-style:none}
 summary::-webkit-details-marker{display:none}
@@ -114,45 +140,244 @@ details.proof{margin:6px 0}
 .drop{border-top:1px solid #e5e5e5;margin:0;padding:18px 0 8px}
 .drop summary{color:#1d1d1f;font-weight:600}
 .drop summary:before{color:#86868b}
+.scanRow{font-size:13px;color:#86868b;margin:5px 0}
+.scanRow.on{color:#1d1d1f;font-weight:600}
+.scanRow.done{color:#1d1d1f}
+.foundRow{font-size:13px;margin:5px 0}
+.foundRow b{font-weight:600}
+
+/* Theme: warm paper, one deep indigo accent. Color guides, it never decorates. */
+body{background:#FAF9F6;color:#1d1d1f}
+a{color:#372A9C}
+::selection{background:#DCD6F7}
+.step{background:#fff;border:1px solid #ECE8DF;border-radius:20px;box-shadow:0 8px 28px rgba(74,63,35,.06)}
+#scanPanel{background:#EFEDFA;border:1px solid #D9D4F2;box-shadow:none}
+.card,.qsec{background:#F2F0E9}
+.fixbox{background:#F2F0E9}
+.sampleNotice{background:#EFF4EF}
+.log{background:#F2F0E9}
+.acard{background:#fff;border-color:#E7E2D6}
+.acard .fixbox,.qsec .fixbox{background:#F2F0E9}
+button.primary{background:#4B3CC4}
+button.primary:hover{background:#372A9C}
+button.primary:disabled{background:#C9C2EE}
+.stepNum,.who{background:#4B3CC4}
+input[type=text]:focus,input[type=password]:focus,input[type=email]:focus{outline:none;border-color:#4B3CC4;box-shadow:0 0 0 4px rgba(75,60,196,.16)}
+.badge{background:#FAF9F6;border-color:#DDD6C6}
+.subdiv{border-top-color:#E4DED0}
+
+
+/* Hierarchy pass: headline steps forward, body steps back, cards lift off the page. */
+body{background:#F4F1EA;color:#44464A}
+h1{color:#141416}
+h1::before{content:"";display:block;width:36px;height:5px;border-radius:3px;background:#4B3CC4;margin:0 auto 20px}
+h2,h3{color:#141416}
+.step,.optWrap{background:#fff;border:1px solid #E0D8C4;border-radius:20px;box-shadow:0 12px 32px rgba(74,63,35,.09)}
+.subdiv{margin-top:48px;padding-top:30px;border-top:1px solid #DFD7C2}
+footer{margin-top:44px;padding-top:22px;border-top:1px solid #DFD7C2}
+button.link{color:#372A9C}
+
+
+/* Type system: small indigo labels for section titles, sans for everything you read. */
+h1{font-family:-apple-system,BlinkMacSystemFont,system-ui,sans-serif;font-size:36px;font-weight:700;line-height:1.15;letter-spacing:-0.025em}
+.sub{font-size:19px;line-height:1.5;color:#4A4D52;max-width:560px}
+.secttl{font-size:13px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:#372A9C;margin:0 0 10px;text-align:left}
+.optWrap h2{font-size:13px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:#372A9C}
+#frontDoor{border:none!important;padding:0!important;background:transparent!important}
+
+
+/* Report cards: verdict tag first, then the object, then one quiet line. */
+.asum{display:block}
+.ahead{display:flex;justify-content:space-between;align-items:center}
+.atag{display:inline-block;font-size:13px;font-weight:600;color:#fff;border-radius:980px;padding:3px 12px}
+.tagIssue{background:#B3261E}
+.tagProtected{background:#1A7F37}
+.tagOk{background:#E7F4EA;color:#1E6B34}
+.tagNc{background:#FBF0D9;color:#7A5410}
+.aobj{display:block;font-weight:600;color:#141416;margin-top:9px}
+.objkind{font-weight:400;font-size:13px;color:#86868B}
+.asumline{display:block;font-size:13px;color:#6E6E73;margin-top:3px;line-height:1.45}
+.aexp{color:#372A9C;padding-top:0}
+.acard{border-left:4px solid #D8D2C0}
+.acard.stIssue{border-left-color:#B3261E}
+.acard.stProtected{border-left-color:#1A7F37}
+.acard.stOk{border-left-color:#8FBF9A}
+.acard.stNc{border-left-color:#D9A83E}
+
+
+/* Status lines must never blend into the page: problems sit in a soft red box, guidance in a soft green one. */
+#discoverStatus:empty{display:none}
+.alertErr{background:#FDECEC;border:1px solid #F0BDB6;color:#8F1D16;border-radius:12px;padding:10px 14px;margin-top:10px;line-height:1.45}
+.alertInfo{background:#EFF4EF;border:1px solid #CBDDCF;color:#33523B;border-radius:12px;padding:10px 14px;margin-top:10px;line-height:1.45}
+
+
+/* Hero, rebuilt to her spec: badge, one CTA, four checks as a visual grid. */
+h1::before{display:none}
+.heroBadge{display:inline-block;background:#E6E2F8;color:#372A9C;font-size:13px;font-weight:600;border-radius:980px;padding:4px 14px}
+.sub2{font-size:17px;color:#4A4D52;text-align:center;max-width:560px;margin:0 auto 8px;line-height:1.5}
+.trustline{text-align:center;color:#6E6E73;font-size:13px;margin:10px 0 0}
+button.primary{background:#111}
+button.primary:hover{background:#000}
+.whead{font-size:20px;font-weight:600;color:#141416;margin:32px 0 4px}
+.checkGrid{display:grid;grid-template-columns:1fr 1fr;gap:20px 24px;margin-top:14px}
+.ckT{font-weight:600;color:#141416;margin:0;display:flex;align-items:center;gap:8px}
+.ckT svg{flex:none}
+.ckQ{font-size:13px;color:#6E6E73;margin:4px 0 0;line-height:1.45}
+.builtline{text-align:center;color:#86868B;font-size:13px;margin-top:24px}
+@media (max-width:430px){.checkGrid{grid-template-columns:1fr}}
+
+
+.promptBox{background:#fff;border:1px solid #E0D8C4;border-radius:12px;padding:12px 14px;font-size:13px;line-height:1.55;white-space:pre-wrap;color:#1d1d1f;text-align:left}
+
+/* Phase 1 restructure: three-band Quick report, scope line, reason labels, immutable snapshot */
+.quickSnapshot{margin:0}
+.scopeLine{text-align:center;color:#6E6E73;font-size:13px;line-height:1.5;max-width:560px;margin:10px auto 4px}
+.metaLine{text-align:center;color:#6E6E73;font-size:13px;line-height:1.55;max-width:620px;margin:10px auto 4px}
+.band{margin:22px 0 0;background:#EFF4EF;border-radius:18px;padding:22px 18px 12px}
+.bandHead{font-weight:600;margin:0 0 8px;color:#141416}
+.bandHead .bandCount{font-weight:400;color:#6E6E73;font-size:13px}
+.band .acard:first-of-type{margin-top:6px}
+.reasonTag{display:inline-block;font-size:13px;font-weight:600;background:#FBF0D9;color:#7A5410;border-radius:980px;padding:2px 10px;margin-top:6px}
+.reasonLine{display:block;font-size:13px;color:#7A5410;margin-top:4px}
+.quickEnd{border-top:1px solid #E3E3E7;margin-top:18px;padding-top:10px}
+.reportTitle{font-size:28px;font-weight:700;letter-spacing:-0.02em;text-align:center;margin:2px 0 6px;color:#141416}
+/* D-6 middle path: unverified summary block, stray-names line, Deep Scan section */
+.strayLine{text-align:center;max-width:560px;margin:2px auto 4px}
+.unverBlock{margin:22px 0 0;background:#FBF6E9;border-radius:18px;padding:16px 18px 12px}
+.unverLine{margin:0;color:#141416}
+.unverDetails{margin-top:6px}
+.unverList{margin:6px 0 6px 18px;padding:0}
+.unverList li{margin:4px 0;font-size:13px;color:#424245}
+.deepCard{margin-top:22px}
+.deepSection{margin:26px 0 0}
+.deepIntro{text-align:center;max-width:560px;margin:4px auto 6px}
+
+/* MakerGuard identity (B3): IBM Plex type, deep indigo accent, instrument-crisp cards. */
+body{font-family:"IBM Plex Sans",-apple-system,BlinkMacSystemFont,system-ui,sans-serif}
+h1,.reportTitle,.verdict,.issuePage h3{font-family:"IBM Plex Sans",-apple-system,BlinkMacSystemFont,system-ui,sans-serif}
+h1{font-weight:700;letter-spacing:-0.02em}
+.brandmark{font-weight:700;letter-spacing:-0.01em}
+.atag,.reasonTag,.bandCount,.metaLine,.dots{font-family:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace}
+.atag,.reasonTag{font-size:12px;letter-spacing:.05em;text-transform:uppercase}
+.metaLine{font-size:12.5px}
+.acard{border-radius:10px;border-color:#DCD4BE;box-shadow:0 1px 2px rgba(28,24,64,.04)}
+.card{border-radius:14px}
+.step,.optWrap{border-radius:14px}
+.reportPanel{border-radius:16px}
+.band{border-radius:12px;border:1px solid #DDD8F0;background:#F0EEFA}
+.sampleNotice{border-radius:10px;background:#F0EEFA}
+.unverBlock{border-radius:12px}
+.bandHead{font-weight:700;letter-spacing:-0.01em}
+.groupHead{font-family:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#372A9C;margin:30px 0 4px}
+.checksIntro{font-size:17px;line-height:1.5;color:#4A4D52;max-width:620px;margin:10px 0 2px}
+
+/* Deep Scan evidence locker (LB3b): the flagship section. Same system:
+   IBM Plex, indigo guidance accent, black primary buttons, status colours
+   unchanged. Rows are proper test cards with a live state pill. */
+.deepLocker{margin:34px 0 0;border:1px solid #DDD8F0;background:#FBFAF7;border-radius:14px;padding:24px 20px 14px}
+.deepTitle{font-size:24px;font-weight:700;letter-spacing:-0.02em;color:#141416;margin:0}
+.deepLead{font-size:15px;line-height:1.55;color:#4A4D52;margin:8px 0 0}
+.carriesLine{background:#F0EEFA;border:1px solid #DDD8F0;border-radius:10px;padding:10px 12px;font-size:13px;line-height:1.55;color:#2A2160;margin:14px 0 0}
+.carriesLine strong{color:#372A9C}
+/* Changes 2+3: one scan-pill language across the landing list and the
+   Deep locker cards; calm check cards; collapsed note detail. */
+.scanPill{font-family:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;background:#E6E2F8;color:#372A9C;border-radius:980px;padding:2px 10px;white-space:nowrap;flex:none}
+.ckT .scanPill{margin-left:auto}
+.dckT .scanPill{margin-left:auto}
+.groupSub{font-size:13px;color:#6E6E73;margin:0;line-height:1.45}
+.deepGrid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:16px 0 4px}
+@media (max-width:430px){.deepGrid{grid-template-columns:1fr}}
+.dck{background:#fff;border:1px solid #E7E2D6;border-radius:10px;padding:12px 14px}
+.dckT{font-weight:600;color:#141416;margin:0;display:flex;align-items:center;gap:8px}
+.dckT svg{flex:none}
+.dckQ{font-size:13px;color:#6E6E73;margin:4px 0 0;line-height:1.45}
+.needChip{display:inline-block;font-size:12px;font-weight:600;background:#F0EEFA;color:#372A9C;border-radius:980px;padding:2px 10px;margin-top:8px}
+.deepExp{font:inherit;font-size:13px;color:#372A9C;background:none;border:0;padding:0;margin-top:8px;cursor:pointer}
+.deepSetup{margin:16px 0 0}
+.deepSetup input[type=text],.deepSetup input[type=password],.deepRow input[type=text],.deepRow input[type=password]{background:#fff;margin:0 0 8px}
+.deepUntested{font-size:13px;color:#6E6E73;line-height:1.6;margin:0 0 4px}
+.deepRow{background:#fff;border:1px solid #E7E2D6;border-left:4px solid #D8D2C0;border-radius:10px;padding:14px 16px;margin:12px 0}
+.deepRowHead{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.deepRowTitle{font-weight:600;color:#141416;margin:0}
+.deepState{flex:none}
+.deepBody{margin-top:8px;font-size:15px;line-height:1.55}
+.deepBody .small{font-size:13px}
+.deepNeed{color:#7A5410}
+.deepReason{font-size:13px;color:#7A5410;margin-top:6px}
+.deepReason .reasonTag{margin-top:0}
+.linkedLine{font-size:13px;color:#372A9C;background:#F0EEFA;border-radius:8px;padding:6px 10px;margin:8px 0 0;line-height:1.5}
+.gradeLine{font-size:13px;color:#424245;margin:8px 0 0}
+.deepNoteCard{background:#fff;border:1px solid #E7E2D6;border-left:4px solid #D8D2C0;border-radius:10px;padding:12px 14px;margin:10px 0}
+.deepNoteCard.stIssue{border-left-color:#B3261E}
+.deepNoteCard.stProtected{border-left-color:#1A7F37}
+.deepNoteCard.stNc{border-left-color:#D9A83E}
+.deepNoteTitle{font-weight:600;color:#141416;margin:8px 0 0}
+.deepNoteLine{font-size:13px;color:#424245;margin:4px 0 0;line-height:1.5}
+.deepAuthNote{background:#FBF6E9;border:1px solid #EBD9A8;border-radius:10px;padding:10px 12px;font-size:13px;line-height:1.55;color:#5C430A;margin:0 0 10px}
+.deepSigninOk{background:#EFF4EF;border:1px solid #CBDDCF;border-radius:10px;padding:10px 12px;font-size:13px;line-height:1.55;color:#33523B;margin:0 0 10px}
+.deepRowAsk{border-top:1px solid #EDE8DB;margin-top:12px;padding-top:12px}
+.deepRowAsk label{margin:12px 0 6px}
+
+/* Founder feedback (2026-11-04): one small form, three spots. */
+.fbCard{background:#fff;border:1px solid #E0D8C4;border-left:4px solid #372A9C;border-radius:12px;padding:16px 18px;margin:22px 0 6px;text-align:left}
+.fbCard p{margin:0 0 8px;line-height:1.5;color:#424245}
+.fbCard .fbTitle{font-weight:700;color:#141416}
+.fbLabText{margin-top:12px;color:#141416}
+.fbRow{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:8px}
+.fbEmail{flex:1 1 200px;height:44px;padding:0 14px;font-size:16px;font-family:inherit;border:1px solid #d2d2d7;border-radius:12px;background:#fff}
+.fbEmail:focus{outline:none;border-color:#4B3CC4;box-shadow:0 0 0 4px rgba(75,60,196,.16)}
+.fbSend{height:44px;padding:0 24px;border-radius:980px;border:none;background:#111;color:#fff;font-weight:600;cursor:pointer}
+.fbSend:disabled{opacity:.35;cursor:default}
+.fbStatus{min-height:18px;margin-top:8px}
+.fbMini{margin-top:14px;background:#fff;border:1px solid #E0D8C4;border-radius:12px;padding:12px 14px}
+.fbMini p{margin:0;line-height:1.5}
+.fbPanel{background:#fff;border-radius:16px;width:100%;max-width:520px;max-height:calc(100vh - 36px);max-height:calc(100dvh - 36px);overflow-y:auto;padding:10px 22px 22px;box-shadow:0 24px 70px rgba(0,0,0,.3)}
+.fbPanel .fbCard{border:none;margin:0;padding:6px 0 0}
+.fbCloseRow{display:flex;justify-content:flex-end}
+.fbPageEnd{text-align:center;margin:36px 0 0}
 </style>
 </head>
 <body>
 
-<div class="topbar"><span class="brandmark">MakerGuard</span><span class="topnote">Security for one-person empires</span></div>
-<h1>Can a stranger read your users&rsquo; data?</h1>
-<p class="sub">A 60 second check for your Supabase product.</p>
-<p class="free">Free. Read only. Nothing is stored.</p>
+<div class="topbar"><span class="brandmark"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4B3CC4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-4px;margin-right:7px"><path d="M12 3l7 3v5c0 4.5-3 8.5-7 10-4-1.5-7-5.5-7-10V6z"/><path d="M9 12l2 2 4-4"/></svg>MakerGuard</span><a class="topnote" href="#whatwecheck" style="text-decoration:none">How it works</a></div>
+<p style="text-align:center;margin:0 0 14px"><span class="heroBadge">For Supabase-powered apps</span></p>
+<h1>Find out what strangers can access, before an attacker does.</h1>
+<p class="sub">Your app might look secure. But can someone read another user&rsquo;s data, access private files, or find exposed credentials?</p>
 
 <div class="step">
 
 <section id="frontDoor" style="border:1px solid #ddd;border-radius:12px;padding:18px;margin:0 0 22px">
-<p style="font-weight:600;margin:0 0 6px">Start with your app link</p>
+<p class="secttl">Your live app URL</p>
 <input id="appLink" type="text" placeholder="https://your-app.lovable.app" aria-label="Your app link" autocomplete="off" spellcheck="false">
-<p><button id="discoverBtn" class="primary" type="button">Examine my app</button></p>
+<p><button id="discoverBtn" class="primary" type="button">Quick Scan &rarr;</button></p>
+<p class="trustline">Free &middot; Read-only security checks &middot; No app data stored</p>
 <p id="discoverStatus" class="small"></p>
 <div id="discoveryCard" class="hidden"></div>
+<div id="scanPanel" class="hidden" style="margin-top:14px;border:1px solid #e5e5e5;border-radius:12px;padding:14px 16px">
+<p style="font-weight:600;margin:0 0 8px"><span id="scanTitle">Scanning your app</span> <span id="scanClock" class="small" style="font-weight:400;color:#6e6e73"></span></p>
+<div id="scanSteps"></div>
+<div id="scanFound"></div>
+</div>
 <p class="small" style="margin:12px 0 0"><button id="manualToggle" class="link" type="button">No link? Enter your backend details yourself</button></p>
 </section>
 <div id="manualWrap" class="hidden">
-<p style="font-weight:600;margin:0 0 6px">Your backend details</p>
-<div class="labRow"><label for="supabaseUrl">Supabase URL</label><span class="tipWrap"><button type="button" class="tipBtn" data-tip="tip-supabaseUrl" aria-label="Help for Supabase URL">!</button><p class="tipText hidden" id="tip-supabaseUrl">Where to find it: Supabase, Settings, API, Project URL. It is the public address of your database, already inside your app's code. Requests from this check go only to this address.</p></span></div>
-<input id="supabaseUrl" type="text" placeholder="https://your-project.supabase.co" autocomplete="off" spellcheck="false"><div class="labRow"><label for="anonKey">Anon key</label><span class="tipWrap"><button type="button" class="tipBtn" data-tip="tip-anonKey" aria-label="Help for Anon key">!</button><p class="tipText hidden" id="tip-anonKey">Where to find it: Supabase, Settings, API, the anon or publishable key. It is the public key every visitor's browser already uses. Never the service_role key, it is refused here because it can bypass all your protection. Your key stays in your browser, is never stored, and never appears in your report.</p></span></div>
+<p class="secttl">Your backend details</p>
+<div class="labRow"><label for="supabaseUrl">Supabase URL</label><span class="tipWrap"><button type="button" class="tipBtn" data-tip="tip-supabaseUrl" aria-label="Help for Supabase URL">!</button><p class="tipText hidden" id="tip-supabaseUrl">Where to find it: Supabase, Settings, API, Project URL. It is the public address of your database, already inside your app's code. The database tests run from your browser to this address, and the address itself is never sent to MakerGuard.</p></span></div>
+<input id="supabaseUrl" type="text" placeholder="https://your-project.supabase.co" autocomplete="off" spellcheck="false"><div class="labRow"><label for="anonKey">Anon key</label><span class="tipWrap"><button type="button" class="tipBtn" data-tip="tip-anonKey" aria-label="Help for Anon key">!</button><p class="tipText hidden" id="tip-anonKey">Where to find it: Supabase, Settings, API, the anon or publishable key. It is the public key every visitor's browser already uses. Never the service_role key, it is refused here because it can bypass all your protection. Your key is used only in your browser, is never sent to MakerGuard or stored, and never appears in your report.</p></span></div>
 <input id="anonKey" type="password" placeholder="Anon / publishable key only" autocomplete="off" spellcheck="false">
 <label class="check"><input id="showKey" type="checkbox"> Show key</label>
 <div class="labRow"><label for="tableName">Table names</label><span class="tipWrap"><button type="button" class="tipBtn" data-tip="tip-tableName" aria-label="Help for Table names">!</button><p class="tipText hidden" id="tip-tableName">The tables you want checked, as many as you like, separated by commas, like profiles, orders. The names are listed in Supabase, under Table Editor.</p></span></div>
 <input id="tableName" type="text" placeholder="Your table names, separated by commas" autocomplete="off" spellcheck="false">
-<p>Every table named here gets checked for one question: can a stranger, with no login at all, read your users&rsquo; data?</p>
-</div>
 
 <div class="optWrap">
 <h2>Optional checks</h2>
 <p class="small">Open only the ones you care about. Closed ones are skipped.</p>
 
-<details class="drop"><summary>Find out if a signed-in user can read another user&rsquo;s data</summary>
+<details class="drop" id="p2drop"><summary>Find out if a signed-in user can read another user&rsquo;s data</summary>
 <p class="small">This is the second door into the same data. The check at the top of this page tests a stranger with no login. This one tests a signed-in user reaching for rows that are not theirs.</p>
 
 <div class="personRow"><span class="who">A</span><p class="whoTitle">Test user A, signs in</p></div>
-<p class="small">No test user yet? Create one in your Supabase: Authentication, Users, Add user, tick Auto Confirm. Make up the email and password.</p>
+<p class="small">No test user yet? This takes about two minutes, and no inbox is needed: create both users in your Supabase, under Authentication, Users, Add user, with Auto Confirm ticked. Made-up emails are fine, like test-a@myapp.com.</p>
 <p class="optTag">How do you want to sign in as A? Pick one.</p>
 <label class="radioRow"><input type="radio" name="signinMethod" id="methodCreds" value="creds" checked> With A&rsquo;s email and password</label>
 <label class="radioRow"><input type="radio" name="signinMethod" id="methodToken" value="token"> With A&rsquo;s token instead</label>
@@ -169,7 +394,7 @@ details.proof{margin:6px 0}
 </div>
 
 <div class="personRow"><span class="who">B</span><p class="whoTitle">Test user B, never signs in</p></div>
-<p class="small">Create B the same way as A. Then add one fake row owned by B in your table. Only that row&rsquo;s number is needed, find it in the id column in Table Editor. The check then signs in as A and tries to read B&rsquo;s row.</p>
+<p class="small">Create B the same way as A. Then, in Table Editor, add one fake row owned by B in your table and note the number in its id column. That number is all this check needs from B. The check signs in as A and tries to read that one row.</p>
 <div class="labRow"><label for="rowId">Row number of B&rsquo;s fake row</label><span class="tipWrap"><button type="button" class="tipBtn" data-tip="tip-rowId" aria-label="Help for Row number of B&rsquo;s fake row">!</button><p class="tipText hidden" id="tip-rowId">The number in the id column of the fake row that belongs to test user B, from Table Editor. Not A's number: A can always read A's own row, so aiming at A's row shows an Issue on every table, even a protected one. For one table, just that number. For several tables, give the numbers in the same order as your table names at the top, separated by commas. Each number is that table's own fact, nothing to do with the others, and in a fresh test setup it is often the same number every time, like 2, 2, 2. Leave a gap for a table you want to skip, like 2, , 2. Test rows only, never a real customer's row.</p></span></div>
 <input id="rowId" type="text" placeholder="Same order as your table names" autocomplete="off" spellcheck="false">
 </details>
@@ -184,11 +409,31 @@ details.proof{margin:6px 0}
 </details>
 </div>
 
-<p class="small" style="text-align:center">Your browser talks directly to your Supabase, and to nothing else except the homepage you give it. Your project address, key, table names and results never leave your browser.</p>
-
-</div>
+<p class="small" style="text-align:center">Nothing you type here is sent to MakerGuard, and neither are your results. The tests run in your browser, talking directly to your Supabase and to the homepage you give it.</p>
 <button id="runBtn" class="primary">Run check</button>
 <p class="small" style="text-align:center">Runs everything you filled in. Anything left blank is skipped, not an error.</p>
+</div>
+</div>
+<p class="checksIntro">MakerGuard tests your live app for real-world data exposure and gives you evidence-backed findings, not a checklist or a code review.</p>
+<h2 class="whead" id="whatwecheck">What we check</h2>
+<h3 class="groupHead">Quick Scan</h3>
+<p class="groupSub">Runs from your link alone.</p>
+<div class="checkGrid">
+<div class="ck"><p class="ckT"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#141416" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6z"/><circle cx="12" cy="12" r="3"/></svg>Public data exposure<span class="scanPill">Quick Scan</span></p><p class="ckQ">Can strangers read data without logging in?</p></div>
+<div class="ck"><p class="ckT"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#141416" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>File exposure<span class="scanPill">Quick Scan</span></p><p class="ckQ">Can someone retrieve files they shouldn&rsquo;t see?</p></div>
+<div class="ck"><p class="ckT"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#141416" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="15" r="4.5"/><path d="M11.3 11.7L20 3M16.5 6.5L19 9M14 9l2.5 2.5"/></svg>Exposed credentials<span class="scanPill">Quick Scan</span></p><p class="ckQ">Are privileged keys present in shipped frontend code?</p></div>
+</div>
+<h3 class="groupHead">Deep Scan</h3>
+<p class="groupSub">Runs with one test sign-in.</p>
+<div class="checkGrid">
+<div class="ck"><p class="ckT"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#141416" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19c.6-3 2.8-4.5 5.5-4.5s4.9 1.5 5.5 4.5"/><path d="M15.5 5.3a3.2 3.2 0 0 1 0 5.9M17.3 14.8c1.6.6 2.6 2 2.9 4.2"/></svg>Cross-user access<span class="scanPill">Deep Scan</span></p><p class="ckQ">Can one user access another user&rsquo;s records?</p></div>
+<div class="ck"><p class="ckT"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#141416" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6z"/><circle cx="12" cy="12" r="3"/></svg>The signed-in surface<span class="scanPill">Deep Scan</span></p><p class="ckQ">What any signed-in account can read, including tables open to every signed-in user.</p></div>
+<div class="ck"><p class="ckT"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#141416" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>Cross-user files<span class="scanPill">Deep Scan</span></p><p class="ckQ">Whether one user can open another user&rsquo;s files.</p></div>
+<div class="ck"><p class="ckT"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#141416" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M8.5 12.2l2.4 2.4 4.6-4.9"/></svg>Settling open answers<span class="scanPill">Deep Scan</span></p><p class="ckQ">The answers Quick Scan left ambiguous, like whether an empty answer means an empty table or a protected one.</p></div>
+</div>
+<p class="builtline">Built for web apps using Supabase, including apps created with Lovable, Bolt, and other AI coding tools.</p>
+<p class="builtline" style="margin-top:6px">So far, MakerGuard has examined 61 real AI-built apps.</p>
+
 <p id="errorMsg" class="hidden"></p>
 <p id="progress" class="small"></p>
 <div class="links">
@@ -198,6 +443,32 @@ details.proof{margin:6px 0}
 
 <div id="results"></div>
 <button id="downloadBtn" class="secondary" disabled>Download this report</button>
+<button id="viewReportBtn" type="button" hidden>View the report</button>
+<div id="reportOverlay" class="reportOverlay" hidden>
+  <div class="reportPanel" role="dialog" aria-modal="true" aria-label="MakerGuard report">
+    <div class="reportBar">
+      <span class="reportBarTitle">MakerGuard</span>
+      <span class="reportBarBtns">
+        <button id="popDownloadBtn" type="button" class="iconBtn" aria-label="Download the report" title="Download the report"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg></button>
+        <button id="popCloseBtn" type="button" class="iconBtn" aria-label="Close the report" title="Close">&times;</button>
+      </span>
+    </div>
+    <div id="reportSlot" class="reportSlot"></div>
+  </div>
+</div>
+<div id="fbOverlay" class="reportOverlay" hidden>
+  <div class="fbPanel" role="dialog" aria-modal="true" aria-label="Feedback">
+    <div class="fbCloseRow"><button id="fbCloseBtn" type="button" class="iconBtn" aria-label="Close" title="Close">&times;</button></div>
+    <div class="fbCard" data-fbform>
+      <p class="fbTitle">From the founder</p>
+      <p><strong>Hi, I&rsquo;m Swati.</strong> I built MakerGuard on my own, and I keep it free, because an app built by one person deserves to be as secure as one built by a team of ten.</p>
+      <p>Tried it? I&rsquo;d love to connect personally and hear what worked, what didn&rsquo;t, or what I should build next.</p>
+      <div class="fbRow"><input class="fbEmail" type="email" autocomplete="email" placeholder="you@example.com" aria-label="Your email, only if you would like to chat"><button class="fbSend" type="button" data-spot="page_popup">Let&rsquo;s connect.</button></div>
+      <p class="fbStatus small" aria-live="polite"></p>
+      <p class="small" style="margin:6px 0 0">Optional. Only for our 1:1 chat. Nothing else. Because I hate it too.</p>
+    </div>
+  </div>
+</div>
 <div id="emailCap" hidden style="margin-top:34px">
 <p>Want a nudge to fix this and run the check again in 7 days?</p>
 <label for="emailAddr">Your email</label>
@@ -211,19 +482,56 @@ details.proof{margin:6px 0}
 <pre id="probeLog" class="log"></pre>
 </details>
 
+<div class="subdiv">
+<p class="secttl">What you are probably wondering</p>
+<details class="drop"><summary>Supabase already warns me about unprotected tables. Why do I need this?</summary>
+<p class="small">The advisor reads your database settings. It never visits your live app, never tries a request as a stranger, and never signs in as one user to reach for another user&rsquo;s data, which is where the worst leaks live. It also cannot see your shipped website code, where a master key would sit. This performs those tests, on any live app, whichever tool built it.</p>
+</details>
+<details class="drop"><summary>Why not just ask ChatGPT?</summary>
+<p class="small">ChatGPT, Claude and Gemini can only judge what you paste to them. They cannot send the requests, sign in as a second user, or open your files as a stranger. They give opinions. This runs the tests.</p>
+</details>
+<details class="drop"><summary>Why should I trust the results?</summary>
+<p class="small">Every Issue in your report is a request that actually came back with data, and the evidence is printed in its details. A test that could not be performed is marked Not checked, never guessed, and a name that is not a real table comes back Not checked, not an issue. No answer is given without the attempt behind it.</p>
+</details>
+<details class="drop"><summary>Who is behind MakerGuard?</summary>
+<p class="small">Swati, a solo founder. Ten years at Microsoft, six of them in data security. She builds MakerGuard in public, and the contact link at the bottom of this page reaches her directly.</p>
+</details>
+<details class="drop"><summary>How much does it cost?</summary>
+<p class="small">Nothing. It is free.</p>
+</details>
+<details class="drop" id="faq-data"><summary>Do you store my app, my key, or my results?</summary>
+<p class="small">No. The details you type here and the results you see are not sent to MakerGuard and are not stored by MakerGuard. The tests run in your browser, talking directly to your Supabase. If you paste your app link, the link goes to the MakerGuard reader: it reads your app's public code files, sends back what it finds, and stores nothing.</p>
+</details>
+<details class="drop"><summary>Is any of my stuff used to train a model?</summary>
+<p class="small">No. Your key and your results are never sent to MakerGuard or stored by it, so there is nothing of yours to train on.</p>
+</details>
+<details class="drop"><summary>Is this AI?</summary>
+<p class="small">No. There is no AI in the examiner. It runs deterministic checks and reports what came back, so a run today and a run after your fix can be compared like for like.</p>
+</details>
+</div>
+
+<div class="fbPageEnd"><p class="small" style="margin:0 0 4px">Questions, or a result you do not believe?</p><button id="fbOpenBtn" class="secondary" type="button">Let&rsquo;s connect.</button></div>
 <footer>
+<p style="display:flex;justify-content:space-between;margin:0 0 14px"><a href="#faq-data">Privacy</a><a href="https://instagram.com/midnightbuilds.fyi" target="_blank" rel="noopener">Contact us</a></p>
 <p>This checks only the tables, bucket, and homepage you gave it. It is not a complete security audit.</p>
 <p>Fix the top finding, then run it again with the same inputs to prove the fix.</p>
 </footer>
 
 <script>
-/* ---------- Anonymous usage counts (Plan A) ----------
-   Counts only: event name, an anonymous visitor id kept in this browser,
-   how many fields were filled (a number), and result totals (numbers).
+/* ---------- Anonymous usage counts (Plan A, full funnel) ----------
+   Every step of the funnel sends one event: visited, link submitted,
+   examination started and finished (outcome and size bands only), the
+   manual form opened and submitted, the check started and completed
+   (issue, settled and unverified totals, and the outcome level 1 to 4),
+   the report opened, closed and reopened, a card expanded, a fix prompt
+   copied, the manual fix steps opened, the report downloaded, the Deep
+   Scan setup opened, started and completed, a run failing (stage and
+   reason only), the sample viewed, the reminder submitted, and a return
+   visit. Counts, bands and fixed words only.
    Never sent: any value typed into this form, any address, key, table or
    bucket name, or any finding. A guard below aborts a send if a typed
-   value ever appears in the payload. Email capture is a separate send
-   with no visitor id, so the two can never be joined. */
+   value ever appears anywhere in the payload. Email capture is a
+   separate send with no visitor id, so the two can never be joined. */
 const TELEMETRY_ENDPOINT = "https://script.google.com/macros/s/AKfycbxY6BGRFgZ4meAPAZYw9OlZu3toxJCpgq0sOyOA5HwZTjBKvJN7bQwSSONde6CmXjhS/exec";
 function telId() {
   try {
@@ -236,12 +544,16 @@ function telSend(payload) {
   if (!TELEMETRY_ENDPOINT) return;
   try {
     const body = JSON.stringify(payload);
-    const typed = ["supabaseUrl", "anonKey", "tableName", "testEmail", "testPassword", "userToken", "bucketName", "objectName", "productUrl"];
+    const typed = ["supabaseUrl", "anonKey", "tableName", "testEmail", "testPassword", "userToken", "bucketName", "objectName", "productUrl", "appLink", "emailAddr", "rowId", "deepEmailA", "deepPassA", "deepTokenA", "deepEmailB", "deepPassB", "deepTokenB", "deepFileName", "deepRow0", "deepRow1", "deepRow2"];
     for (const id of typed) {
       const el = document.getElementById(id);
       const val = el && el.value ? el.value.trim() : "";
       if (val && val.length >= 4 && body.indexOf(val) >= 0) return;
     }
+    document.querySelectorAll(".fbEmail").forEach(function(el){
+      const val = el.value ? el.value.trim() : "";
+      if (val && val.length >= 4 && body.indexOf(val) >= 0) throw new Error("leak guard");
+    });
     fetch(TELEMETRY_ENDPOINT, { method: "POST", mode: "no-cors", headers: { "Content-Type": "text/plain" }, body: body }).catch(function () {});
   } catch (e) {}
 }
@@ -255,7 +567,7 @@ function telReturnedCheck() {
     const last = localStorage.getItem("sbscLast");
     if (last && last !== today) {
       const days = Math.round((new Date(today) - new Date(last)) / 86400000);
-      if (days >= 1 && days <= 14) telEvent("returned", { days: days });
+      if (days >= 1 && days <= 14) telEvent("returned", { gap_days: days, days: days });
     }
     localStorage.setItem("sbscLast", today);
   } catch (e) {}
@@ -281,6 +593,41 @@ let memoryTokenEmail = "";
 let memoryUserId = "";
 let lastOverall = null;
 let lastHost = "";
+let lastScope = null;
+let bundleFilesRead = 0;
+let currentRunPath = "manual";
+let currentReportIsSample = false;
+let lastBase = "";
+let lastAnonKey = "";
+let deepState = null;
+const OWNER_COLS = ["user_id","owner_id","owner","created_by","author_id","profile_id","account_id","uid"];
+
+/* Funnel totals for one finished run, from the run's own results.
+   Quick items are everything except the cross-user (P2) items; stray
+   code-found names are not counted as unverified, matching the report.
+   Level (Part D hierarchy, per submitted link): 1 the scan completed;
+   2 a real surface was discovered (a table, a file store, code files);
+   3 at least one test settled conclusively; 4 an issue was proven, or
+   a clean result was fully established (settled tests, none unverified). */
+function quickStats(results){
+  let quick = (results || []).filter(function(it){ return it.probe !== "P2"; });
+  let issues = 0, settled = 0, unverified = 0, surface = false;
+  quick.forEach(function(it){
+    if(it.status === "PROVEN"){ issues++; settled++; }
+    else if(it.status === "BLOCKED"){ settled++; }
+    else if(!isStrayItem(it)){ unverified++; }
+    if(it.probe === "P1" && !isStrayItem(it)) surface = true;
+    if(it.probe === "P3" && it.title && it.title.indexOf(": ") > -1 && (it.findings || []).join(" ").toLowerCase().indexOf("needs a bucket") === -1) surface = true;
+    if(it.probe === "P4" && typeof it.filesRead === "number" && it.filesRead > 0) surface = true;
+  });
+  let level = 1;
+  if(surface) level = 2;
+  if(settled > 0) level = 3;
+  if(issues > 0 || (settled > 0 && unverified === 0)) level = 4;
+  let deep = (results || []).filter(function(it){ return it.probe === "P2" && (it.status === "PROVEN" || it.status === "BLOCKED"); });
+  let deepIssues = deep.filter(function(it){ return it.status === "PROVEN"; }).length;
+  return { issues: issues, settled: settled, unverified: unverified, level: level, deepSettled: deep.length, deepIssues: deepIssues };
+}
 
 function showError(msg){let e=$("errorMsg"); e.textContent=msg; e.classList.remove("hidden");}
 function clearError(){$("errorMsg").classList.add("hidden"); $("errorMsg").textContent="";}
@@ -333,7 +680,7 @@ function issuePageHTML(item, n, total){
   let subj = item.title.indexOf(": ") > -1 ? item.title.split(": ").slice(1).join(": ") : "";
   let subjLabel = item.probe === "P3" ? "Bucket: " : (item.probe === "P4" ? "" : "Table: ");
   if(subj && subjLabel) h += "<p class='small'>"+subjLabel+esc(subj)+"</p>";
-  h += "<div class='fixbox'><p class='lbl'>Fix it, 3 steps</p><ol class='steps'>"+steps+"</ol></div>";
+  h += "<div class='fixbox'><p class='lbl'>Fix it with your builder tool</p><p class='small'>Copy this into Lovable, Bolt, or whichever tool built your app:</p><div class='promptBox'>" + esc(promptFor(item)) + "</div><p style='margin:10px 0 0'><button type='button' class='navbtn copyBtn'>Copy the prompt</button></p><details class='proof' style='margin-top:12px'><summary>Fix it myself instead</summary><ol class='steps'>"+steps+"</ol></details></div>";
   h += "<details class='proof'><summary>Why it matters, and the proof</summary>";
   if(ex.risk) h += "<p><strong>At risk:</strong> "+esc(ex.risk)+"</p>";
   h += "<p class='small'>Proof: "+proof+"</p></details>";
@@ -348,7 +695,43 @@ function navHTML(total){
   return "<div class='navRow'><button type='button' class='navbtn' data-nav='prev' disabled>Back</button><span class='dots'>"+dots+"</span><button type='button' class='navbtn' data-nav='next'>Next issue</button></div>";
 }
 
+const FIXPROMPTS = {
+  P1: "A security check found a real problem in my app. In my Supabase project, the table {name} can be read by anyone on the internet using only the public anon key, with no login at all.\n\nFix it like this:\n1. Turn on Row Level Security for the table {name}.\n2. Make sure no policy on {name} lets the anon role read rows.\n3. If signed-in users need this data, add a policy that lets each user read only rows that belong to them.\n\nDo not change my screens, my fields, or any other table. When you finish, tell me exactly which policies now exist on {name}.",
+  P2: "A security check found a real problem in my app. In my Supabase project, a signed-in user can read another user's row in the table {name}.\n\nFix it like this:\n1. Turn on Row Level Security for the table {name}, if it is not on already.\n2. Change the policies on {name} so a user can read only rows that belong to them: the row's owner must match the signed-in user (auth.uid()).\n3. Remove any policy that lets all signed-in users read all rows.\n\nDo not change my screens, my fields, or any other table. When you finish, tell me exactly which policies now exist on {name}.",
+  P3: "A security check found a real problem in my app. In my Supabase project, the storage bucket {name} is public, so anyone who has a file's address can open the file without logging in.\n\nFix it like this:\n1. Make the bucket {name} private.\n2. Change the app so these files open only for the person they belong to, using signed URLs or storage policies that check the owner.\n3. Check every screen that shows these files still works after the change.\n\nDo not change any other bucket. When you finish, tell me what you changed and how the files are protected now.",
+  P4: "A security check found a real problem in my app. A Supabase service_role key, the master key that bypasses all protection, is present in my app's shipped frontend code, where every visitor can see it.\n\nFix it like this:\n1. Remove the service_role key from all frontend code completely.\n2. Anything that truly needs it must move to a server-side function that reads the key from a secret setting, never from code sent to the browser.\n3. Search the whole project for the key and for the words service_role, and remove every copy in frontend code.\n\nWhen you finish, tell me where the key was and what you moved. I will rotate the key myself in Supabase."
+};
+function promptFor(it){
+  let raw = it.title.indexOf(": ") > -1 ? it.title.split(": ").slice(1).join(": ") : "";
+  let tpl = FIXPROMPTS[it.probe] || "";
+  return tpl.split("{name}").join(raw || "the table");
+}
 function wireCards(){
+  document.querySelectorAll("#results .copyBtn").forEach(function(b){
+    b.addEventListener("click", function(){
+      let card = b.closest(".acard");
+      if(!currentReportIsSample && card) telEvent("fix_copied", { probe: card.getAttribute("data-probe") || "", path: currentRunPath });
+      let box = b.closest(".fixbox").querySelector(".promptBox");
+      let txt = box ? box.textContent : "";
+      function done(){ b.textContent = "Copied"; setTimeout(function(){ b.textContent = "Copy the prompt"; }, 1600); }
+      if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(txt).then(done, done); } else { done(); }
+    });
+  });
+  document.querySelectorAll("#results details.proof").forEach(function(d){
+    d.addEventListener("toggle", function(){
+      if(!d.open || currentReportIsSample) return;
+      let card = d.closest(".acard");
+      if(card) telEvent("fix_manual_opened", { probe: card.getAttribute("data-probe") || "", path: currentRunPath });
+    });
+  });
+  let nz = document.getElementById("nudgeSetup");
+  if(nz) nz.addEventListener("click", function(){
+    // The entrypoint card now leads to the Deep Scan evidence locker in
+    // this report (the flagship section), not the manual form.
+    openDeepSetup();
+    let lk = document.getElementById("deepLocker");
+    if(lk) lk.scrollIntoView({behavior:"smooth", block:"start"});
+  });
   document.querySelectorAll("#results .asum").forEach(function(btn){
     btn.addEventListener("click", function(){
       let det = btn.parentElement.querySelector(".adet");
@@ -356,7 +739,12 @@ function wireCards(){
       let open = det.hidden;
       det.hidden = !open;
       btn.setAttribute("aria-expanded", open ? "true" : "false");
-      if(exp) exp.textContent = open ? "Hide \u25B4" : "Details \u25BE";
+      if(exp){ let cd = btn.closest(".acard"); exp.textContent = open ? "Hide \u25B4" : ((cd && cd.getAttribute("data-fix") === "1") ? "Click for the fix \u25BE" : "Details \u25BE"); }
+      if(open && !currentReportIsSample){
+        let card = btn.closest(".acard");
+        let probe = card ? (card.getAttribute("data-probe") || "") : "";
+        if(probe === "P1" || probe === "P3" || probe === "P4") telEvent("card_expanded", { probe: probe, path: currentRunPath });
+      }
     });
   });
 }
@@ -386,22 +774,108 @@ function subjectOf(it){
   return it.title;
 }
 function firstSent(t){ let i = t.indexOf(". "); return i > 0 ? t.slice(0, i + 1) : t; }
-function answerRowHTML(it){
+function rawSubject(it){
+  if(it.title && it.title.indexOf(": ") > -1) return it.title.split(": ").slice(1).join(": ");
+  return subjectOf(it);
+}
+const TESTNAMES = { P1: "Stranger read", P2: "Cross-user read", P3: "File store check", P4: "Master key scan" };
+function testNameFor(it){ return TESTNAMES[it.probe] || "Check"; }
+function isStrayItem(it){
+  return it.probe === "P1" && it.status === "NOT_CHECKED" && it.origin === "code" && reasonLabelFor(it) === "Resource not confirmed";
+}
+const REASON_LABELS = {
+  "resource_not_confirmed": "Resource not confirmed",
+  "Resource not confirmed": "Resource not confirmed",
+  "authentication_required": "Authentication required",
+  "Authentication required": "Authentication required",
+  "ownership_not_established": "Ownership not established",
+  "Ownership not established": "Ownership not established",
+  "invalid_endpoint": "Invalid endpoint",
+  "Invalid endpoint": "Invalid endpoint",
+  "unsupported_backend": "Unsupported backend",
+  "Unsupported backend": "Unsupported backend",
+  "test_timed_out": "Test timed out",
+  "Test timed out": "Test timed out",
+  "resource_not_discovered": "Resource not discovered",
+  "Resource not discovered": "Resource not discovered",
+  "setup_invalid": "Setup invalid",
+  "Setup invalid": "Setup invalid",
+  "assets_could_not_be_read": "Assets could not be read",
+  "Assets could not be read": "Assets could not be read"
+};
+function reasonLabelFor(it){
+  if(it.reasonCode && REASON_LABELS[it.reasonCode]) return REASON_LABELS[it.reasonCode];
+  if(it.reasonCode && typeof it.reasonCode === "string" && it.reasonCode.length) return it.reasonCode;
+  let txt = ((it.findings || []).join(" ") + " " + (it.title || "")).toLowerCase();
+  if(/timed out|timeout|aborted/.test(txt)) return "Test timed out";
+  if(/no table answered|404|not a real table|spelled differently/.test(txt)) return "Resource not confirmed";
+  if(/bucket not found|bucket.*does not exist/.test(txt)) return "Resource not confirmed";
+  if(/expired|unauthorised \(401\)|unauthorized \(401\)|sign-in is not working|test sign-in.*did not work|token.*different project/.test(txt)) return "Authentication required";
+  if(/needs test user|no test user sign-in|sign in as test user|needs.*signed in|no homepage address was given/.test(txt)) {
+    if(/homepage/.test(txt)) return "Resource not discovered";
+    return "Authentication required";
+  }
+  if(/needs a bucket name|needs a bucket and a file|without both/.test(txt)) return "Setup invalid";
+  if(/row numbers are matched|row number.*order|numbers could not be matched/.test(txt)) return "Setup invalid";
+  if(/no owner column|owner column.*recognis|rows cannot be told apart|ownership/.test(txt)) return "Ownership not established";
+  if(/b's row|test user b's row number|exact row.*still works|add.*row number/.test(txt) && it.probe === "P2") return "Ownership not established";
+  if(/unsupported|not.*supabase|different backend|own server/.test(txt)) return "Unsupported backend";
+  if(/address is wrong|blocks this origin|could not be fetched|homepage could not be fetched|invalid.*url/.test(txt)) return "Invalid endpoint";
+  if(/did not run|not discovered|none named|no.*backend found/.test(txt)) return "Resource not discovered";
+  return "Could not be verified";
+}
+function computeScope(results, override){
+  if(override && typeof override.filesRead === "number") return {filesRead: override.filesRead, tablesTested: override.tablesTested, storesFound: override.storesFound};
+  let files = 0;
+  let tables = {};
+  let stores = {};
+  (results || []).forEach(function(it){
+    if(it.probe === "P4" && typeof it.filesRead === "number") files = it.filesRead;
+    if(it.probe === "P1" && it.title && it.title.indexOf(": ") > -1 && !isStrayItem(it)){ tables[it.title.split(": ").slice(1).join(": ").toLowerCase()] = 1; }
+    if(it.probe === "P3" && it.title && it.title.indexOf(": ") > -1){
+      let subj = it.title.split(": ").slice(1).join(": ").trim();
+      let missing = (it.findings || []).join(" ").toLowerCase().indexOf("needs a bucket") > -1;
+      if(subj && !missing) stores[subj.toLowerCase()] = 1;
+    }
+  });
+  if(override && typeof override === "object"){
+    if(typeof override.filesRead === "number") files = override.filesRead;
+  }
+  return {filesRead: files, tablesTested: Object.keys(tables).length, storesFound: Object.keys(stores).length};
+}
+// Header declutter (2026-11-04): the scope line, the stray-names line and
+// the Checked hostline merge into ONE small grey meta block under the
+// verdict. The verdict sub-line is gone entirely; the unverified count
+// lives only in the Could-not-verify block at the bottom of the report.
+function metaLineHTML(scope, strays, host){
+  let s = scope || {filesRead: 0, tablesTested: 0, storesFound: 0};
+  let names = (strays || []).map(function(it){ return rawSubject(it); });
+  let h = s.filesRead + " code files read &middot; " + s.tablesTested + " tables tested &middot; " + s.storesFound + " file stores";
+  if(names.length) h += " &middot; skipped code names: " + esc(names.join(", "));
+  h += " &middot; Checked: " + esc(host) + (lastRunLabel ? " &middot; " + esc(lastRunLabel) : "");
+  return "<p class='metaLine'>" + h + "</p>";
+}
+function answerRowHTML(it, fixLabel){
   let ex = EXPLAIN[it.probe] || {};
   let sum;
-  if(it.status === "PROVEN") sum = firstSent(ex.story || it.findings.join(" "));
-  else if(it.status === "BLOCKED") sum = (PASSLINE[it.probe] || "The attempt was made and your project stopped it") + ".";
+  if(it.status === "PROVEN" && it.sumLine) sum = it.sumLine.replace(/\.$/, "") + ".";
+  else if(it.status === "PROVEN") sum = firstSent(ex.story || it.findings.join(" "));
+  else if(it.status === "BLOCKED") sum = it.sumLine ? (it.sumLine.replace(/\.$/, "") + ".") : ((PASSLINE[it.probe] || "The attempt was made and your project stopped it") + ".");
   else if(it.status === "NOT_PROVEN") sum = CAVEAT[it.probe] || "The check ran and found nothing, but could not prove this either way.";
   else sum = firstSent(it.findings.join(" "));
-  let h = "<div class='acard'><button type='button' class='asum' aria-expanded='false'><span class='asumt'>" + chipHTML(it.status) + " <strong>" + esc(subjectOf(it)) + ":</strong> " + esc(sum) + "</span><span class='aexp'>Details \u25BE</span></button>";
+  let stCls = it.status === "PROVEN" ? "stIssue" : it.status === "BLOCKED" ? "stProtected" : "stNc";
+  let tag = it.status === "PROVEN" ? "<span class='atag tagIssue'>Issue</span>" : it.status === "BLOCKED" ? "<span class='atag tagProtected'>Protected</span>" : it.status === "NOT_PROVEN" ? "<span class='atag tagNc'>Could not verify</span>" : "<span class='atag tagNc'>Not checked</span>";
+  let kind = it.probe === "P3" ? "file store" : ((it.probe === "P1" || it.probe === "P2") && it.title.indexOf(": ") > -1 ? "table" : "");
+  let reasonHtml = (it.status === "NOT_PROVEN" || it.status === "NOT_CHECKED") ? "<span class='reasonLine'>Reason: <span class='reasonTag'>" + esc(reasonLabelFor(it)) + "</span></span>" : "";
+  let h = "<div class='acard " + stCls + "' data-status='" + esc(it.status) + "' data-probe='" + esc(it.probe) + "'" + ((fixLabel && it.status === "PROVEN") ? " data-fix='1'" : "") + "><button type='button' class='asum' aria-expanded='false'><span class='ahead'>" + tag + "<span class='aexp'>" + ((fixLabel && it.status === "PROVEN") ? "Click for the fix \u25BE" : "Details \u25BE") + "</span></span><span class='aobj'>" + esc(subjectOf(it)) + (kind ? " <span class='objkind'>" + kind + "</span>" : "") + "</span><span class='asumline'>" + esc(sum) + "</span>" + reasonHtml + "</button>";
   h += "<div class='adet' hidden>";
   let body = it.findings.join(" ");
   if(body && body !== sum) h += "<p style='margin:2px 0 0'>" + esc(body) + "</p>";
   if(it.status === "PROVEN"){
     let steps = (FIXSTEPS[it.probe] || it.fixes).map(function(f){ return "<li>" + esc(f) + "</li>"; }).join("");
-    if(ex.risk) h += "<p class='small' style='margin:8px 0 0'><strong>Why it matters:</strong> " + esc(ex.risk) + "</p>";
+    if(ex.risk && !it.configOnly) h += "<p class='small' style='margin:8px 0 0'><strong>Why it matters:</strong> " + esc(ex.risk) + "</p>";
     if(it.control) h += "<p class='small' style='margin:6px 0 0'><strong>Why you can trust this:</strong> " + esc(it.control) + "</p>";
-    h += "<div class='fixbox'><p class='lbl'>Fix it</p><ol class='steps'>" + steps + "</ol></div>";
+    h += "<div class='fixbox'><p class='lbl'>Fix it with your builder tool</p><p class='small'>Copy this into Lovable, Bolt, or whichever tool built your app:</p><div class='promptBox'>" + esc(promptFor(it)) + "</div><p style='margin:10px 0 0'><button type='button' class='navbtn copyBtn'>Copy the prompt</button></p><details class='proof' style='margin-top:12px'><summary>Fix it myself instead</summary><ol class='steps'>" + steps + "</ol></details></div>";
   } else {
     if(it.control) h += "<p class='small' style='margin:8px 0 0'><strong>Why you can trust this:</strong> " + esc(it.control) + "</p>";
     if(it.status === "NOT_CHECKED" && it.fixes.length) h += "<p class='small' style='margin:8px 0 0'><strong>To check it:</strong> " + esc(it.fixes[0]) + "</p>";
@@ -409,34 +883,59 @@ function answerRowHTML(it){
   h += "</div></div>";
   return h;
 }
-function reportBodyHTML(results, overall, host, sampleLabel){
-  let issues = results.filter(function(it){ return it.status === "PROVEN"; });
-  let notChecked = results.filter(function(it){ return it.status === "NOT_CHECKED"; });
-  let notProven = results.filter(function(it){ return it.status === "NOT_PROVEN"; });
+function reportBodyHTML(results, overall, host, sampleLabel, scopeOverride){
+  // D-6 middle path: the Quick snapshot holds non-P2 results only.
+  // Cross-user items never render as Quick cards: settled ones are seeded
+  // into the Deep Scan evidence locker below the snapshot (one Deep
+  // section only), unsettled ones nowhere as cards.
+  // Unverified Quick items collapse to a one-line summary block, and stray
+  // code-found names that never answered as tables collapse to one quiet
+  // line in the scope area.
+  let quick = results.filter(function(it){ return it.probe !== "P2"; });
+  let strays = quick.filter(isStrayItem);
+  let scope = scopeOverride ? computeScope(results, scopeOverride) : computeScope(results, null);
+  let band1 = quick.filter(function(it){ return it.status === "PROVEN"; }).slice().sort(function(a, b){ return levelRank(b.level || "MEDIUM") - levelRank(a.level || "MEDIUM"); });
+  let band2 = quick.filter(function(it){ return it.status === "BLOCKED"; });
+  let unverifiedItems = quick.filter(function(it){ return (it.status === "NOT_PROVEN" || it.status === "NOT_CHECKED") && !isStrayItem(it); });
+  let unverified = unverifiedItems.length;
   let html = "";
+  html += "<section id='quickReport' class='quickSnapshot' data-snapshot='quick'>";
   html += "<p class='brandline'>MakerGuard</p>";
+  html += "<h2 class='reportTitle'>Quick Scan report</h2>";
   if(sampleLabel){ html += "<div class='sampleNotice'><strong>Sample.</strong> Fake data. No real product was checked.</div>"; }
-  if(issues.length > 0){
-    html += "<p class='verdict'>" + issues.length + (issues.length === 1 ? " issue to fix." : " issues to fix.") + "</p>";
-    html += "<p class='verdictsub'>Fix one at a time. Start with the first one.</p>";
-  } else if(notChecked.length > 0){
-    html += "<p class='verdict'>No issues found.</p>";
-    html += "<p class='verdictsub'>But " + notChecked.length + (notChecked.length === 1 ? " question" : " questions") + " could not be answered, each with its reason below. This is not a full pass.</p>";
-  } else if(notProven.length > 0){
-    html += "<p class='verdict'>No issues found.</p>";
-    html += "<p class='verdictsub'>Nothing leaked in the answers below. " + notProven.length + (notProven.length === 1 ? " answer" : " answers") + " could not be proven either way, explained below.</p>";
+  if(band1.length > 0){
+    html += "<p class='verdict'>" + band1.length + (band1.length === 1 ? " issue to fix." : " issues to fix.") + "</p>";
+  } else if(unverified === 0){
+    html += "<p class='verdict'>No issues found in this quick scan.</p>";
   } else {
-    html += "<p class='verdict'>All clear.</p>";
-    html += "<p class='verdictsub'>In these 4 questions only. Not your whole product.</p>";
+    html += "<p class='verdict'>No issues found in the checks that completed.</p>";
   }
-  html += "<p class='hostline'>Checked: " + esc(host) + (lastRunLabel ? " &middot; " + esc(lastRunLabel) : "") + "</p>";
-  ["P1", "P2", "P3", "P4"].forEach(function(probe){
-    let items = results.filter(function(it){ return it.probe === probe; });
-    if(!items.length) items = [{probe: probe, title: "", status: "NOT_CHECKED", level: "MEDIUM", findings: ["This part of the check did not run."], fixes: []}];
-    html += "<div class='qsec'><p class='qhead'>" + QUESTIONS[probe] + "</p>";
-    items.forEach(function(it){ html += answerRowHTML(it); });
+  html += metaLineHTML(scope, strays, host);
+  if(band1.length){
+    html += "<div class='band bandIssues' data-band='1'><p class='bandHead'>Issues <span class='bandCount'>" + band1.length + "</span></p>";
+    band1.forEach(function(it){ html += answerRowHTML(it, true); });
     html += "</div>";
-  });
+  }
+  if(band2.length){
+    html += "<div class='band bandClean' data-band='2'><p class='bandHead'>No issue found <span class='bandCount'>" + band2.length + "</span></p>";
+    band2.forEach(function(it){ html += answerRowHTML(it); });
+    html += "</div>";
+  }
+  if(unverifiedItems.length){
+    html += "<div class='unverBlock' data-band='3'><p class='unverLine'><strong>Could not verify: " + unverified + (unverified === 1 ? " check." : " checks.") + "</strong></p>";
+    html += "<details class='unverDetails'><summary>Which checks, and why</summary><ul class='unverList'>";
+    unverifiedItems.forEach(function(it){
+      html += "<li><strong>" + esc(subjectOf(it)) + "</strong> &middot; " + esc(testNameFor(it)) + " &middot; " + esc(reasonLabelFor(it)) + "</li>";
+    });
+    html += "</ul></details></div>";
+  }
+  html += "<div class='card nudgeCard deepCard' style='text-align:center'><p style='margin:0 0 6px'><strong>Deep Scan</strong></p><p class='small' style='margin:0 0 8px'>Quick Scan never signs in. Deep Scan is the sign-in boundary investigation: the second half of the check, and the door behind the worst leaks. It covers four things:</p><p class='small' style='margin:0 0 4px'><strong>Cross-user access:</strong> whether one signed-in user can read another user's data.</p><p class='small' style='margin:0 0 4px'><strong>The signed-in surface:</strong> what any signed-in account can read, including tables open to every signed-in user.</p><p class='small' style='margin:0 0 4px'><strong>Cross-user files:</strong> whether one user can open another user's files.</p><p class='small' style='margin:0 0 10px'><strong>Settling open answers:</strong> the answers Quick Scan left ambiguous, like whether an empty answer means an empty table or a protected one.</p><p class='small' style='margin:0 0 10px'>It starts from one test sign-in, a fake user you create in your app, and asks for more only when a specific test needs it.</p><button type='button' class='navbtn' id='nudgeSetup'>Set up the second-user test</button></div>";
+  html += "<p class='small quickEnd' style='text-align:center'>End of Quick Scan report. Deeper checks, when they run, appear below this snapshot and do not change it.</p>";
+  html += "</section>";
+  // The Deep Scan section is the evidence locker, appended by render()
+  // from deepState (see buildDeepState / deepLockerHTML). Settled
+  // cross-user items from this run are seeded into it, so Deep results
+  // live in exactly one section and the snapshot is never edited.
   return html;
 }
 
@@ -448,16 +947,921 @@ function stampRun(sample){
   for(let i = 0; i < 5; i++) id += A[Math.floor(Math.random() * A.length)];
   lastRunLabel = "Run " + id + " \u00B7 " + t;
 }
-function render(results, overall, host, sampleLabel){
+function render(results, overall, host, sampleLabel, scopeOverride){
+  currentReportIsSample = !!sampleLabel;
   stampRun(!!sampleLabel);
   lastResults = results; lastOverall = overall; lastHost = host;
-  $("results").innerHTML = reportBodyHTML(results, overall, host, sampleLabel);
+  lastScope = scopeOverride ? {filesRead: scopeOverride.filesRead, tablesTested: scopeOverride.tablesTested, storesFound: scopeOverride.storesFound} : computeScope(results, null);
+  $("results").innerHTML = reportBodyHTML(results, overall, host, sampleLabel, lastScope);
   wireCards();
+  // Deep Scan evidence locker: built fresh from this run's results and
+  // appended after the snapshot. Deep telemetry no longer rides the Quick
+  // run: deep_started and deep_completed fire from the locker itself, at
+  // the real moments (first Deep test executing; a Deep run finishing
+  // with settled items). See the Deep section code below.
+  buildDeepState(results, !!sampleLabel);
+  if (deepState){
+    $("results").insertAdjacentHTML("beforeend", deepLockerHTML());
+    wireDeep();
+  }
+  if(!fbConnected){
+    let fbEnd = document.createElement("div");
+    fbEnd.innerHTML = fbFormHTML("report_end");
+    $("results").appendChild(fbEnd.firstElementChild);
+    document.querySelectorAll("#results .acard[data-fix='1'] .adet").forEach(function(det){
+      if(det.querySelector("[data-fbform]")) return;
+      let holder = document.createElement("div");
+      holder.innerHTML = fbMiniHTML();
+      det.appendChild(holder.firstElementChild);
+    });
+  }
   $("downloadBtn").disabled = false;
-  if (!sampleLabel)   telEvent("completed", { proven: results.filter(function(r){return r.status === "PROVEN";}).length, notChecked: results.filter(function(r){return r.status === "NOT_CHECKED";}).length, blocked: results.filter(function(r){return r.status === "BLOCKED";}).length });
+  if (!sampleLabel){
+    telEvent("completed", { proven: results.filter(function(r){return r.status === "PROVEN";}).length, notChecked: results.filter(function(r){return r.status === "NOT_CHECKED";}).length, blocked: results.filter(function(r){return r.status === "BLOCKED";}).length });
+    let qs = quickStats(results);
+    telEvent("quick_completed", { path: currentRunPath, issues: qs.issues, settled: qs.settled, unverified: qs.unverified, level: qs.level });
+  }
   $("emailCap").hidden = !(TELEMETRY_ENDPOINT && !sampleLabel);
-  window.scrollTo({top: $("results").offsetTop - 10, behavior: "smooth"});
+  $("viewReportBtn").hidden = false;
+  openReport("render");
 }
+
+/* ================= Deep Scan evidence locker (LB3b) =================
+   The flagship section, appended inside #results directly after the
+   immutable Quick snapshot (so it travels into the report popup, which
+   moves the same #results node). Everything Quick Scan found carries
+   over; the locker asks only for what a specific test needs, in ladder
+   order: one test sign-in, then either a second sign-in (grade Proven)
+   or up to three prioritised row numbers (grade Probe), then one real
+   file name per store. Deep activity never touches the snapshot's DOM.
+   A future evidence source (the project ZIP, behind its own release
+   gates) joins this locker as another slot above the sign-in asks; this
+   build ships no ZIP UI and no ZIP mention. */
+
+function deepTotals(){
+  let ds = deepState;
+  if(!ds) return {settled: 0, issues: 0};
+  let settled = 0, issues = 0;
+  ds.rows.cross.items.forEach(function(it){
+    if(it.status === "PROVEN"){ settled++; issues++; }
+    else if(it.status === "BLOCKED"){ settled++; }
+  });
+  ["surface", "files", "settle"].forEach(function(k){
+    ds.rows[k].items.forEach(function(n){
+      if(n.settled){ settled++; if(n.tag === "Issue") issues++; }
+    });
+  });
+  return {settled: settled, issues: issues};
+}
+function deepFireStarted(){
+  if(deepState && !deepState.startedFired && !currentReportIsSample){
+    telEvent("deep_started", { path: currentRunPath });
+    deepState.startedFired = true;
+  }
+}
+function checkDeepCompleted(){
+  let ds = deepState;
+  if(!ds || ds.completedFired || currentReportIsSample) return;
+  let t = deepTotals();
+  if(t.settled > 0){
+    telEvent("deep_completed", { path: currentRunPath, settled: t.settled, issues: t.issues });
+    ds.completedFired = true;
+  }
+}
+function linkedLineNow(){
+  return "Initially unverified in Quick Scan. Verified in Deep Scan, " + new Date().toLocaleTimeString([], {hour: "numeric", minute: "2-digit"}) + ".";
+}
+function reasonLineHTML(label){
+  return "<p class='deepReason'>Reason: <span class='reasonTag'>" + esc(label) + "</span></p>";
+}
+function buildDeepState(results, isSample){
+  deepState = null;
+  if(isSample || !lastBase) return;
+  let ds = {
+    base: lastBase, anonKey: lastAnonKey,
+    tables: [], stores: [], p4Text: "",
+    setupOpen: false, setupFired: false,
+    auth: "pending", authNote: "", authDone: false,
+    tokenA: "", userIdA: "", tokenB: "", userIdB: "",
+    startedFired: false, completedFired: false, autoRan: false,
+    columns: null, rowAsks: null, rowIds: {},
+    filesName: "", filesStore: "",
+    settleCandidates: [],
+    rows: {
+      cross:   { state: "needs", pill: {text: "Needs one thing", cls: "tagNc"}, items: [], autoNotes: {} },
+      surface: { state: "needs", pill: {text: "Needs one thing", cls: "tagNc"}, items: [] },
+      files:   { state: "needs", pill: {text: "Needs one thing", cls: "tagNc"}, items: [] },
+      settle:  { state: "needs", pill: {text: "Needs one thing", cls: "tagNc"}, items: [] }
+    }
+  };
+  let p1ByName = {};
+  results.forEach(function(it){
+    if(it.probe === "P1" && it.title && it.title.indexOf(": ") > -1) p1ByName[rawSubject(it).toLowerCase()] = it;
+  });
+  Object.keys(p1ByName).forEach(function(k){
+    let it = p1ByName[k];
+    if(isStrayItem(it)) return;
+    if(it.status === "PROVEN" || it.status === "BLOCKED" || it.status === "NOT_PROVEN"){
+      ds.tables.push({ name: rawSubject(it), quickStatus: it.status, ownerCol: "" });
+    }
+  });
+  let seeded = results.filter(function(it){ return it.probe === "P2" && (it.status === "PROVEN" || it.status === "BLOCKED"); });
+  seeded.forEach(function(it){
+    if(!it.title || it.title.indexOf(": ") === -1) return;
+    let nm = rawSubject(it);
+    if(!nm || nm.toLowerCase() === "all tables") return;
+    if(!ds.tables.some(function(t){ return t.name.toLowerCase() === nm.toLowerCase(); })){
+      let p1 = p1ByName[nm.toLowerCase()];
+      ds.tables.push({ name: nm, quickStatus: p1 ? p1.status : "", ownerCol: "" });
+    }
+    let c = Object.assign({}, it);
+    if(!c.grade) c.grade = "Probe";
+    ds.rows.cross.items.push(c);
+  });
+  results.forEach(function(it){
+    if(it.probe === "P3" && it.title && it.title.indexOf(": ") > -1){
+      let nm = rawSubject(it);
+      let missing = ((it.findings || []).join(" ").toLowerCase().indexOf("needs a bucket") > -1);
+      if(nm && !missing && ds.stores.indexOf(nm) === -1) ds.stores.push(nm);
+    }
+    if(it.probe === "P4"){
+      if(it.status === "PROVEN") ds.p4Text = "a master key pattern was found in the code files that were read";
+      else if(it.status === "BLOCKED") ds.p4Text = "no master key pattern was found in the code files that were read";
+      else ds.p4Text = "the master-key question could not be verified";
+    }
+    if(it.probe === "P1" && it.title && it.title.indexOf(": ") > -1 && !isStrayItem(it)){
+      let body = (it.findings || []).join(" ");
+      if(it.status === "BLOCKED" && /does not establish whether the table is empty/.test(body)){
+        ds.settleCandidates.push({ table: rawSubject(it), kind: "zero" });
+      } else if(it.status === "NOT_PROVEN"){
+        ds.settleCandidates.push({ table: rawSubject(it), kind: "offshape" });
+      }
+    }
+  });
+  // A sign-in already made in the form above carries over too: Deep Scan
+  // never asks for anything twice.
+  try{
+    let mt = document.querySelector('input[name="signinMethod"]:checked');
+    if(mt && mt.value === "token"){
+      let tv = $("userToken").value.trim();
+      if(tv){ ds.tokenA = tv; ds.userIdA = userIdFromToken(tv); }
+    } else if(memoryToken){
+      ds.tokenA = memoryToken;
+      ds.userIdA = memoryUserId || userIdFromToken(memoryToken);
+    }
+  }catch(e){}
+  // Initial row states.
+  if(!ds.tables.length){
+    ds.rows.cross.state = "na"; ds.rows.cross.pill = {text: "Cannot run here", cls: "tagNc"};
+    ds.rows.surface.state = "na"; ds.rows.surface.pill = {text: "Cannot run here", cls: "tagNc"};
+  } else if(ds.rows.cross.items.length){
+    let covered = {};
+    ds.rows.cross.items.forEach(function(it){ covered[rawSubject(it).toLowerCase()] = 1; });
+    if(ds.tables.every(function(t){ return covered[t.name.toLowerCase()]; })){
+      ds.rows.cross.state = "done"; ds.rows.cross.pill = {text: "Done", cls: "tagProtected"};
+    }
+  }
+  if(!ds.stores.length){
+    ds.rows.files.state = "na"; ds.rows.files.pill = {text: "Done, not applicable", cls: "tagNc"};
+  }
+  if(!ds.settleCandidates.length){
+    ds.rows.settle.state = "na"; ds.rows.settle.pill = {text: "Done, not applicable", cls: "tagNc"};
+  }
+  deepState = ds;
+}
+function carriesHTML(){
+  let ds = deepState;
+  let t = ds.tables.length;
+  let names = ds.tables.map(function(x){ return x.name; }).join(", ");
+  let h = "<strong>What carries over from Quick Scan:</strong> " + t + " confirmed table" + (t === 1 ? "" : "s") + (names ? " (" + esc(names) + ")" : "");
+  h += " &middot; " + (ds.stores.length ? esc(ds.stores.join(", ")) + " file store" + (ds.stores.length === 1 ? "" : "s") : "no file stores");
+  if(ds.p4Text) h += " &middot; master key: " + esc(ds.p4Text);
+  h += ". Nothing here is asked twice.";
+  return h;
+}
+function deepRowShell(key, title){
+  let r = deepState.rows[key];
+  return "<div class='deepRow' id='deepRow-" + key + "'><div class='deepRowHead'><p class='deepRowTitle'>" + title + "</p><span class='atag deepState " + r.pill.cls + "' id='deepState-" + key + "'>" + r.pill.text + "</span></div><div class='deepBody' id='deepBody-" + key + "'>" + deepBodyHTML(key) + "</div></div>";
+}
+function deepCheckCardsHTML(){
+  // Change 2: the locker leads with the four Deep checks as calm cards
+  // in the landing's check-grid language (same names, same one-liners,
+  // same Deep Scan pill), each with one plain needs chip. This replaces
+  // prose listings of the four areas inside the locker.
+  let ic = {
+    users: "<svg width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='#141416' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><circle cx='9' cy='8' r='3.2'/><path d='M3.5 19c.6-3 2.8-4.5 5.5-4.5s4.9 1.5 5.5 4.5'/><path d='M15.5 5.3a3.2 3.2 0 0 1 0 5.9M17.3 14.8c1.6.6 2.6 2 2.9 4.2'/></svg>",
+    eye: "<svg width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='#141416' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><path d='M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6z'/><circle cx='12' cy='12' r='3'/></svg>",
+    folder: "<svg width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='#141416' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><path d='M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z'/></svg>",
+    check: "<svg width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='#141416' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><circle cx='12' cy='12' r='8.5'/><path d='M8.5 12.2l2.4 2.4 4.6-4.9'/></svg>"
+  };
+  let cards = [
+    { icon: ic.users, name: "Cross-user access", line: "Whether one signed-in user can read another user's data.", need: "Needs the other test user's sign-in, or one of their row numbers" },
+    { icon: ic.eye, name: "The signed-in surface", line: "What any signed-in account can read, including tables open to every signed-in user.", need: "Needs one test sign-in" },
+    { icon: ic.folder, name: "Cross-user files", line: "Whether one user can open another user's files.", need: "Needs one real file name" },
+    { icon: ic.check, name: "Settling open answers", line: "The answers Quick Scan left ambiguous, re-tested with a sign-in.", need: "Runs once you sign in" }
+  ];
+  let h = "<div class='deepGrid'>";
+  cards.forEach(function(c){
+    h += "<div class='dck'><p class='dckT'>" + c.icon + esc(c.name) + "<span class='scanPill'>Deep Scan</span></p><p class='dckQ'>" + esc(c.line) + "</p><span class='needChip'>" + esc(c.need) + "</span></div>";
+  });
+  h += "</div>";
+  return h;
+}
+function deepLockerHTML(){
+  if(!deepState) return "";
+  let h = "<section id='deepLocker' class='deepSection deepLocker' data-snapshot='deep'>";
+  h += "<h2 class='deepTitle'>Deep Scan</h2>";
+  h += "<p class='deepLead'>The sign-in boundary investigation: the tests a link alone cannot reach, and where the worst leaks hide. It starts from one test sign-in, and asks only for what a specific test needs.</p>";
+  h += deepCheckCardsHTML();
+  h += "<p class='carriesLine'>" + carriesHTML() + "</p>";
+  h += "<div class='deepSetup' id='deepSetup'>" + deepSetupHTML() + "</div>";
+  h += "<div id='deepRows'>";
+  h += deepRowShell("cross", "Cross-user access");
+  h += deepRowShell("surface", "The signed-in surface");
+  h += deepRowShell("files", "Cross-user files");
+  h += deepRowShell("settle", "Settling open answers");
+  h += "</div>";
+  // ZIP-SLOT: a future evidence source (the project file, read locally,
+  // behind its own release test plan) joins the locker here, above the
+  // sign-in asks, in effort order. No UI ships for it in this build.
+  h += "</section>";
+  return h;
+}
+function tokenInstructionsHTML(){
+  return "<p class='small'>How to get it: sign in to your own app in another tab, as the test user. Then open the browser storage for your app (in Chrome, the Application tab, then Local Storage), find the session entry, and copy the access token value. Paste it here.</p>";
+}
+function deepSigninBlockHTML(who){
+  let ds = deepState;
+  let h = "";
+  if(ds.auth === "email" || ds.auth === "both"){
+    h += "<label for='deepEmail" + who + "'>Test user " + who + " email</label><input id='deepEmail" + who + "' type='text' autocomplete='off' spellcheck='false' placeholder='test-" + who.toLowerCase() + "@example.com'>";
+    h += "<label for='deepPass" + who + "'>Test user " + who + " password</label><input id='deepPass" + who + "' type='password' autocomplete='off' placeholder='Throwaway password for that test account only'>";
+    h += "<p style='margin:6px 0 0'><button type='button' class='navbtn' data-deep='signin-" + who.toLowerCase() + "'>Sign in as test user " + who + "</button></p>";
+  }
+  if(ds.auth === "token" || ds.auth === "both"){
+    if(who === "A") h += tokenInstructionsHTML();
+    else h += "<p class='small'>Get B's token the same way: sign in to your app as test user B in another tab, and copy the access token from the browser storage.</p>";
+    h += "<label for='deepToken" + who + "'>Test user " + who + " sign-in token</label><input id='deepToken" + who + "' type='password' autocomplete='off' spellcheck='false' placeholder='Only a token for a TEST user'>";
+    h += "<p style='margin:6px 0 0'><button type='button' class='navbtn' data-deep='token-" + who.toLowerCase() + "'>Use this token for " + who + "</button></p>";
+  }
+  return h;
+}
+function deepSetupHTML(){
+  let ds = deepState;
+  if(!ds) return "";
+  if(!ds.setupOpen){
+    let bits = [];
+    if(ds.tables.length) bits.push("cross-user access and the signed-in surface across " + ds.tables.length + " confirmed table" + (ds.tables.length === 1 ? "" : "s"));
+    if(ds.stores.length) bits.push("cross-user files in " + ds.stores.length + " file store" + (ds.stores.length === 1 ? "" : "s"));
+    if(ds.settleCandidates.length) bits.push("settling " + ds.settleCandidates.length + " open answer" + (ds.settleCandidates.length === 1 ? "" : "s"));
+    if(!bits.length) return "<p class='deepUntested'>Quick Scan found nothing in this app that a sign-in can test further.</p>";
+    return "<p class='deepUntested'>Not tested yet: " + bits.join("; ") + ". Deep Scan starts from one test sign-in and asks for more only when a test needs it.</p><p style='margin:6px 0 0'><button type='button' class='navbtn' data-deep='open-setup'>Set up Deep Scan</button></p>";
+  }
+  if(ds.tokenA){
+    return "<div class='deepSigninOk'>Signed in as test user A. The signed-in tests below run from this sign-in. It stays in this page's memory only, is never sent to MakerGuard, and expires in about an hour.</div>";
+  }
+  if(ds.auth === "pending" || ds.auth === "detecting"){
+    return "<p class='small'>Reading your app's sign-in settings, so only the sign-in ways your app actually supports are offered&hellip;</p>";
+  }
+  let h = "<p style='margin:0 0 4px'><strong>Test user A signs in</strong></p>";
+  h += "<p class='small'>Use a throwaway test user you created in your own app. MakerGuard never creates accounts. The password goes only to your app's own sign-in, and the sign-in stays in this page's memory, never stored.</p>";
+  if(ds.authNote === "google") h += "<div class='deepAuthNote'>Your app signs people in with Google, so there is no email and password to use here. Use a sign-in token instead.</div>";
+  else if(ds.authNote === "noemail") h += "<div class='deepAuthNote'>Email sign-in is not switched on in your app, so there is no email and password to use here. Use a sign-in token instead.</div>";
+  else if(ds.auth === "both") h += "<div class='deepAuthNote'>Your app's sign-in settings could not be read, so both sign-in ways are offered. Use whichever your app supports.</div>";
+  h += deepSigninBlockHTML("A");
+  h += "<p class='small' id='deepAStatus'></p>";
+  return h;
+}
+function updateDeepSetup(){
+  let el = $("deepSetup");
+  if(el) el.innerHTML = deepSetupHTML();
+}
+function setRowPill(key, text, cls){
+  let ds = deepState;
+  if(!ds) return;
+  ds.rows[key].pill = {text: text, cls: cls};
+  let p = $("deepState-" + key);
+  if(p){ p.textContent = text; p.className = "atag deepState " + cls; }
+}
+function setRowState(key, state, pillText, pillCls){
+  if(deepState) deepState.rows[key].state = state;
+  setRowPill(key, pillText, pillCls);
+}
+function updateDeepRow(key){
+  let b = $("deepBody-" + key);
+  if(b) b.innerHTML = deepBodyHTML(key);
+}
+function wireDeep(){
+  ["cross", "surface", "files", "settle"].forEach(function(k){ updateDeepRow(k); });
+}
+function deepBodyHTML(key){
+  if(key === "cross") return crossBodyHTML();
+  if(key === "surface") return surfaceBodyHTML();
+  if(key === "files") return filesBodyHTML();
+  return settleBodyHTML();
+}
+function deepNoteHTML(n, expanded){
+  let tagCls = n.tag === "Issue" ? "tagIssue" : n.tag === "No issue found" ? "tagProtected" : "tagNc";
+  let cardCls = n.tag === "Issue" ? "stIssue" : n.tag === "No issue found" ? "stProtected" : "stNc";
+  let lines = n.lines || [];
+  let h = "<div class='deepNoteCard " + cardCls + "'><span class='atag " + tagCls + "'>" + esc(n.tag) + "</span>";
+  h += "<p class='deepNoteTitle'>" + esc(n.title) + "</p>";
+  if(expanded || lines.length <= 1){
+    // Full text, no collapse: the downloaded report takes this path, so
+    // print keeps every line exactly as before.
+    lines.forEach(function(l){ h += "<p class='deepNoteLine'>" + esc(l) + "</p>"; });
+  } else {
+    // On screen (Change 2 declutter): the verdict line stays visible,
+    // the explanation lines collapse behind the same Details pattern
+    // the Quick cards use, closed by default.
+    h += "<p class='deepNoteLine'>" + esc(lines[0]) + "</p>";
+    h += "<div class='deepDet' hidden>";
+    lines.slice(1).forEach(function(l){ h += "<p class='deepNoteLine'>" + esc(l) + "</p>"; });
+    h += "</div>";
+    h += "<button type='button' class='deepExp' aria-expanded='false'>Details \u25BE</button>";
+  }
+  if(n.linked) h += "<p class='linkedLine'>" + esc(n.linked) + "</p>";
+  h += "</div>";
+  return h;
+}
+function deepCardHTML(it){
+  let h = answerRowHTML(it);
+  let extra = "";
+  if(it.grade === "Proven") extra = "<p class='gradeLine'><strong>Grade: Proven.</strong> Test user B signed in too, and the row aimed at came out of B's own session, so its ownership is verified, not just asserted.</p>";
+  else if(it.grade === "Probe") extra = "<p class='gradeLine'><strong>Grade: Probe.</strong> This rests on your word that the row number belongs to test user B. If B signs in as well, the result upgrades to Proven.</p>";
+  if(extra){
+    let idx = h.lastIndexOf("</div></div>");
+    if(idx > -1) h = h.slice(0, idx) + extra + h.slice(idx);
+  }
+  return h;
+}
+function crossBodyHTML(){
+  let ds = deepState, r = ds.rows.cross;
+  if(r.state === "na"){
+    return "<p class='small'>Quick Scan confirmed no tables in this app, so there is nothing to aim a cross-user test at.</p>" + reasonLineHTML("Resource not discovered");
+  }
+  let h = "";
+  r.items.forEach(function(it){ h += deepCardHTML(it); });
+  Object.keys(r.autoNotes || {}).forEach(function(tn){
+    h += "<p class='small'><strong>" + esc(tn) + ":</strong> " + esc(r.autoNotes[tn]) + "</p>";
+  });
+  if(r.state === "running"){ h += "<p class='small'>Running the cross-user tests&hellip;</p>"; return h; }
+  if(r.state === "done"){
+    if(r.items.length) h += "<p class='small'>Every confirmed table has a cross-user verdict above.</p>";
+    return h;
+  }
+  if(!ds.tokenA){
+    h += "<p class='deepNeed'>Needs one thing: a test sign-in for user A, in the setup above. Nothing in this row can run until then.</p>";
+    return h;
+  }
+  if(ds.tokenB){
+    h += "<p class='small'>Test user B is signed in. The proven test can run for every table.</p>";
+    h += "<p style='margin:6px 0 0'><button type='button' class='navbtn' data-deep='run-proven'>Run the proven cross-user test</button></p>";
+    return h;
+  }
+  h += "<div class='deepRowAsk'><p style='margin:0 0 4px'><strong>Finish the proof, either way:</strong></p>";
+  h += "<p class='small'><strong>Way 1: test user B signs in too.</strong> The check then aims at rows from B's own session, and every verdict is graded Proven.</p>";
+  h += deepSigninBlockHTML("B");
+  h += "<p class='small' id='deepBStatus'></p>";
+  if(ds.rowAsks === null) ds.rowAsks = prioritiseRowAsks();
+  if(ds.rowAsks.length){
+    h += "<p class='small'><strong>Way 2: give B's row numbers.</strong> At most three tables are asked, the ones where the answer matters most first. These results are graded Probe: they rest on your word that each number is B's row in that table.</p>";
+    ds.rowAsks.forEach(function(name, i){
+      h += "<label for='deepRow" + i + "'>Row number in " + esc(name) + " that belongs to test user B</label><input id='deepRow" + i + "' type='text' autocomplete='off' spellcheck='false' value='" + esc(ds.rowIds[name] || "") + "'>";
+    });
+    h += "<p style='margin:6px 0 0'><button type='button' class='navbtn' data-deep='run-rows'>Run the exact-row test</button></p>";
+  }
+  h += "</div>";
+  return h;
+}
+function surfaceBodyHTML(){
+  let ds = deepState, r = ds.rows.surface;
+  if(r.state === "na"){
+    return "<p class='small'>No confirmed tables, so there is no signed-in surface to test.</p>" + reasonLineHTML("Resource not discovered");
+  }
+  let h = "";
+  r.items.forEach(function(n){ h += deepNoteHTML(n); });
+  if(r.state === "running"){ h += "<p class='small'>Reading every confirmed table as test user A&hellip;</p>"; return h; }
+  if(!ds.tokenA){
+    h += "<p class='deepNeed'>Needs one thing: a test sign-in for user A, in the setup above. This row then runs on its own: every confirmed table is read again as A, and anything A can read that a stranger could not is reported here.</p>";
+    return h;
+  }
+  if(r.state === "done") h += "<p class='small'>Every confirmed table was read as test user A. Tables a stranger could already read are in the Quick Scan report above and are not repeated here.</p>";
+  return h;
+}
+function filesBodyHTML(){
+  let ds = deepState, r = ds.rows.files;
+  if(!ds.stores.length){
+    return "<p class='small'>No file stores were found in Quick Scan.</p>";
+  }
+  let h = "";
+  r.items.forEach(function(n){ h += deepNoteHTML(n); });
+  if(r.state === "running"){ h += "<p class='small'>Trying to open the file as test user A&hellip;</p>"; return h; }
+  if(!ds.tokenA){
+    h += "<p class='deepNeed'>Needs one thing: a test sign-in for user A, in the setup above. Then one file name settles this row.</p>";
+    return h;
+  }
+  if(ds.stores.length > 1){
+    h += "<label for='deepStoreSel'>File store</label><select id='deepStoreSel' style='width:100%;height:48px;padding:0 12px;font-size:17px;border:1px solid #d2d2d7;border-radius:12px;background:#fff;margin:0 0 8px'>";
+    ds.stores.forEach(function(s){ h += "<option value='" + esc(s) + "'" + (ds.filesStore === s ? " selected" : "") + ">" + esc(s) + "</option>"; });
+    h += "</select>";
+  } else {
+    h += "<p class='small'>File store: <strong>" + esc(ds.stores[0]) + "</strong></p>";
+  }
+  h += "<label for='deepFileName'>Name of a real file in this store that belongs to the other test user</label><input id='deepFileName' type='text' autocomplete='off' spellcheck='false' placeholder='Exactly as it appears in Storage' value='" + esc(ds.filesName || "") + "'>";
+  h += "<p style='margin:6px 0 0'><button type='button' class='navbtn' data-deep='run-files'>Try to open it as user A</button></p>";
+  h += "<p class='small' id='deepFilesStatus'></p>";
+  return h;
+}
+function settleBodyHTML(){
+  let ds = deepState, r = ds.rows.settle;
+  if(r.state === "na"){
+    return "<p class='small'>Quick Scan left no open answers that a sign-in can settle.</p>";
+  }
+  let h = "";
+  r.items.forEach(function(n){ h += deepNoteHTML(n); });
+  if(r.state === "running"){ h += "<p class='small'>Re-testing the open answers as test user A&hellip;</p>"; return h; }
+  if(!ds.tokenA){
+    h += "<p class='deepNeed'>Needs one thing: a test sign-in for user A, in the setup above. The open answers (for " + ds.settleCandidates.map(function(c){ return c.table; }).join(", ") + ") are then re-tested as A, where a sign-in can change the answer.</p>";
+    return h;
+  }
+  if(r.state === "done") h += "<p class='small'>Each settled answer is linked to the Quick Scan snapshot above, never written into it.</p>";
+  return h;
+}
+function openDeepSetup(){
+  let ds = deepState;
+  if(!ds) return;
+  if(!ds.setupFired && !currentReportIsSample){
+    telEvent("deep_setup_opened", { path: currentRunPath });
+    ds.setupFired = true;
+  }
+  // If this run already settled cross-user items (the form flow above),
+  // its Deep events fire here, where the Deep section is opened on them,
+  // exactly once. The Quick path itself no longer fires them.
+  if(deepTotals().settled > 0){
+    deepFireStarted();
+    checkDeepCompleted();
+  }
+  if(ds.setupOpen) return;
+  ds.setupOpen = true;
+  updateDeepSetup();
+  if(!ds.authDone) deepDetectAuth();
+  if(ds.tokenA && !ds.autoRan){
+    ds.autoRan = true;
+    runDeepAfterSignIn();
+  }
+}
+async function deepDetectAuth(){
+  let ds = deepState;
+  if(!ds) return;
+  ds.auth = "detecting";
+  updateDeepSetup();
+  let method = "both", note = "";
+  try{
+    let resp = await fetchT(ds.base + "/auth/v1/settings", { method: "GET", headers: { "apikey": ds.anonKey } });
+    if(resp.ok){
+      let d = await resp.json();
+      let ext = (d && d.external) || {};
+      let emailOn = ext.email === true || (d && d.external_email_enabled === true) || (d && Array.isArray(d.providers) && d.providers.indexOf("email") > -1);
+      let googleOn = ext.google === true || (d && Array.isArray(d.providers) && d.providers.indexOf("google") > -1);
+      if(emailOn){ method = "email"; note = ""; }
+      else if(googleOn){ method = "token"; note = "google"; }
+      else { method = "token"; note = "noemail"; }
+    }
+  }catch(e){ method = "both"; }
+  if(deepState !== ds) return;
+  ds.auth = method; ds.authNote = note; ds.authDone = true;
+  updateDeepSetup();
+  updateDeepRow("cross");
+}
+async function deepSignInRequest(email, password){
+  let ds = deepState;
+  let resp = await fetchT(ds.base + "/auth/v1/token?grant_type=password", { method: "POST", headers: { "apikey": ds.anonKey, "Content-Type": "application/json" }, body: JSON.stringify({ email: email, password: password }) });
+  let data = null;
+  try{ data = await resp.json(); }catch(e){ data = null; }
+  if(resp.ok && data && data.access_token){
+    return { token: data.access_token, userId: (data.user && data.user.id) ? data.user.id : userIdFromToken(data.access_token) };
+  }
+  throw new Error("sign-in failed");
+}
+async function deepVerifyToken(tok){
+  let ds = deepState;
+  try{
+    let r = await fetchJson(ds.base + "/auth/v1/user", ds.anonKey, tok);
+    if(r.status === 200) return true;
+    if(r.status === 401 || r.status === 403) return false;
+    return true;
+  }catch(e){ return true; }
+}
+async function deepDoSignInA(){
+  let ds = deepState;
+  let st = $("deepAStatus");
+  let emailEl = $("deepEmailA"), passEl = $("deepPassA");
+  let email = emailEl ? emailEl.value.trim() : "";
+  let pass = passEl ? passEl.value : "";
+  if(!email || !pass){ if(st) st.textContent = "Fill in the test user A email and its throwaway password first."; return; }
+  if(st) st.textContent = "Signing in as test user A, directly to your app\u2026";
+  try{
+    let r = await deepSignInRequest(email, pass);
+    if(passEl) passEl.value = "";
+    ds.tokenA = r.token; ds.userIdA = r.userId;
+    onDeepSignedInA();
+  }catch(e){
+    if(passEl) passEl.value = "";
+    let st2 = $("deepAStatus");
+    if(st2) st2.textContent = "That sign-in did not work. Check the test user exists in your app, that it is confirmed, and that the password matches that test account.";
+  }
+}
+async function deepUseTokenA(){
+  let ds = deepState;
+  let st = $("deepAStatus");
+  let tokEl = $("deepTokenA");
+  let tok = tokEl ? tokEl.value.trim() : "";
+  if(!tok){ if(st) st.textContent = "Paste a test user's sign-in token first."; return; }
+  if(masterKeyProblem(tok)){ if(st) st.textContent = "STOP: that is a master (service) key, not a test user's sign-in token. It can read every row, so it would fake a leak on every table. Paste a test user's token instead."; return; }
+  if(st) st.textContent = "Checking the token against your app\u2026";
+  let ok = await deepVerifyToken(tok);
+  if(!ok){ if(st) st.textContent = "That token did not check out. It may have expired (tokens last about an hour) or belong to a different app. Sign in to your app again and copy a fresh one."; return; }
+  ds.tokenA = tok; ds.userIdA = userIdFromToken(tok);
+  onDeepSignedInA();
+}
+function onDeepSignedInA(){
+  let ds = deepState;
+  updateDeepSetup();
+  if(!ds.autoRan){
+    ds.autoRan = true;
+    runDeepAfterSignIn();
+  }
+}
+async function deepDoSignInB(){
+  let ds = deepState;
+  let st = $("deepBStatus");
+  let emailEl = $("deepEmailB"), passEl = $("deepPassB");
+  let email = emailEl ? emailEl.value.trim() : "";
+  let pass = passEl ? passEl.value : "";
+  if(!email || !pass){ if(st) st.textContent = "Fill in the test user B email and its throwaway password first."; return; }
+  if(st) st.textContent = "Signing in as test user B, directly to your app\u2026";
+  try{
+    let r = await deepSignInRequest(email, pass);
+    if(passEl) passEl.value = "";
+    ds.tokenB = r.token; ds.userIdB = r.userId;
+    runCrossProven();
+  }catch(e){
+    if(passEl) passEl.value = "";
+    let st2 = $("deepBStatus");
+    if(st2) st2.textContent = "That sign-in did not work. Check the test user exists in your app, that it is confirmed, and that the password matches.";
+  }
+}
+async function deepUseTokenB(){
+  let ds = deepState;
+  let st = $("deepBStatus");
+  let tokEl = $("deepTokenB");
+  let tok = tokEl ? tokEl.value.trim() : "";
+  if(!tok){ if(st) st.textContent = "Paste test user B's sign-in token first."; return; }
+  if(masterKeyProblem(tok)){ if(st) st.textContent = "STOP: that is a master (service) key, not a test user's sign-in token. Paste a test user's token instead."; return; }
+  let ok = await deepVerifyToken(tok);
+  if(!ok){ if(st) st.textContent = "That token did not check out. It may have expired, or belong to a different app. Copy a fresh one."; return; }
+  ds.tokenB = tok; ds.userIdB = userIdFromToken(tok);
+  runCrossProven();
+}
+async function ensureColumns(){
+  let ds = deepState;
+  if(ds.columns) return ds.columns;
+  try{
+    let fd = await discoverTables(ds.base, ds.anonKey, ds.tokenA);
+    ds.columns = fd.columns || {};
+  }catch(e){ ds.columns = {}; }
+  ds.tables.forEach(function(t){
+    let cols = ds.columns[t.name] || [];
+    t.ownerCol = OWNER_COLS.filter(function(c){ return cols.indexOf(c) > -1; })[0] || "";
+  });
+  return ds.columns;
+}
+function prioritiseRowAsks(){
+  let ds = deepState;
+  let settledNames = {};
+  ds.rows.cross.items.forEach(function(it){
+    if(it.status === "PROVEN" || it.status === "BLOCKED") settledNames[rawSubject(it).toLowerCase()] = 1;
+  });
+  let cand = ds.tables.filter(function(t){ return !settledNames[t.name.toLowerCase()]; });
+  function tier(t){
+    if(t.ownerCol) return 0;
+    if(/profile|account|document|user/i.test(t.name)) return 1;
+    if(t.quickStatus === "PROVEN") return 2;
+    return 3;
+  }
+  cand = cand.slice().sort(function(a, b){ return tier(a) - tier(b); });
+  return cand.slice(0, 3).map(function(t){ return t.name; });
+}
+function upsertCrossItem(it){
+  let ds = deepState;
+  let key = rawSubject(it).toLowerCase();
+  let ix = -1;
+  ds.rows.cross.items.forEach(function(x, i){ if(rawSubject(x).toLowerCase() === key) ix = i; });
+  if(ix > -1) ds.rows.cross.items[ix] = it;
+  else ds.rows.cross.items.push(it);
+}
+function crossSettledAll(){
+  let ds = deepState;
+  let covered = {};
+  ds.rows.cross.items.forEach(function(it){
+    if(it.status === "PROVEN" || it.status === "BLOCKED") covered[rawSubject(it).toLowerCase()] = 1;
+  });
+  return ds.tables.length > 0 && ds.tables.every(function(t){ return covered[t.name.toLowerCase()]; });
+}
+async function runDeepAfterSignIn(){
+  let ds = deepState;
+  if(!ds || !ds.tokenA) return;
+  deepFireStarted();
+  updateDeepRow("files");
+  await ensureColumns();
+  await runSurfaceBatch();
+  await runSettleBatch();
+  await runCrossAutoAttempt();
+  checkDeepCompleted();
+}
+async function runSurfaceBatch(){
+  let ds = deepState;
+  if(!ds.tables.length) return;
+  setRowState("surface", "running", "Running", "tagNc");
+  updateDeepRow("surface");
+  for(let i = 0; i < ds.tables.length; i++){
+    let t = ds.tables[i];
+    let note = null;
+    let oc = t.ownerCol || "";
+    let sel = oc ? ("id," + oc) : "id";
+    try{
+      let r = await fetchJson(ds.base + "/rest/v1/" + encodeURIComponent(t.name) + "?select=" + encodeURIComponent(sel) + "&limit=25", ds.anonKey, ds.tokenA);
+      if(r.status === 200 && Array.isArray(r.data)){
+        if(oc && ds.userIdA){
+          // With an owner column, A's own rows can be told apart from
+          // everyone else's, so the verdict never overclaims.
+          let others = r.data.filter(function(row){ return row && row[oc] && String(row[oc]) !== String(ds.userIdA); });
+          if(others.length > 0){
+            if(t.quickStatus !== "PROVEN"){
+              note = { tag: "Issue", title: t.name, settled: true, lines: ["Any signed-in account can read this table.", "Signed in as test user A, " + others.length + " row(s) came back whose owner is not A. Anyone who makes a free account in your app can reach other users' data this way. Only the id and owner columns were asked for, so no other personal values were touched."] };
+            } // else: already an issue in the Quick report; not repeated here.
+          } else if(r.data.length > 0){
+            note = { tag: "No issue found", title: t.name, settled: true, lines: ["Signed in as test user A, only A's own rows came back from this table (" + r.data.length + " row(s)). That is owner-only access working as it should."] };
+          } else {
+            note = { tag: "No issue found", title: t.name, settled: true, lines: ["Signed in as test user A, this table returned no rows. Either it is empty, or A can only ever see rows of their own and has none. Either way, nothing in it is open to every signed-in account."] };
+          }
+        } else if(r.data.length > 0){
+          if(t.quickStatus === "BLOCKED"){
+            note = { tag: "Issue", title: t.name, settled: true, lines: ["Any signed-in account can read this table.", "A stranger received nothing from this table in Quick Scan, but signed in as test user A, " + r.data.length + " row(s) came back. Anyone who makes a free account in your app can read this data. Only the id column was asked for. If some of those rows are A's own, that part is fine; the cross-user test settles whether A can reach rows that belong to someone else."] };
+          } else if(t.quickStatus === "PROVEN"){
+            // Already an issue in the Quick report; not repeated here.
+          } else {
+            note = { tag: "Could not verify", title: t.name, settled: false, lines: ["Signed-in accounts can read this table: signed in as test user A, rows came back. Quick Scan could not settle what a stranger receives from it, so on its own this does not prove a leak."] };
+          }
+        } else {
+          note = { tag: "No issue found", title: t.name, settled: true, lines: ["Signed in as test user A, this table returned no rows. Either it is empty, or A can only ever see rows of their own and has none. Either way, nothing in it is open to every signed-in account."] };
+        }
+      } else if(r.status === 401 || r.status === 403){
+        note = { tag: "No issue found", title: t.name, settled: true, lines: ["Your project refused the signed-in read for this table (" + r.status + "). Signed-in accounts are not let in either."] };
+      } else {
+        note = { tag: "Could not verify", title: t.name, settled: false, lines: ["The signed-in read did not return a clear answer (status: " + r.status + "). Treat this as unknown, not safe."] };
+      }
+    }catch(e){
+      note = { tag: "Could not verify", title: t.name, settled: false, lines: ["The signed-in read could not be completed from this browser. Treat this as unknown, not safe."] };
+    }
+    if(note){
+      let ix = ds.rows.surface.items.findIndex(function(n){ return n.title.toLowerCase() === t.name.toLowerCase(); });
+      if(ix > -1) ds.rows.surface.items[ix] = note;
+      else ds.rows.surface.items.push(note);
+      updateDeepRow("surface");
+    }
+  }
+  setRowState("surface", "done", "Done", "tagProtected");
+  updateDeepRow("surface");
+}
+async function runSettleBatch(){
+  let ds = deepState;
+  if(!ds.settleCandidates.length) return;
+  setRowState("settle", "running", "Running", "tagNc");
+  updateDeepRow("settle");
+  for(let i = 0; i < ds.settleCandidates.length; i++){
+    let c = ds.settleCandidates[i];
+    let note;
+    try{
+      let r = await fetchJson(ds.base + "/rest/v1/" + encodeURIComponent(c.table) + "?select=id&limit=5", ds.anonKey, ds.tokenA);
+      if(r.status === 200 && Array.isArray(r.data) && r.data.length > 0){
+        if(c.kind === "zero"){
+          note = { tag: "No issue found", title: c.table, settled: true, linked: linkedLineNow(), lines: ["Signed in as test user A, " + r.data.length + " row(s) came back from this table, so the table is not empty. The Quick Scan answer stands, with the reason now proven: a stranger receives nothing from this table because your protection stops them, not because there is nothing to take."] };
+        } else {
+          note = { tag: "Could not verify", title: c.table, settled: true, linked: linkedLineNow(), lines: ["Signed in as test user A, this table answered with rows, so it is real and signed-in accounts can read it. The stranger answer stays exactly as Quick Scan recorded it; Deep Scan verified the table, not the stranger's side of it."] };
+        }
+      } else if(r.status === 200 && Array.isArray(r.data)){
+        note = { tag: "Could not verify", title: c.table, settled: false, lines: ["Still open. Signed in as test user A, no rows came back either. An empty table and a table where A simply has no rows of their own look exactly the same from outside, so this answer stays unverified."] };
+      } else if(r.status === 401 || r.status === 403){
+        note = { tag: "No issue found", title: c.table, settled: true, linked: linkedLineNow(), lines: ["Signed-in accounts are refused from this table too (" + r.status + "). Whatever rows it holds, they are not open to strangers or to ordinary signed-in accounts."] };
+      } else {
+        note = { tag: "Could not verify", title: c.table, settled: false, lines: ["The re-test did not return a clear answer (status: " + r.status + "). This answer stays unverified."] };
+      }
+    }catch(e){
+      note = { tag: "Could not verify", title: c.table, settled: false, lines: ["The re-test could not be completed from this browser. This answer stays unverified."] };
+    }
+    let ix = ds.rows.settle.items.findIndex(function(n){ return n.title.toLowerCase() === c.table.toLowerCase(); });
+    if(ix > -1) ds.rows.settle.items[ix] = note;
+    else ds.rows.settle.items.push(note);
+    updateDeepRow("settle");
+  }
+  let anySettled = ds.rows.settle.items.some(function(n){ return n.settled; });
+  let allSettled = ds.settleCandidates.every(function(c){
+    return ds.rows.settle.items.some(function(n){ return n.title.toLowerCase() === c.table.toLowerCase() && n.settled; });
+  });
+  if(allSettled) setRowState("settle", "done", "Done", "tagProtected");
+  else if(anySettled) setRowState("settle", "done", "Done", "tagProtected");
+  updateDeepRow("settle");
+}
+async function runCrossAutoAttempt(){
+  let ds = deepState;
+  if(!ds.tables.length) return;
+  await ensureColumns();
+  for(let i = 0; i < ds.tables.length; i++){
+    let t = ds.tables[i];
+    if(!t.ownerCol) continue;
+    let already = ds.rows.cross.items.some(function(it){
+      return rawSubject(it).toLowerCase() === t.name.toLowerCase() && (it.status === "PROVEN" || it.status === "BLOCKED");
+    });
+    if(already) continue;
+    let auto = await probeCrossAuto(ds.base, ds.anonKey, ds.tokenA, ds.userIdA, t.name, ds.columns[t.name] || []);
+    if(auto.status === "PROVEN"){
+      auto.grade = "Probe";
+      upsertCrossItem(auto);
+    } else if(auto.status === "BLOCKED"){
+      // The automatic attempt is probe evidence only: it can flag an
+      // issue, it can never produce a Protected answer.
+      ds.rows.cross.autoNotes[t.name] = "The automatic look, signed in as test user A, saw none of anyone else's rows here. That is evidence, not a verdict: this attempt can never prove protection. The exact-row test or B's sign-in below settles it.";
+    }
+    updateDeepRow("cross");
+  }
+  if(ds.rowAsks === null) ds.rowAsks = prioritiseRowAsks();
+  if(crossSettledAll()) setRowState("cross", "done", "Done", "tagProtected");
+  updateDeepRow("cross");
+}
+async function runCrossProbe(){
+  let ds = deepState;
+  if(!ds || !ds.tokenA) return;
+  if(ds.rowAsks === null) ds.rowAsks = prioritiseRowAsks();
+  ds.rowAsks.forEach(function(name, i){
+    let el = $("deepRow" + i);
+    if(el && el.value.trim()) ds.rowIds[name] = el.value.trim();
+  });
+  deepFireStarted();
+  setRowState("cross", "running", "Running", "tagNc");
+  updateDeepRow("cross");
+  for(let i = 0; i < ds.rowAsks.length; i++){
+    let name = ds.rowAsks[i];
+    let id = ds.rowIds[name];
+    if(!id) continue;
+    let it = await probeCrossUser(ds.base, ds.anonKey, name, ds.tokenA, id);
+    it.grade = "Probe";
+    upsertCrossItem(it);
+    updateDeepRow("cross");
+  }
+  if(crossSettledAll()) setRowState("cross", "done", "Done", "tagProtected");
+  else setRowState("cross", "needs", "Needs one thing", "tagNc");
+  updateDeepRow("cross");
+  checkDeepCompleted();
+}
+async function runCrossProven(){
+  let ds = deepState;
+  if(!ds || !ds.tokenA || !ds.tokenB) return;
+  deepFireStarted();
+  setRowState("cross", "running", "Running", "tagNc");
+  updateDeepSetup();
+  updateDeepRow("cross");
+  for(let i = 0; i < ds.tables.length; i++){
+    let t = ds.tables[i];
+    let existing = ds.rows.cross.items.filter(function(it){ return rawSubject(it).toLowerCase() === t.name.toLowerCase() && (it.status === "PROVEN" || it.status === "BLOCKED"); })[0];
+    if(existing && existing.grade === "Proven") continue;
+    let br = null, bErr = false;
+    try{ br = await fetchJson(ds.base + "/rest/v1/" + encodeURIComponent(t.name) + "?select=id&limit=5", ds.anonKey, ds.tokenB); }
+    catch(e){ bErr = true; }
+    let it;
+    if(bErr || !br || br.status === 401 || br.status === 403){
+      it = { probe: "P2", title: "Cross-user row read: " + t.name, status: "NOT_CHECKED", level: "MEDIUM", grade: "Proven", reasonCode: "Authentication required", findings: ["Test user B's sign-in did not work for this request, for example a token that has expired. A test that could not run is not a pass, so this question stays unanswered."], fixes: ["Sign in as test user B again, then run the proven test again."] };
+    } else if(br.status === 200 && Array.isArray(br.data) && br.data.length > 0){
+      it = await probeCrossUser(ds.base, ds.anonKey, t.name, ds.tokenA, String(br.data[0].id));
+      it.grade = "Proven";
+    } else if(br.status === 200 && Array.isArray(br.data)){
+      it = { probe: "P2", title: "Cross-user row read: " + t.name, status: "NOT_CHECKED", level: "MEDIUM", grade: "Proven", reasonCode: "Ownership not established", findings: ["Test user B can see no rows in this table, so there is no row of B's here for A to aim at. Add one fake row owned by B in this table, or use the row-number way instead. Do not read this as safe."], fixes: ["Add a fake row owned by test user B in this table, then run again."] };
+    } else {
+      it = { probe: "P2", title: "Cross-user row read: " + t.name, status: "NOT_CHECKED", level: "MEDIUM", grade: "Proven", findings: ["Reading test user B's rows did not return a clear answer (status: " + (br ? br.status : "none") + "). Treat this as unknown, not safe."], fixes: ["Run the proven test again."] };
+    }
+    upsertCrossItem(it);
+    updateDeepRow("cross");
+  }
+  if(crossSettledAll()) setRowState("cross", "done", "Done", "tagProtected");
+  else setRowState("cross", "needs", "Needs one thing", "tagNc");
+  updateDeepRow("cross");
+  checkDeepCompleted();
+}
+async function runFilesTest(){
+  let ds = deepState;
+  if(!ds || !ds.tokenA || !ds.stores.length) return;
+  let nameEl = $("deepFileName");
+  let name = nameEl ? nameEl.value.trim() : "";
+  let store = ds.stores[0];
+  if(ds.stores.length > 1){
+    let sel = $("deepStoreSel");
+    if(sel && sel.value) store = sel.value;
+  }
+  let st = $("deepFilesStatus");
+  if(!name){ if(st) st.textContent = "Give the exact name of one real file in this store that belongs to the other test user."; return; }
+  ds.filesName = name; ds.filesStore = store;
+  deepFireStarted();
+  setRowState("files", "running", "Running", "tagNc");
+  updateDeepRow("files");
+  let url = ds.base + "/storage/v1/object/authenticated/" + encodeURIComponent(store) + "/" + name.split("/").map(function(seg){ return encodeURIComponent(seg); }).join("/");
+  addLog("GET " + ds.base + "/storage/v1/object/authenticated/" + store + "/" + name + " as test user A (token redacted)");
+  let note;
+  try{
+    let resp = await fetchT(url, { method: "GET", headers: { "apikey": ds.anonKey, "Authorization": "Bearer " + ds.tokenA, "Range": "bytes=0-0" } });
+    if(resp.status === 200 || resp.status === 206){
+      note = { tag: "Issue", title: store, settled: true, lines: ["Test user A opened the file " + name + " in this store, the file you named as the other test user's. Any signed-in user who knows or can guess a file's name could open it the same way. The file itself was not shown here. This rests on the file being the other user's, as you named it."] };
+    } else if(resp.status === 401 || resp.status === 403 || resp.status === 404){
+      note = { tag: "No issue found", title: store, settled: true, lines: ["Test user A could not open the file " + name + " in this store (your storage answered " + resp.status + "). To a signed-in user who does not own it, that file is not reachable this way. This rests on the file name being exactly right: a wrong name would get the same answer."] };
+    } else {
+      note = { tag: "Could not verify", title: store, settled: false, lines: ["The signed-in file request did not return a clear answer (status: " + resp.status + "). Treat this as unknown, not safe."] };
+    }
+  }catch(e){
+    note = { tag: "Could not verify", title: store, settled: false, lines: ["The signed-in file request could not be completed from this browser. Treat this as unknown, not safe."] };
+  }
+  ds.rows.files.items = [note];
+  setRowState("files", "done", "Done", "tagProtected");
+  updateDeepRow("files");
+  checkDeepCompleted();
+}
+function deepDownloadHTML(){
+  let ds = deepState;
+  if(!ds) return "";
+  if(deepTotals().settled === 0) return "";
+  let h = "<section class='deepSection'><p class='secttl' style='text-align:center'>Deep Scan</p>";
+  h += "<p class='small deepIntro'>Sign-in boundary results from this run: cross-user access, the signed-in surface, cross-user files, and the answers Quick Scan left ambiguous. These ran with a test user signed in, so they sit outside the Quick Scan snapshot above.</p>";
+  ds.rows.cross.items.forEach(function(it){
+    if(it.status === "PROVEN" || it.status === "BLOCKED") h += deepCardHTML(it);
+  });
+  ["surface", "files", "settle"].forEach(function(k){
+    ds.rows[k].items.forEach(function(n){ if(n.settled) h += deepNoteHTML(n, true); });
+  });
+  h += "</section>";
+  return h;
+}
+// One delegated handler for everything inside the locker: setup and run
+// buttons (data-deep), the expand toggles on settled cross-user cards,
+// and their fix-prompt copy buttons (wireCards only wires cards that
+// existed at render time).
+document.addEventListener("click", function(e){
+  if(!e.target || !e.target.closest) return;
+  let lk = e.target.closest("#deepLocker");
+  if(!lk) return;
+  let asum = e.target.closest(".asum");
+  if(asum){
+    let det = asum.parentElement.querySelector(".adet");
+    let exp = asum.querySelector(".aexp");
+    if(det){
+      let open = det.hidden;
+      det.hidden = !open;
+      asum.setAttribute("aria-expanded", open ? "true" : "false");
+      if(exp){ let cd2 = asum.closest(".acard"); exp.textContent = open ? "Hide \u25B4" : ((cd2 && cd2.getAttribute("data-fix") === "1") ? "Click for the fix \u25BE" : "Details \u25BE"); }
+    }
+    return;
+  }
+  let dx = e.target.closest(".deepExp");
+  if(dx){
+    let det = dx.parentElement.querySelector(".deepDet");
+    if(det){
+      let open = det.hidden;
+      det.hidden = !open;
+      dx.setAttribute("aria-expanded", open ? "true" : "false");
+      dx.textContent = open ? "Hide \u25B4" : "Details \u25BE";
+    }
+    return;
+  }
+  let cp = e.target.closest(".copyBtn");
+  if(cp){
+    let card = cp.closest(".acard");
+    if(!currentReportIsSample && card) telEvent("fix_copied", { probe: card.getAttribute("data-probe") || "", path: currentRunPath });
+    let box = cp.closest(".fixbox") ? cp.closest(".fixbox").querySelector(".promptBox") : null;
+    let txt = box ? box.textContent : "";
+    function doneCp(){ cp.textContent = "Copied"; setTimeout(function(){ cp.textContent = "Copy the prompt"; }, 1600); }
+    if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(txt).then(doneCp, doneCp); } else { doneCp(); }
+    return;
+  }
+  let b = e.target.closest("[data-deep]");
+  if(!b) return;
+  let act = b.getAttribute("data-deep");
+  if(act === "open-setup") openDeepSetup();
+  else if(act === "signin-a") deepDoSignInA();
+  else if(act === "token-a") deepUseTokenA();
+  else if(act === "signin-b") deepDoSignInB();
+  else if(act === "token-b") deepUseTokenB();
+  else if(act === "run-rows") runCrossProbe();
+  else if(act === "run-proven") runCrossProven();
+  else if(act === "run-files") runFilesTest();
+});
 
 function addLog(line){
   let el = $("probeLog");
@@ -505,28 +1909,31 @@ async function probeAnon(base, anonKey, table, token){
       item.status = "PROVEN"; item.level = "HIGH";
       item.findings.push("Anyone using only your public anon key could read " + r.data.length + " row(s) from this table. Only the id column was asked for, on purpose, so no names, emails, or other personal values were touched. A table answers a stranger like this for one of two reasons: row level security is off for it, or it is on but a policy lets everyone through. From outside, the two look the same.");
       item.fixes.push("Open this table in Supabase, under Table Editor, and match the step to what you see. If Row Level Security is off, turn it on. Then open the table's policies: if any policy lets everyone read, or lets any signed-in user read, delete it or narrow it. The read policy that should remain lets each user read only their own rows. Then run this check again.");
-    } else if(r.status === 200){
-      let settled = false;
+    } else if(r.status === 200 && Array.isArray(r.data)){
+      // D-6 settled stranger rule: a valid request reached a confirmed
+      // resource and the stranger received no data. That settles the
+      // stranger question, whatever the reason underneath.
+      let provenByComparison = false;
       if(token){
         try{
           let ra = await fetchJson(url, anonKey, token);
-          if(ra.status === 200 && Array.isArray(ra.data) && ra.data.length > 0){
-            item.status = "BLOCKED"; item.level = "LOW";
-            item.findings.push("A stranger asking for this table got nothing back, while your signed-in test user can see rows in it. So the table is not empty: your protection is what stopped the stranger.");
-            settled = true;
-          } else if(ra.status === 200){
-            item.status = "NOT_PROVEN"; item.level = "MEDIUM";
-            item.findings.push("Nothing came back when a stranger asked, and nothing came back for your signed-in test user either. The table may be empty, or its rules may be hiding every row from both of them. From outside those look the same, so this is not a guaranteed pass.");
-            item.fixes.push("If you know this table holds rows your test user should be able to see, check the table's policies in Supabase > Authentication > Policies.");
-            settled = true;
-          }
-        }catch(e){ settled = false; }
+          if(ra.status === 200 && Array.isArray(ra.data) && ra.data.length > 0) provenByComparison = true;
+        }catch(e){ provenByComparison = false; }
       }
-      if(!settled){
-        item.status = "NOT_PROVEN"; item.level = "MEDIUM";
-        item.findings.push("No rows came back when a stranger asked. That could mean your row level security is working, or it could mean the table is empty. From outside, there is no way to tell, so this table is not proven safe.");
-        item.fixes.push("Sign in as test user A and run again: if the test user can see rows while a stranger cannot, that proves the protection and this answer becomes Protected. A table you know is empty is also fine.");
+      item.status = "BLOCKED"; item.level = "LOW";
+      item.sumLine = "A stranger requested data and received none";
+      if(provenByComparison){
+        item.findings.push("A stranger asking for this table got nothing back, while your signed-in test user can see rows in it. So the table is not empty: your protection is what stopped the stranger.");
+      } else {
+        item.findings.push("A stranger asked this table for data and received none. The request reached the table and was answered, so no data from this table is exposed to a stranger.");
+        item.findings.push("Zero rows returned to an unauthenticated request. This does not establish whether the table is empty or access is restricted.");
       }
+    } else if(r.status === 200){
+      // Answered 200, but not the list of rows this check expects:
+      // an off-shape answer settles nothing either way.
+      item.status = "NOT_PROVEN"; item.level = "MEDIUM";
+      item.findings.push("The stranger's request was answered (status 200), but the answer was not the list of rows this check expects, so it could not be settled either way. Treat this as unknown, not safe.");
+      item.fixes.push("Run the check again. If this keeps happening, check the table's policies in Supabase > Authentication > Policies by hand.");
     } else if(r.status === 401 || r.status === 403){
       item.status = "BLOCKED"; item.level = "LOW";
       item.findings.push("Your project refused the stranger's request (401 or 403). That is exactly what a protected table does.");
@@ -542,13 +1949,23 @@ async function probeAnon(base, anonKey, table, token){
         item.status = "PROVEN"; item.level = "HIGH";
         item.findings.push("Anyone using only your public anon key could count " + counted + " row(s) in this table, which means row level security is letting a stranger see into it (this table has no id column, so the check counted rows instead of reading them). No row values were fetched.");
         item.fixes.push("Open this table in Supabase, under Table Editor, and match the step to what you see. If Row Level Security is off, turn it on. Then open the table's policies: if any policy lets everyone read, or lets any signed-in user read, delete it or narrow it. The read policy that should remain lets each user read only their own rows. Then run this check again.");
+      } else if(counted === 0){
+        // D-6 settled stranger rule, count shape: the count request is a
+        // valid request that reached a confirmed resource, and the
+        // stranger can see zero rows in it. That settles the stranger
+        // question the same way an empty list answer does; only an
+        // unparseable count (counted < 0) stays unverified.
+        item.status = "BLOCKED"; item.level = "LOW";
+        item.sumLine = "A stranger requested data and received none";
+        item.findings.push("A stranger asked this table for data and received none. This table has no id column, so the check counted the rows a stranger can see instead of reading them, and the count came back zero. The request reached the table and was answered, so no data from this table is exposed to a stranger.");
+        item.findings.push("Zero rows returned to an unauthenticated request. This does not establish whether the table is empty or access is restricted.");
       } else {
         item.status = "NOT_CHECKED"; item.level = "MEDIUM";
         item.findings.push("The stranger's request did not return a clear answer (status: 400, and counting rows did not settle it). This table may have no id column. Treat this as unknown, not safe.");
         item.fixes.push("Check the table name is correct, then run again. If the table has no id column, check its policies in Supabase > Authentication > Policies by hand.");
       }
     } else if(r.status === 404){
-      item.status = "NOT_CHECKED"; item.level = "MEDIUM";
+      item.status = "NOT_CHECKED"; item.level = "MEDIUM"; item.reasonCode = "Resource not confirmed";
       item.findings.push("No table answered to that name (404). The name may be spelled differently in your project, or this table may not be open to the data API at all. Treat this as unknown, not safe.");
       item.fixes.push("Check the name letter for letter in Supabase, under Table Editor, then run again.");
     } else {
@@ -558,7 +1975,13 @@ async function probeAnon(base, anonKey, table, token){
     }
   }catch(e){
     item.status = "NOT_CHECKED"; item.level = "MEDIUM";
-    item.findings.push("The stranger's request could not be completed from this browser. This can happen if Supabase blocks this origin, or if the address is wrong. Treat this as unknown, not safe.");
+    if(e && e.name === "AbortError"){
+      item.reasonCode = "Test timed out";
+      item.findings.push("The stranger's request timed out before your project answered, so nothing was settled either way. Treat this as unknown, not safe.");
+      item.fixes.push("Run the check again. If it keeps timing out, check that the project is awake and the address is right.");
+    } else {
+      item.findings.push("The stranger's request could not be completed from this browser. This can happen if Supabase blocks this origin, or if the address is wrong. Treat this as unknown, not safe.");
+    }
   }
   return item;
 }
@@ -566,6 +1989,7 @@ async function probeAnon(base, anonKey, table, token){
 async function probeCrossUser(base, anonKey, table, userToken, rowId){
   let item = {probe:"P2", title:"Cross-user row read: "+table, status:"NOT_CHECKED", level:"MEDIUM", findings:[], fixes:[]};
   if(!userToken || !rowId){
+    item.reasonCode = !userToken ? "Authentication required" : "Ownership not established";
     item.findings.push("Not checked: this needs test user A signed in and one row owned by test user B. Without both, cross-user access can neither be proven nor ruled out. Do not read this as safe.");
     item.fixes.push("Create two test users and one row owned by user B, sign in as user A, then run again.");
     return item;
@@ -614,6 +2038,7 @@ async function probeCrossUser(base, anonKey, table, userToken, rowId){
 async function probeBucket(base, bucket, objectName){
   let item = {probe:"P3", title:"Public storage bucket: "+bucket, status:"NOT_CHECKED", level:"MEDIUM", findings:[], fixes:[]};
   if(!bucket || !objectName){
+    item.reasonCode = "Setup invalid";
     item.findings.push("Not checked: this needs a bucket name and a file name. Without both, your files cannot be tested. Do not read this as safe.");
     item.fixes.push("Give a bucket and a file name you know exists, then run again.");
     return item;
@@ -642,6 +2067,12 @@ async function probeBucket(base, bucket, objectName){
         item.fixes.push("If your bucket's real name is different from the one above, run again with its exact name. A correct name with this answer means your files are not open to strangers.");
       } else if(/not found/i.test(emsg)){
         item.status = "PROVEN"; item.level = "HIGH";
+        // Configuration evidence only: the store is proven public, the
+        // named file was NOT fetched. configOnly makes the card carry
+        // this wording instead of the generic file-exposure story, which
+        // would claim this file opens for anyone. It does not.
+        item.configOnly = true;
+        item.sumLine = "This file store is public. The file named above was not found in it.";
         item.findings.push("Your bucket is public. That is proven, not guessed: Supabase gives this object not found answer only for a bucket it serves to strangers, while a private bucket answers as if it was not there at all, whatever file name is asked for. No file matched the name above, so this exact file was not the one fetched, but the bucket itself is open: anyone can fetch any file in it if they know or can guess its name.");
         item.fixes.push("Make the bucket private if its files are not meant for everyone, then run again. To test one exact file, use its name letter for letter as it appears in Supabase, under Storage.");
       } else {
@@ -671,8 +2102,9 @@ function scanForMasterKey(text){
   return "";
 }
 async function probeBundle(productUrl){
-  let item = {probe:"P4", title:"Key in client bundle", status:"NOT_CHECKED", level:"MEDIUM", findings:[], fixes:[]};
+  let item = {probe:"P4", title:"Key in client bundle", status:"NOT_CHECKED", level:"MEDIUM", findings:[], fixes:[], filesRead: 0};
   if(!productUrl){
+    item.reasonCode = "Resource not discovered";
     item.findings.push("Not checked: no homepage address was given, so your website code was not read. Do not read this as safe.");
     item.fixes.push("Give your homepage address, then run again.");
     return item;
@@ -681,6 +2113,7 @@ async function probeBundle(productUrl){
   try{
     let resp = await fetchT(clean, {method: "GET"});
     if(!resp.ok){
+      item.reasonCode = "Invalid endpoint";
       item.findings.push("Your homepage could not be fetched (status: " + resp.status + "). Treat this as unknown, not safe.");
       return item;
     }
@@ -711,6 +2144,7 @@ async function probeBundle(productUrl){
         if(hit) found.push([scripts[i], hit]);
       }catch(e){}
     }
+    item.filesRead = read + 1; bundleFilesRead = item.filesRead;
     if(found.length > 0){
       item.status = "PROVEN"; item.level = "HIGH";
       found.forEach(function(f){ item.findings.push("A master key pattern was found in one of your website's public code files: " + f[0] + ". Pattern type: " + f[1] + ". The key itself is never shown."); });
@@ -720,9 +2154,35 @@ async function probeBundle(productUrl){
       item.findings.push("No master key pattern showed up in your homepage or in the " + read + " of its code files that were read. That covers only those files, not your whole site.");
     }
   }catch(e){
-    item.status = "NOT_CHECKED"; item.level = "MEDIUM";
+    item.status = "NOT_CHECKED"; item.level = "MEDIUM"; item.filesRead = 0; bundleFilesRead = 0;
+    item.reasonCode = "Assets could not be read";
     item.findings.push("Your homepage or its code files could not be read from this browser. Browsers block reading another site's pages unless that site allows it, which is normal. This question stays unanswered, it is not a pass. To answer it yourself, search your built JavaScript files for a master key pattern, or open this check page from your own website, where the read is allowed.");
     item.fixes.push("Search your built JavaScript for sbp_ and service_role, and rotate anything you find. Or open this check page from your own website and run again.");
+  }
+  return item;
+}
+
+function p4FromReader(productUrl){
+  // When this run came through the front door, MakerGuard's reader has
+  // already read the app's code files server-side, which a browser is
+  // forbidden to do across sites. That evidence is stronger than the
+  // in-browser read, so the master-key item is built from it. The reader
+  // returns only whether a master key pattern was found and how many
+  // files it read; a key value is never returned.
+  let d = window.__mgReaderData;
+  if(!d || !productUrl) return null;
+  if(d.reachable === false) return null;
+  if(typeof d.master_key_found !== "boolean") return null;
+  try{ if(d.url && cleanUrl(d.url) !== cleanUrl(productUrl)) return null; }catch(e){ return null; }
+  let files = (typeof d.files_read === "number" && d.files_read > 0) ? d.files_read : 0;
+  let item = {probe:"P4", title:"Key in client bundle", status:"NOT_CHECKED", level:"MEDIUM", findings:[], fixes:[], filesRead: files};
+  if(d.master_key_found){
+    item.status = "PROVEN"; item.level = "HIGH";
+    item.findings.push("A master key pattern was found in your app's public code. MakerGuard's reader found it while reading the code files your visitors download" + (files ? " (" + files + " files read)" : "") + ". The key itself is never shown.");
+    item.fixes.push("Remove the key from your website code, rotate it immediately, and keep it only on a server. Never ship a master key in code a browser can download.");
+  } else {
+    item.status = "BLOCKED"; item.level = "LOW";
+    item.findings.push("MakerGuard's reader read your app's code files from outside, the way a visitor's browser gets them" + (files ? ": " + files + " files, your homepage and the code files it loads" : "") + ". No master key pattern showed up in them. That covers only those files, not your whole site.");
   }
   return item;
 }
@@ -763,6 +2223,7 @@ async function discoverTables(base, anonKey, bearer){
 async function probeCrossAuto(base, anonKey, token, myId, table, columns){
   let item = {probe:"P2", title:"Cross-user row read: "+table, status:"NOT_CHECKED", level:"MEDIUM", findings:[], fixes:[]};
   if(!token || !myId){
+    item.reasonCode = "Authentication required";
     item.findings.push("Not checked: sign in as test user A first. Signed in as you, the check can tell your rows from someone else's. Do not read this as safe.");
     item.fixes.push("Sign in as test user A in the form above, then run again.");
     return item;
@@ -770,6 +2231,7 @@ async function probeCrossAuto(base, anonKey, token, myId, table, columns){
   let ownerCols = ["user_id","owner_id","owner","created_by","author_id","profile_id","account_id","uid"];
   let ownerCol = ownerCols.filter(function(c){ return (columns || []).indexOf(c) > -1; })[0] || "";
   if(!ownerCol){
+    item.reasonCode = "Ownership not established";
     item.findings.push("Not proven either way: this table has no owner column the check recognises, so your rows cannot be told apart from someone else's automatically. Use the exact row below for this table: test user B's row number, with test user A signed in. Do not read this as safe.");
     item.fixes.push("Use the exact row for this table: a row owned by test user B, with test user A signed in.");
     return item;
@@ -835,30 +2297,45 @@ $("signInBtn").addEventListener("click", async function(){
 });
 
 $("runBtn").addEventListener("click", async function(){
+  let autoRun = !!window.__mgAutoRun;
+  window.__mgAutoRun = false;
+  let runPath = autoRun ? "link" : "manual";
+  currentRunPath = runPath;
   telEvent("started", { fields: countFilled() });
+  if(!autoRun) telEvent("manual_submitted", {});
   clearError();
   let base = cleanUrl($("supabaseUrl").value);
   let anonKey = $("anonKey").value.trim();
   let table = $("tableName").value.trim();
   let tableNamesIn = table ? table.split(/[,\n]/).map(function(s){ return s.trim(); }).filter(function(s, ix, arr){ return s.length && arr.indexOf(s) === ix; }) : [];
-  if(!base || !anonKey){ showError("Please fill in your Supabase URL, anon key, and at least one table name."); return; }
-  if(masterKeyProblem(anonKey)){ showError("STOP: That looks like a master (service) key, not the public anon key. A master key bypasses all protection, so this check refuses it. Paste the anon / publishable key instead."); return; }
-  if(/service/i.test(anonKey)){ showError("STOP: That key looks like it may be a service key. Only paste an anon / publishable key."); return; }
+  if(!base || !anonKey){ telEvent("run_failed", { stage: "quick", reason: "invalid_input", path: runPath }); showError("Please fill in your Supabase URL, anon key, and at least one table name."); return; }
+  if(masterKeyProblem(anonKey)){ telEvent("run_failed", { stage: "quick", reason: "master_key_refused", path: runPath }); showError("STOP: That looks like a master (service) key, not the public anon key. A master key bypasses all protection, so this check refuses it. Paste the anon / publishable key instead."); return; }
+  if(/service/i.test(anonKey)){ telEvent("run_failed", { stage: "quick", reason: "master_key_refused", path: runPath }); showError("STOP: That key looks like it may be a service key. Only paste an anon / publishable key."); return; }
   $("runBtn").disabled = true;
   $("probeLog").textContent = "";
-  telEvent("ran", {});
   $("progress").textContent = "Running the check. Read only, talking only to your Supabase.";
   let host = "";
   try{ host = new URL(base).host; }catch(e){ host = base; }
   let results = [];
   let methodEl = document.querySelector('input[name="signinMethod"]:checked');
   let effectiveToken = (methodEl && methodEl.value === "token") ? $("userToken").value.trim() : memoryToken;
-  if(methodEl && methodEl.value === "token" && masterKeyProblem(effectiveToken)){ showError("STOP: The token you pasted is a master (service) key, not a test user's sign-in token. It can read every row, so it would fake a leak on every table. Paste a test user's token, or use the email and password option instead."); $("runBtn").disabled = false; $("progress").textContent = ""; return; }
+  if(methodEl && methodEl.value === "token" && masterKeyProblem(effectiveToken)){ telEvent("run_failed", { stage: "quick", reason: "master_key_refused", path: runPath }); showError("STOP: The token you pasted is a master (service) key, not a test user's sign-in token. It can read every row, so it would fake a leak on every table. Paste a test user's token, or use the email and password option instead."); $("runBtn").disabled = false; $("progress").textContent = ""; return; }
+  // Validation has passed and the first probe is about to run: only now
+  // do the "ran" and "quick_started" events fire.
+  telEvent("ran", {});
+  telEvent("quick_started", { path: runPath });
+  // The Deep Scan locker works from this run's backend details. They stay
+  // in this page's memory only, like the test sign-in token.
+  lastBase = base; lastAnonKey = anonKey;
   if(tableNamesIn.length){
     $("progress").textContent = "Question 1 of 4: can a stranger read your tables?";
     let rowIdVal = $("rowId").value.trim();
+    let codeNames = [];
+    try{ let cf = window.__mgCodeTables; if(cf && typeof cf.value === "string" && cf.value === table && Array.isArray(cf.names)) codeNames = cf.names; }catch(e){}
     for(let tix = 0; tix < tableNamesIn.length; tix++){
-      results.push(await probeAnon(base, anonKey, tableNamesIn[tix], effectiveToken));
+      let anonItem = await probeAnon(base, anonKey, tableNamesIn[tix], effectiveToken);
+      anonItem.origin = codeNames.indexOf(tableNamesIn[tix]) > -1 ? "code" : "builder";
+      results.push(anonItem);
     }
     $("progress").textContent = "Question 2 of 4: can a signed-in user read another user's data?";
     let rowParts = rowIdVal ? rowIdVal.split(",").map(function(s){ return s.trim(); }) : [];
@@ -907,6 +2384,7 @@ $("runBtn").addEventListener("click", async function(){
       }catch(e){}
     }
     if(!tableNames.length && !specRead && !authSpecRead){
+      telEvent("run_failed", { stage: "quick", reason: "network", path: runPath });
       showError("The list of tables could not be read from that address and key. Two possible reasons: the address and key do not match this project, or Supabase's new rule is at work, it no longer shows the table list to a public key, to protect your database structure. Either way, name your tables in the fields at the top of this page, several at once separated by commas, and run again. The names are listed in Supabase, under Table Editor.");
       $("progress").textContent = "";
       $("runBtn").disabled = false;
@@ -925,7 +2403,9 @@ $("runBtn").addEventListener("click", async function(){
     for(let ti = 0; ti < capped.length; ti++){
       let tn = capped[ti];
       $("progress").textContent = "Checking table " + (ti + 1) + " of " + capped.length + ": " + tn;
-      results.push(await probeAnon(base, anonKey, tn, effectiveToken));
+      let anonItem2 = await probeAnon(base, anonKey, tn, effectiveToken);
+      anonItem2.origin = "code";
+      results.push(anonItem2);
       if(effectiveToken){
         results.push(await probeCrossAuto(base, anonKey, effectiveToken, myId, tn, columnsByTable[tn] || []));
       } else if(!crossMissingPushed){
@@ -942,7 +2422,10 @@ $("runBtn").addEventListener("click", async function(){
   $("progress").textContent = "Question 3 of 4: can anyone open your files without logging in?";
   results.push(await probeBucket(base, $("bucketName").value.trim(), $("objectName").value.trim()));
   $("progress").textContent = "Question 4 of 4: is a master key hiding in your website code?";
-  results.push(await probeBundle($("productUrl").value.trim()));
+  let p4url = $("productUrl").value.trim();
+  let p4reader = p4FromReader(p4url);
+  if(p4reader){ bundleFilesRead = p4reader.filesRead; results.push(p4reader); }
+  else results.push(await probeBundle(p4url));
   let overall = "LOW";
   results.forEach(function(it){ overall = maxLevel(overall, it.level); });
   render(results, overall, host, false);
@@ -953,17 +2436,20 @@ $("runBtn").addEventListener("click", async function(){
 
 $("sampleBtn").addEventListener("click", function(){
   clearError();
+  bundleFilesRead = 12;
   let results = [
     {probe:"P1", title:"Anon table read: profiles", status:"PROVEN", level:"HIGH", findings:["Sample: anyone using only the public anon key could read rows from this table. Only the id column was asked for, so no personal values were touched."], fixes:["Turn on Row Level Security for this table in Supabase and add a policy so users read only their own rows. Then run this check again."]},
-    {probe:"P2", title:"Cross-user row read: profiles", status:"PROVEN", level:"HIGH", findings:["Sample: test user A could read a row owned by test user B."], fixes:["Add a policy that checks the row owner against the signed-in user. Then run again with the same test users."]},
-    {probe:"P1", title:"Anon table read: orders", status:"BLOCKED", level:"LOW", findings:["Sample: your project refused the stranger's request."], fixes:[]},
-    {probe:"P1", title:"Anon table read: invoices", status:"NOT_PROVEN", level:"MEDIUM", findings:["Sample: no rows came back when a stranger asked."], fixes:[]},
+    {probe:"P1", title:"Anon table read: orders", status:"BLOCKED", level:"LOW", findings:["Sample: your project refused the stranger's request (401 or 403). That is exactly what a protected table does."], fixes:[]},
+    {probe:"P1", title:"Anon table read: invoices", status:"BLOCKED", level:"LOW", sumLine:"A stranger requested data and received none", findings:["Sample: a stranger asked this table for data and received none. Zero rows returned to an unauthenticated request. This does not establish whether the table is empty or access is restricted."], fixes:[]},
     {probe:"P3", title:"Public storage bucket: avatars", status:"BLOCKED", level:"LOW", findings:["Sample: your storage refused the no-login request."], fixes:[]},
-    {probe:"P4", title:"Key in client bundle", status:"NOT_CHECKED", level:"MEDIUM", findings:["Sample: your homepage code could not be read from this browser, so this question is unanswered. Browsers often block this read, which is normal."], fixes:["Search your built JavaScript for a master key pattern, or open this check page from your own website and run again."]}
+    {probe:"P1", title:"Anon table read: ghost_table", status:"NOT_CHECKED", level:"MEDIUM", origin:"builder", reasonCode:"Resource not confirmed", findings:["Sample: No table answered to that name (404). The name may be spelled differently in your project, or this table may not be open to the data API at all. Treat this as unknown, not safe."], fixes:["Check the name letter for letter in Supabase, under Table Editor, then run again."]},
+    {probe:"P1", title:"Anon table read: chunk_limit", status:"NOT_CHECKED", level:"MEDIUM", origin:"code", reasonCode:"Resource not confirmed", findings:["Sample: a name found in the app's code did not answer as a table (404)."], fixes:[]},
+    {probe:"P4", title:"Key in client bundle", status:"NOT_CHECKED", level:"MEDIUM", reasonCode:"Assets could not be read", findings:["Sample: your homepage code could not be read from this browser, so this question is unanswered. Browsers often block this read, which is normal."], fixes:["Search your built JavaScript for a master key pattern, or open this check page from your own website and run again."], filesRead: 12}
   ];
   $("probeLog").textContent = "Sample only: nothing was checked and no request was made.";
   $("logWrap").classList.remove("hidden");
-  render(results, "HIGH", "sample.example (fake data only)", true);
+  render(results, "HIGH", "sample.example (fake data only)", true, {filesRead: 12, tablesTested: 4, storesFound: 1});
+  telEvent("sample_viewed", {});
   $("progress").textContent = "Sample report only. No real product was checked.";
 });
 
@@ -973,24 +2459,115 @@ $("emailBtn").addEventListener("click", function(){
   if (!TELEMETRY_ENDPOINT) { $("emailStatus").textContent = "Reminders are not switched on yet."; return; }
   try {
     fetch(TELEMETRY_ENDPOINT, { method: "POST", mode: "no-cors", headers: { "Content-Type": "text/plain" }, body: JSON.stringify({ type: "email", email: em, day: new Date().toISOString().slice(0, 10) }) }).catch(function () {});
+    telEvent("reminder_submitted", {});
     $("emailStatus").textContent = "Done. One reminder, in 7 days.";
     $("emailBtn").disabled = true;
   } catch (e) { $("emailStatus").textContent = "That did not send. Try once more."; }
 });
+/* ---------- Founder feedback (2026-11-04) ----------
+   One small form in three spots: right under the fix inside an issue
+   card (spot fix_card), at the end of the report (report_end), and in
+   a popup from the Feedback button at the end of the page
+   (page_popup). Nothing blocks the scan or the fix; the email field
+   is always optional. Telemetry records the spot at each step:
+   feedback_opened (popup only), feedback_started (first touch of the
+   email field), feedback_submitted, each with the spot in the stage
+   field. The email itself travels only in the separate email send,
+   only when Send is pressed, with the spot as its fifth field, and
+   never joins the event rows. What someone types but never sends
+   never leaves their browser. Every button reads Let's connect.
+   Once an email is sent, the other spots on that report go away and
+   no form on the page asks again during this visit. */
+let fbConnected = false;
+function fbFormHTML(spot){
+  return "<div class='fbCard' data-fbform>" +
+  "<p class='fbTitle'>From the founder</p>" +
+  "<p><strong>Hi, I\u2019m Swati.</strong> I built MakerGuard on my own, and I keep it free, because an app built by one person deserves to be as secure as one built by a team of ten.</p>" +
+  "<p>Tried it? I\u2019d love to connect personally and hear what worked, what didn\u2019t, or what I should build next.</p>" +
+  "<div class='fbRow'><input class='fbEmail' type='email' autocomplete='email' placeholder='you@example.com' aria-label='Your email, only if you would like to chat'><button class='fbSend' type='button' data-spot='" + spot + "'>Let\u2019s connect.</button></div>" +
+  "<p class='fbStatus small' aria-live='polite'></p>" +
+  "<p class='small' style='margin:6px 0 0'>Optional. Only for our 1:1 chat. Nothing else. Because I hate it too.</p></div>";
+}
+function fbMiniHTML(){
+  return "<div class='fbMini' data-fbform><p><strong>Did this fix help?</strong> I\u2019m Swati, the founder. I\u2019d love to connect personally and hear what worked, and what didn\u2019t.</p>" +
+  "<div class='fbRow'><input class='fbEmail' type='email' autocomplete='email' placeholder='you@example.com' aria-label='Your email, only if you would like to chat'><button class='fbSend' type='button' data-spot='fix_card'>Let\u2019s connect.</button></div>" +
+  "<p class='small' style='margin:6px 0 0'>Optional. Only for our 1:1 chat. Nothing else. Because I hate it too.</p>" +
+  "<p class='fbStatus small' aria-live='polite'></p></div>";
+}
+function openFb(){
+  let ov = $("fbOverlay"); if(!ov || !ov.hidden) return;
+  ov.hidden = false;
+  document.documentElement.style.overflow = "hidden";
+  document.body.style.overflow = "hidden";
+  telEvent("feedback_opened", { stage: "page_popup" });
+  let inp = ov.querySelector(".fbEmail"); if(inp) inp.focus();
+}
+function closeFb(){
+  let ov = $("fbOverlay"); if(!ov || ov.hidden) return;
+  ov.hidden = true;
+  if(!popOpen){ document.documentElement.style.overflow = ""; document.body.style.overflow = ""; }
+  let b = $("fbOpenBtn"); if(b) b.focus();
+}
+function sendFb(btn){
+  let form = btn.closest("[data-fbform]"); if(!form) return;
+  let input = form.querySelector(".fbEmail");
+  let status = form.querySelector(".fbStatus");
+  let em = input ? input.value.trim() : "";
+  if(!em || em.indexOf("@") < 0 || em.indexOf(".") < 0){ if(status) status.textContent = "That email does not look complete yet."; return; }
+  if(!TELEMETRY_ENDPOINT){ if(status) status.textContent = "Feedback is not switched on yet."; return; }
+  let spot = btn.getAttribute("data-spot") || "";
+  try {
+    fetch(TELEMETRY_ENDPOINT, { method: "POST", mode: "no-cors", headers: { "Content-Type": "text/plain" }, body: JSON.stringify({ type: "email", email: em, day: new Date().toISOString().slice(0, 10), spot: spot, kind: "feedback" }) }).catch(function () {});
+    telEvent("feedback_submitted", { stage: spot });
+    if(status) status.textContent = "Thank you. That came straight to me, and I will write back.";
+    btn.disabled = true; if(input) input.disabled = true;
+    fbConnected = true;
+    document.querySelectorAll("[data-fbform]").forEach(function(f){
+      if(f === form) return;
+      if(f.closest("#results")){ f.remove(); return; }
+      let b2 = f.querySelector(".fbSend"); if(b2) b2.disabled = true;
+      let i2 = f.querySelector(".fbEmail"); if(i2) i2.disabled = true;
+      let s2 = f.querySelector(".fbStatus"); if(s2) s2.textContent = "Thank you. You already connected here.";
+    });
+  } catch (e) { if(status) status.textContent = "That did not send. Try once more."; }
+}
+document.addEventListener("click", function(e){
+  if(!e.target.closest) return;
+  if(e.target.closest("#fbOpenBtn")){ openFb(); return; }
+  if(e.target.closest("#fbCloseBtn")){ closeFb(); return; }
+  if(e.target === $("fbOverlay")){ closeFb(); return; }
+  let s = e.target.closest(".fbSend");
+  if(s) sendFb(s);
+});
+document.addEventListener("focusin", function(e){
+  if(!e.target.classList || !e.target.classList.contains("fbEmail")) return;
+  let f = e.target.closest("[data-fbform]");
+  if(f && !f.getAttribute("data-started")){
+    f.setAttribute("data-started", "1");
+    let b = f.querySelector(".fbSend");
+    telEvent("feedback_started", { stage: b ? (b.getAttribute("data-spot") || "") : "" });
+  }
+});
+document.addEventListener("keydown", function(e){
+  if((e.key === "Escape" || e.key === "Esc") && $("fbOverlay") && !$("fbOverlay").hidden) closeFb();
+});
+
 $("clearBtn").addEventListener("click", function(){
+  if(popOpen) closeReport();
   ["supabaseUrl","anonKey","tableName","testEmail","testPassword","userToken","rowId","bucketName","objectName","productUrl"].forEach(function(id){ $(id).value = ""; });
   $("results").innerHTML = ""; $("probeLog").textContent = ""; $("logWrap").classList.add("hidden");
-  $("progress").textContent = ""; lastResults = null; lastOverall = null; lastHost = ""; lastRunLabel = ""; memoryToken = ""; memoryTokenEmail = ""; $("signInStatus").textContent = "Not signed in. The cross-user question needs a sign-in, or a pasted test token, before it can be answered.";
-  $("downloadBtn").disabled = true; clearError();
+  $("progress").textContent = ""; lastResults = null; lastOverall = null; lastHost = ""; lastRunLabel = ""; lastScope = null; bundleFilesRead = 0; memoryToken = ""; memoryTokenEmail = ""; lastBase = ""; lastAnonKey = ""; deepState = null; $("signInStatus").textContent = "Not signed in. The cross-user question needs a sign-in, or a pasted test token, before it can be answered.";
+  $("downloadBtn").disabled = true; $("viewReportBtn").hidden = true; clearError();
   let mc = $("methodCreds"); if(mc){ mc.checked = true; applyMethod(); }
 });
 
-$("downloadBtn").addEventListener("click", function(){
+function downloadReport(){
   telEvent("acted", {});
+  if(!currentReportIsSample) telEvent("downloaded", { path: currentRunPath });
   if(!lastResults) return;
-  let reportCss = "body{font-family:-apple-system,system-ui,sans-serif;font-size:17px;font-weight:400;line-height:1.47;max-width:640px;margin:40px auto;padding:0 20px;color:#1d1d1f}strong{font-weight:600}.brandline{text-align:center;font-weight:600;margin:0 0 10px}.verdict{font-size:28px;font-weight:600;letter-spacing:-0.015em;text-align:center;margin:24px 0 6px}.verdictsub{text-align:center;color:#6e6e73;margin:0}.hostline,.issueno,.restline,.small{font-size:13px}.hostline{color:#86868b;text-align:center}.issueno{font-weight:600;color:#6e6e73}.issuePage{display:none}.issuePage.active{display:block}.issuePage h3{font-size:28px;font-weight:600;letter-spacing:-0.015em;margin:2px 0}.dot{color:#d70015}.dotG{color:#1a7f37}.dotGrey{color:#86868b}.stWord{font-weight:600}.story{margin:10px 0 4px}.atrisk{color:#424245}.fixbox{background:#f5f5f7;border-radius:16px;padding:6px 20px 12px;margin:20px 0}.lbl{font-weight:600;margin:10px 0 2px}ol.steps{margin:6px 0 6px 20px;padding:0}ol.steps li{margin:6px 0}.navRow{display:flex;justify-content:space-between;align-items:center}.navbtn{height:44px;padding:0 20px;border-radius:980px;border:1px solid #1d1d1f;background:#fff;font-size:17px;cursor:pointer}.navbtn:disabled{opacity:.25}.dots{font-size:13px;color:#86868b;letter-spacing:4px}.restline{text-align:center;color:#6e6e73}.rowline{padding:10px 4px;border-top:1px solid #e5e5e5}.qsec{margin:22px 0 0;background:#f5f5f7;border-radius:18px;padding:22px 18px 12px}.qhead{font-weight:600;margin:0 0 8px}.arow{padding:10px 2px;border-top:1px solid #e3e3e7}.qsec .fixbox{background:#ffffff}.acard{background:#fff;border:1px solid #e3e3e7;border-radius:14px;padding:12px 14px;margin:10px 0}.asum{display:flex;justify-content:space-between;align-items:flex-start;width:100%;background:none;border:0;padding:0;font:inherit;color:inherit;text-align:left;cursor:pointer}.aexp{font-size:13px;color:#0066cc;white-space:nowrap;margin-left:10px;padding-top:2px}.adet{border-top:1px solid #eee;margin-top:10px;padding-top:10px}.acard .fixbox{background:#f5f5f7}.small{color:#6e6e73}.sampleNotice{background:#f5f5f7;border-radius:12px;padding:12px;text-align:center}details.proof summary,summary{font-size:13px;color:#0066cc;cursor:pointer}";
-  let navJs = "<script>document.addEventListener('click',function(e){var b=e.target.closest('.asum');if(!b)return;var d=b.parentElement.querySelector('.adet');var x=b.querySelector('.aexp');var o=d.hidden;d.hidden=!o;b.setAttribute('aria-expanded',o?'true':'false');if(x)x.textContent=o?'Hide \u25B4':'Details \u25BE';});<\/script>";
-  let doc = "<!doctype html><html><head><meta charset='utf-8'><title>MakerGuard report</title><style>" + reportCss + "</style></head><body>" + reportBodyHTML(lastResults, lastOverall, lastHost, false) + navJs + "</body></html>";
+  let reportCss = "body{font-family:'IBM Plex Sans',-apple-system,system-ui,sans-serif;font-size:17px;font-weight:400;line-height:1.47;max-width:640px;margin:40px auto;padding:0 20px;color:#1d1d1f}strong{font-weight:600}.brandline{text-align:center;font-weight:600;margin:0 0 10px}.verdict{font-size:28px;font-weight:600;letter-spacing:-0.015em;text-align:center;margin:24px 0 6px}.verdictsub{text-align:center;color:#6e6e73;margin:0}.hostline,.issueno,.restline,.small{font-size:13px}.hostline{color:#86868b;text-align:center}.issueno{font-weight:600;color:#6e6e73}.issuePage{display:none}.issuePage.active{display:block}.issuePage h3{font-size:28px;font-weight:600;letter-spacing:-0.015em;margin:2px 0}.dot{color:#d70015}.dotG{color:#1a7f37}.dotGrey{color:#86868b}.stWord{font-weight:600}.story{margin:10px 0 4px}.atrisk{color:#424245}.fixbox{background:#f5f5f7;border-radius:16px;padding:6px 20px 12px;margin:20px 0}.lbl{font-weight:600;margin:10px 0 2px}ol.steps{margin:6px 0 6px 20px;padding:0}ol.steps li{margin:6px 0}.navRow{display:flex;justify-content:space-between;align-items:center}.navbtn{height:44px;padding:0 20px;border-radius:980px;border:1px solid #1d1d1f;background:#fff;font-size:17px;cursor:pointer}.navbtn:disabled{opacity:.25}.dots{font-size:13px;color:#86868b;letter-spacing:4px}.restline{text-align:center;color:#6e6e73}.rowline{padding:10px 4px;border-top:1px solid #e5e5e5}.qsec{margin:22px 0 0;background:#f5f5f7;border-radius:18px;padding:22px 18px 12px}.qhead{font-weight:600;margin:0 0 8px}.arow{padding:10px 2px;border-top:1px solid #e3e3e7}.qsec .fixbox{background:#ffffff}.acard{background:#fff;border:1px solid #e3e3e7;border-radius:14px;padding:12px 14px;margin:10px 0}.asum{display:flex;justify-content:space-between;align-items:flex-start;width:100%;background:none;border:0;padding:0;font:inherit;color:inherit;text-align:left;cursor:pointer}.aexp{font-size:13px;color:#0066cc;white-space:nowrap;margin-left:10px;padding-top:2px}.adet{border-top:1px solid #eee;margin-top:10px;padding-top:10px}.acard .fixbox{background:#f5f5f7}.promptBox{background:#fff;border:1px solid #e3e3e7;border-radius:12px;padding:12px 14px;font-size:13px;line-height:1.55;white-space:pre-wrap}.nudgeCard{display:none}.small{color:#6e6e73}.sampleNotice{background:#f5f5f7;border-radius:12px;padding:12px;text-align:center}details.proof summary,summary{font-size:13px;color:#0066cc;cursor:pointer}";
+  let navJs = "<script>document.addEventListener('click',function(e){var b=e.target.closest('.asum');if(!b)return;var d=b.parentElement.querySelector('.adet');var x=b.querySelector('.aexp');var o=d.hidden;d.hidden=!o;b.setAttribute('aria-expanded',o?'true':'false');var c=b.closest('.acard');if(x)x.textContent=o?'Hide \u25B4':(c&&c.getAttribute('data-fix')==='1'?'Click for the fix \u25BE':'Details \u25BE');});<\/script>";
+  let doc = "<!doctype html><html><head><meta charset='utf-8'><title>MakerGuard report</title><style>" + reportCss + ".reportTitle{font-size:26px;font-weight:700;letter-spacing:-0.02em;text-align:center;margin:6px 0 4px}.quickSnapshot{margin:0}.scopeLine{text-align:center;color:#6e6e73;font-size:13px;line-height:1.5;margin:10px auto 4px}.metaLine{text-align:center;color:#6e6e73;font-size:13px;line-height:1.55;margin:10px auto 4px}.band{margin:22px 0 0;background:#F0EEFA;border-radius:12px;padding:22px 18px 12px}.bandHead{font-weight:600;margin:0 0 8px}.bandCount{font-weight:400;color:#6e6e73;font-size:13px}.reasonTag{display:inline-block;font-size:13px;font-weight:600;background:#FBF0D9;color:#7A5410;border-radius:980px;padding:2px 10px;margin-top:6px}.reasonLine{display:block;font-size:13px;color:#7A5410;margin-top:4px}.secttl{font-size:13px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:#372A9C;text-align:center}.atag{display:inline-block;font-size:13px;font-weight:600;color:#fff;border-radius:980px;padding:3px 12px}.tagIssue{background:#B3261E}.tagProtected{background:#1A7F37}.tagNc{background:#FBF0D9;color:#7A5410}.ahead{display:flex;justify-content:space-between;align-items:center}.aobj{display:block;font-weight:600;margin-top:9px}.objkind{font-weight:400;font-size:13px;color:#86868B}.asumline{display:block;font-size:13px;color:#6E6E73;margin-top:3px;line-height:1.45}.acard{border-left:4px solid #D8D2C0}.acard.stIssue{border-left-color:#B3261E}.acard.stProtected{border-left-color:#1A7F37}.acard.stNc{border-left-color:#D9A83E}.quickEnd{border-top:1px solid #E3E3E7;margin-top:18px;padding-top:10px}.strayLine{text-align:center;color:#6e6e73;max-width:560px;margin:2px auto 4px}.unverBlock{margin:22px 0 0;background:#fbf6e9;border-radius:18px;padding:16px 18px 12px}.unverLine{margin:0}.unverList{margin:6px 0 6px 18px;padding:0}.unverList li{margin:4px 0;font-size:13px;color:#424245}.deepCard{display:none}.deepSection{margin:26px 0 0}.deepIntro{text-align:center;color:#6e6e73;max-width:560px;margin:4px auto 6px}.atag,.reasonTag,.bandCount,.metaLine{font-family:'IBM Plex Mono',ui-monospace,Menlo,monospace}.atag,.reasonTag{font-size:12px;letter-spacing:.05em;text-transform:uppercase}.bandHead{font-weight:700;letter-spacing:-0.01em}.acard{border-radius:10px}.deepNoteCard{background:#fff;border:1px solid #E7E2D6;border-left:4px solid #D8D2C0;border-radius:10px;padding:12px 14px;margin:10px 0}.deepNoteCard.stIssue{border-left-color:#B3261E}.deepNoteCard.stProtected{border-left-color:#1A7F37}.deepNoteCard.stNc{border-left-color:#D9A83E}.deepNoteTitle{font-weight:600;color:#141416;margin:8px 0 0}.deepNoteLine{font-size:13px;color:#424245;margin:4px 0 0;line-height:1.5}.linkedLine{font-size:13px;color:#372A9C;background:#F0EEFA;border-radius:8px;padding:6px 10px;margin:8px 0 0;line-height:1.5}.gradeLine{font-size:13px;color:#424245;margin:8px 0 0}</style></head><body>" + reportBodyHTML(lastResults, lastOverall, lastHost, false, lastScope) + deepDownloadHTML() + navJs + "</body></html>";
   let parts = [doc];
   let blob = new Blob([parts.join("\n")], {type: "text/html"});
   let a = document.createElement("a");
@@ -998,7 +2575,47 @@ $("downloadBtn").addEventListener("click", function(){
   a.download = "makerguard-report.html";
   document.body.appendChild(a); a.click(); a.remove();
   setTimeout(function(){ URL.revokeObjectURL(a.href); }, 1000);
-});
+}
+$("downloadBtn").addEventListener("click", downloadReport);
+$("popDownloadBtn").addEventListener("click", downloadReport);
+
+// Report popup: when a scan finishes, the report opens on screen as a
+// popup page, no scrolling to find it. The same #results node moves into
+// the popup and back out on close, so all card wiring and the single set
+// of element ids stay intact, and the report stays fully usable inline.
+var reportOverlay = $("reportOverlay"), reportSlot = $("reportSlot"), resultsEl = $("results");
+var resultsHomeParent = null, resultsHomeNext = null, popOpen = false, popLastFocus = null;
+function openReport(source){
+  if(popOpen || !resultsEl.innerHTML) return;
+  popLastFocus = document.activeElement;
+  if(!resultsHomeParent){ resultsHomeParent = resultsEl.parentNode; resultsHomeNext = resultsEl.nextSibling; }
+  reportSlot.appendChild(resultsEl);
+  reportSlot.scrollTop = 0;
+  reportOverlay.hidden = false;
+  document.documentElement.style.overflow = "hidden";
+  document.body.style.overflow = "hidden";
+  popOpen = true;
+  if(!currentReportIsSample){
+    if(source === "view") telEvent("report_reopened", { path: currentRunPath });
+    else telEvent("report_opened", { path: currentRunPath });
+  }
+  $("popCloseBtn").focus();
+}
+function closeReport(){
+  if(!popOpen) return;
+  if(resultsHomeParent) resultsHomeParent.insertBefore(resultsEl, resultsHomeNext);
+  reportOverlay.hidden = true;
+  document.documentElement.style.overflow = "";
+  document.body.style.overflow = "";
+  popOpen = false;
+  if(!currentReportIsSample) telEvent("report_closed", { path: currentRunPath });
+  var t = (popLastFocus && popLastFocus !== document.body && document.contains(popLastFocus)) ? popLastFocus : $("discoverBtn");
+  if(t && t.focus) t.focus();
+}
+$("popCloseBtn").addEventListener("click", closeReport);
+$("viewReportBtn").addEventListener("click", function(){ openReport("view"); });
+reportOverlay.addEventListener("click", function(e){ if(e.target === reportOverlay) closeReport(); });
+document.addEventListener("keydown", function(e){ if(popOpen && (e.key === "Escape" || e.key === "Esc")) closeReport(); });
 
 document.querySelectorAll(".tipBtn").forEach(function(b){
   b.addEventListener("click", function(){
@@ -1029,44 +2646,124 @@ document.addEventListener("click", function(e){
 </script>
 
 <script>
-// MakerGuard front door (link-first beta, 2026-11-03). One link in,
-// discovery card out, then the check above runs on what was found.
-// The reader service reads public pages only and stores nothing;
-// the check itself runs here in the builder's browser.
-// DEPLOY STEP: replace the address below with the live reader
-// address (the Render service URL, ending in /fetch).
+// MakerGuard front door, preview v3 (2026-11-03). One link in.
+// While the reader works, the panel narrates the real phases of
+// the examination. When it answers, the panel shows a clean
+// summary of what was found and one button runs the check on
+// the filled-in fields, which stay hidden unless the builder
+// asks for them or nothing was found.
 var MG_FETCHER = 'https://reader.midnightbuilds.fyi/fetch';
 (function(){
   var btn = document.getElementById('discoverBtn');
   var status = document.getElementById('discoverStatus');
+  function setStatus(msg, kind){ status.textContent = msg; status.className = 'small' + (kind === 'err' ? ' alertErr' : kind === 'info' ? ' alertInfo' : ''); }
   var card = document.getElementById('discoveryCard');
   var wrap = document.getElementById('manualWrap');
+  var panel = document.getElementById('scanPanel');
+  var stepsEl = document.getElementById('scanSteps');
+  var foundEl = document.getElementById('scanFound');
+  var clockEl = document.getElementById('scanClock');
+  var titleEl = document.getElementById('scanTitle');
+  function esc(t){ var d = document.createElement('div'); d.textContent = t; return d.innerHTML; }
   function reveal(){ wrap.classList.remove('hidden'); }
   document.getElementById('manualToggle').addEventListener('click', function(){
+    telEvent('manual_opened', {});
     reveal();
     wrap.scrollIntoView({behavior:'smooth', block:'start'});
     document.getElementById('supabaseUrl').focus();
   });
-  function esc(t){ var d = document.createElement('div'); d.textContent = t; return d.innerHTML; }
+
+  var STEP_LABELS = [
+    'Opening your app',
+    'Reading the code your visitors download',
+    'Following the code files',
+    'Hunting for your backend, keys and tables',
+    'Writing up what was found'
+  ];
+  var timers = [];
+  function stopTimers(){ timers.forEach(function(t){ clearInterval(t); clearTimeout(t); }); timers = []; }
+  function renderSteps(activeIdx, allDone){
+    stepsEl.innerHTML = STEP_LABELS.map(function(label, i){
+      var cls = 'scanRow', mark = '\u00B7';
+      if (allDone || i < activeIdx) { cls += ' done'; mark = '\u2713'; }
+      else if (i === activeIdx) { cls += ' on'; mark = '\u203A'; }
+      return '<p class="' + cls + '">' + mark + ' ' + label + '</p>';
+    }).join('');
+  }
+  function startPanel(){
+    panel.classList.remove('hidden');
+    card.classList.add('hidden'); card.innerHTML = '';
+    foundEl.innerHTML = '';
+    titleEl.textContent = 'Examining your app';
+    var t0 = Date.now(), idx = 0;
+    renderSteps(0, false);
+    clockEl.textContent = '\u00B7 0s';
+    timers.push(setInterval(function(){
+      clockEl.textContent = '\u00B7 ' + Math.round((Date.now() - t0) / 1000) + 's';
+    }, 500));
+    timers.push(setInterval(function(){
+      if (idx < STEP_LABELS.length - 1) { idx++; renderSteps(idx, false); }
+    }, 2200));
+    panel.scrollIntoView({behavior:'smooth', block:'nearest'});
+  }
+  function finishSteps(){
+    stopTimers();
+    renderSteps(STEP_LABELS.length, true);
+  }
+
+  function examineBands(d){
+    var t = ((d.tables || []).length + (d.tables_inferred || []).length);
+    var f = (typeof d.files_read === 'number') ? d.files_read : 0;
+    return {
+      tables_band: t === 0 ? 'none' : (t <= 5 ? '1-5' : (t <= 15 ? '6-15' : '16+')),
+      stores: (d.buckets && d.buckets.length) ? '1+' : '0',
+      files_band: f === 0 ? '0' : (f <= 10 ? '1-10' : '11-24')
+    };
+  }
+  function examineZeroBands(){ return { tables_band: 'none', stores: '0', files_band: '0' }; }
+
   btn.addEventListener('click', function(){
     var link = document.getElementById('appLink').value.trim();
-    if(!/^https?:\/\//i.test(link)){ status.textContent = 'Paste the full link to your live app, starting with https://'; return; }
-    btn.disabled = true; card.classList.add('hidden'); card.innerHTML = '';
-    status.textContent = 'Reading your app\u2019s public code now. This can take a little while.';
+    if(!/^https?:\/\//i.test(link)){ telEvent('run_failed', { stage: 'examine', reason: 'invalid_input' }); setStatus('Paste the full link to your live app, starting with https://', 'err'); return; }
+    telEvent('link_submitted', {});
+    setStatus('', '');
+    btn.disabled = true;
+    startPanel();
+    telEvent('examine_started', {});
     var ctl = ('AbortController' in window) ? new AbortController() : null;
     var timer = ctl ? setTimeout(function(){ ctl.abort(); }, 240000) : null;
-    fetch(MG_FETCHER + '?url=' + encodeURIComponent(link), ctl ? { signal: ctl.signal } : {})
+    var outbound = link;
+    try {
+      var parsed = new URL(link);
+      if (parsed.search || parsed.hash) { parsed.search = ''; parsed.hash = ''; outbound = parsed.toString(); }
+    } catch(e) {}
+    fetch(MG_FETCHER + '?url=' + encodeURIComponent(outbound), ctl ? { signal: ctl.signal } : {})
       .then(function(r){ return r.json(); })
       .then(function(d){
         if(timer) clearTimeout(timer);
         btn.disabled = false;
-        if(d.error){ status.textContent = d.error; return; }
-        if(d.reachable === false){ status.textContent = d.note || 'The app did not answer.'; return; }
+        if(d.error){
+          var zb = examineZeroBands(); zb.outcome = 'error';
+          telEvent('examine_finished', zb);
+          telEvent('run_failed', { stage: 'examine', reason: d.error.indexOf('not a public app link') > -1 ? 'invalid_input' : 'other' });
+          stopTimers(); panel.classList.add('hidden'); setStatus(d.error, 'err'); return;
+        }
+        window.__mgReaderData = d;
+        if(d.reachable === false){
+          var zb2 = examineZeroBands(); zb2.outcome = 'unreachable';
+          telEvent('examine_finished', zb2);
+          stopTimers(); panel.classList.add('hidden'); setStatus(d.note || 'The app did not answer.', 'err'); return;
+        }
+        var bands = examineBands(d);
+        bands.outcome = (d.projects && d.projects.length) ? 'found' : 'no_backend';
+        telEvent('examine_finished', bands);
         if(!d.projects || !d.projects.length){
-          status.textContent = 'No Supabase backend found in this app\u2019s public code. MakerGuard today checks Supabase products. If your backend is Supabase, type your details in the form opened below.';
+          stopTimers(); panel.classList.add('hidden');
+          setStatus('No Supabase backend found in this app\u2019s public code. MakerGuard today checks Supabase products. If your backend is Supabase, type your details in the form opened below.', 'info');
           reveal();
           return;
         }
+        finishSteps();
         var ref = d.projects[0];
         document.getElementById('supabaseUrl').value = 'https://' + ref + '.supabase.co';
         if(d.public_key){ document.getElementById('anonKey').value = d.public_key; }
@@ -1074,32 +2771,57 @@ var MG_FETCHER = 'https://reader.midnightbuilds.fyi/fetch';
         var inferred = (d.tables_inferred || []).filter(function(t){ return confirmed.indexOf(t) === -1; });
         var all = confirmed.concat(inferred).slice(0, 40);
         document.getElementById('tableName').value = all.join(', ');
+        window.__mgCodeTables = {value: document.getElementById('tableName').value, names: all.slice()};
         document.getElementById('productUrl').value = link;
         if(d.buckets && d.buckets.length === 1){ document.getElementById('bucketName').value = d.buckets[0]; }
-        var keyLine = d.public_key ? ('Public key found (' + esc(d.key_type || 'public') + '). It ships in your app\u2019s code for every visitor to see, which is normal.') : 'No public key found in the code, so the table questions cannot run yet.';
-        var html = '<p style="font-weight:600;margin:0 0 6px">Found your backend</p>'
-          + '<p class="small">Supabase project: ' + esc(ref) + '<br>' + keyLine + '<br>'
-          + (confirmed.length ? ('Tables your app talks to (' + confirmed.length + '): ' + esc(confirmed.join(', ')) + '<br>') : 'No table names were confirmed in the code.<br>')
-          + (inferred.length ? ('Likely tables (' + inferred.length + '): ' + esc(inferred.join(', ')) + '. Your code passes these names as it runs, so each one is tested below. A name that is not a real table is reported as unknown, never as safe and never as a problem.<br>') : '')
-          + (d.buckets && d.buckets.length ? ('File stores found: ' + esc(d.buckets.join(', ')) + '. To check one, type a file name in the files section below.') : '')
-          + '</p>'
-          + (d.projects.length > 1 ? '<p class="small">More than one backend was found in this app (' + esc(d.projects.join(', ')) + '). The check below is set to the first one. The others are not covered by this run.</p>' : '')
-          + (d.master_key_found ? '<p><strong>First finding: a master key pattern is sitting in your app\u2019s public code.</strong> That is the most serious thing this check looks for. The report below covers it in full.</p>' : '')
-          + '<p class="small">Covered means the tables your app\u2019s code talks to. A table your code never touches is not covered, and the report will not pretend otherwise.</p>'
-          + '<p><button id="runDiscovered" class="primary" type="button">Run the check</button></p>';
-        card.innerHTML = html;
-        card.classList.remove('hidden');
-        status.textContent = '';
-        document.getElementById('runDiscovered').addEventListener('click', function(){
+        var rows = '';
+        rows += '<p class="foundRow"><b>Backend</b> \u00B7 Supabase, project ' + esc(ref) + '</p>';
+        rows += d.public_key
+          ? '<p class="foundRow"><b>Public key</b> \u00B7 found (' + esc(d.key_type || 'public') + '). It sits in your app\u2019s code for every visitor to see, which is normal.</p>'
+          : '<p class="foundRow"><b>Public key</b> \u00B7 not found in the code, so the table questions cannot run yet.</p>';
+        if (confirmed.length) rows += '<p class="foundRow"><b>Tables your app talks to</b> \u00B7 ' + esc(confirmed.join(', ')) + '</p>';
+        if (inferred.length) rows += '<p class="foundRow"><b>Tables it likely uses</b> \u00B7 ' + esc(inferred.join(', ')) + '. Each one gets tested. A name that is not a real table is reported Not checked, never as safe and never as a problem.</p>';
+        if (!confirmed.length && !inferred.length) rows += '<p class="foundRow"><b>Tables</b> \u00B7 none named in the code.</p>';
+        if (d.buckets && d.buckets.length) rows += '<p class="foundRow"><b>File stores</b> \u00B7 ' + esc(d.buckets.join(', ')) + '</p>';
+        if (d.projects.length > 1) rows += '<p class="small">More than one backend was found in this app (' + esc(d.projects.join(', ')) + '). This run covers the first one only.</p>';
+        if (d.master_key_found) rows += '<p><strong>First finding: a master key pattern is sitting in your app\u2019s public code.</strong> That is the most serious thing this check looks for. The report covers it in full.</p>';
+        rows += '<p class="small">This covers the tables your app\u2019s code names. A table your code never mentions cannot be seen from a link, so it is not covered here, and it will never be called safe.</p>';
+        titleEl.textContent = 'Found your backend';
+        clockEl.textContent = '';
+        if (!d.public_key) {
+          rows += '<p class="small">The public key was not found in the code, so the check cannot run yet. Add it in the form opened below.</p>';
+          foundEl.innerHTML = rows;
           reveal();
+          return;
+        }
+        foundEl.innerHTML = rows;
+        setTimeout(function(){
+          titleEl.textContent = 'Running the check on your live app';
+          foundEl.innerHTML = rows + '<p class="scanRow on">\u203A Asking as a stranger, with no login</p>'
+            + '<p class="scanRow">\u00B7 Asking as one user reaching for another user\u2019s row, if you set that up</p>'
+            + '<p class="scanRow">\u00B7 Trying your file stores and hunting for a master key</p>'
+            + '<p class="small">Your report appears below when the answers are in.</p>';
+          window.__mgAutoRun = true;
           document.getElementById('runBtn').click();
-          document.getElementById('results').scrollIntoView({behavior:'smooth', block:'start'});
-        });
+          var iv = setInterval(function(){
+            var res = document.getElementById('results');
+            if (res && /Checked/.test(res.textContent || '')) {
+              clearInterval(iv);
+              titleEl.textContent = 'Your report is ready';
+              foundEl.innerHTML = '<p class="small">It is just below. Fix one thing at a time, starting with the first issue.</p>';
+              res.scrollIntoView({behavior:'smooth', block:'start'});
+            }
+          }, 1000);
+        }, 1400);
       })
       .catch(function(){
         if(timer) clearTimeout(timer);
         btn.disabled = false;
-        status.textContent = 'The examination could not be completed. Type your details in the form opened below instead.';
+        var zb = examineZeroBands(); zb.outcome = 'error';
+        telEvent('examine_finished', zb);
+        telEvent('run_failed', { stage: 'examine', reason: 'reader_unreachable' });
+        stopTimers(); panel.classList.add('hidden');
+        setStatus('The scan could not be completed. Type your details in the form opened below instead.', 'err');
         reveal();
       });
   });
