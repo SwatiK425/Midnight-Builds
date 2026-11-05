@@ -15,9 +15,6 @@ if(window.top!==window.self){try{window.top.location=window.self.location;}catch
 @font-face{font-family:'IBM Plex Sans';src:url('fonts/ibm-plex-sans-500.woff2') format('woff2');font-weight:500;font-style:normal;font-display:swap}
 @font-face{font-family:'IBM Plex Sans';src:url('fonts/ibm-plex-sans-600.woff2') format('woff2');font-weight:600;font-style:normal;font-display:swap}
 @font-face{font-family:'IBM Plex Sans';src:url('fonts/ibm-plex-sans-700.woff2') format('woff2');font-weight:700;font-style:normal;font-display:swap}
-@font-face{font-family:'IBM Plex Mono';src:url('fonts/ibm-plex-mono-400.woff2') format('woff2');font-weight:400;font-style:normal;font-display:swap}
-@font-face{font-family:'IBM Plex Mono';src:url('fonts/ibm-plex-mono-500.woff2') format('woff2');font-weight:500;font-style:normal;font-display:swap}
-@font-face{font-family:'IBM Plex Mono';src:url('fonts/ibm-plex-mono-600.woff2') format('woff2');font-weight:600;font-style:normal;font-display:swap}
 </style>
 <style>
 /* One typeface. Three sizes: 28 display, 17 text, 13 caption. Two weights: 400 and 600. Nothing else. */
@@ -61,6 +58,7 @@ button.secondary:disabled,.navbtn:disabled{opacity:.25;cursor:default}
 .reportPanel{background:#fff;border-radius:20px;width:100%;max-width:880px;max-height:calc(100vh - 36px);max-height:calc(100dvh - 36px);display:flex;flex-direction:column;overflow:hidden;box-shadow:0 24px 70px rgba(0,0,0,.3)}
 .reportBar{display:flex;justify-content:space-between;align-items:center;padding:10px 12px 10px 20px;border-bottom:1px solid #e5e5e5;background:#fff}
 .reportBarTitle{font-weight:600}
+.reportPanel .brandline{display:none}
 .reportBarBtns{display:flex;gap:8px;align-items:center}
 .iconBtn{width:40px;height:40px;border-radius:50%;border:1px solid #1d1d1f;background:#fff;color:#1d1d1f;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;font-size:22px;line-height:1;padding:0}
 .iconBtn:hover{background:#f5f5f7}
@@ -257,7 +255,7 @@ body{font-family:"IBM Plex Sans",-apple-system,BlinkMacSystemFont,system-ui,sans
 h1,.reportTitle,.verdict,.issuePage h3{font-family:"IBM Plex Sans",-apple-system,BlinkMacSystemFont,system-ui,sans-serif}
 h1{font-weight:700;letter-spacing:-0.02em}
 .brandmark{font-weight:700;letter-spacing:-0.01em}
-.atag,.reasonTag,.bandCount,.metaLine,.dots{font-family:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace}
+.atag,.reasonTag,.bandCount,.metaLine,.dots{font-family:"IBM Plex Sans",-apple-system,BlinkMacSystemFont,system-ui,sans-serif}
 .atag,.reasonTag{font-size:12px;letter-spacing:.05em;text-transform:uppercase}
 .metaLine{font-size:12.5px}
 .acard{border-radius:10px;border-color:#DCD4BE;box-shadow:0 1px 2px rgba(28,24,64,.04)}
@@ -268,20 +266,44 @@ h1{font-weight:700;letter-spacing:-0.02em}
 .sampleNotice{border-radius:10px;background:#F0EEFA}
 .unverBlock{border-radius:12px}
 .bandHead{font-weight:700;letter-spacing:-0.01em}
-.groupHead{font-family:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#372A9C;margin:30px 0 4px}
+.groupHead{font-family:"IBM Plex Sans",-apple-system,BlinkMacSystemFont,system-ui,sans-serif;font-size:13px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#372A9C;margin:30px 0 4px}
 .checksIntro{font-size:17px;line-height:1.5;color:#4A4D52;max-width:620px;margin:10px 0 2px}
 
 /* Deep Scan evidence locker (LB3b): the flagship section. Same system:
    IBM Plex, indigo guidance accent, black primary buttons, status colours
    unchanged. Rows are proper test cards with a live state pill. */
-.deepLocker{margin:34px 0 0;border:1px solid #DDD8F0;background:#FBFAF7;border-radius:14px;padding:24px 20px 14px}
+.deepLocker{margin:34px 0 0;border:1px solid #E7E2D6;background:#FBFAF7;border-radius:14px;padding:24px 20px 14px}
 .deepTitle{font-size:24px;font-weight:700;letter-spacing:-0.02em;color:#141416;margin:0}
+.flowDesc{color:#55534e;margin:0 0 12px}
+.flowProg{display:flex;align-items:center;gap:8px;font-size:13px;color:#8a8378;margin:0 0 6px}
+.flowProg .fdot{width:9px;height:9px;border-radius:50%;background:#d8d2c4;display:inline-block;margin-right:3px}
+.flowProg .fdone{color:#1c7c43;font-weight:600}
+.flowProg .fdone .fdot{background:#1c7c43}
+.flowProg .fnow{color:#1d1d1f;font-weight:600}
+.flowProg .fnow .fdot{background:#372a9c}
+.flowProg .fbar{flex:0 0 22px;height:2px;background:#e7e0d2;border-radius:2px}
+.flowStep{border-top:1px solid #f0ead9;padding:12px 0 2px;margin-top:12px}
+.flowHead{display:flex;align-items:center;gap:9px;font-weight:600}
+.flowTick{width:20px;height:20px;border-radius:50%;background:#1c7c43;color:#fff;font-size:12px;display:inline-flex;align-items:center;justify-content:center;flex:0 0 20px}
+.flowNum{width:20px;height:20px;border-radius:50%;background:#372a9c;color:#fff;font-size:12px;display:inline-flex;align-items:center;justify-content:center;flex:0 0 20px}
+.flowLine{margin:6px 0 2px 29px}
+.flowMicro{margin:0 0 4px 29px;font-size:13px;color:#8a8378}
+.flowBody{margin:8px 0 4px 29px}
+.vwrap{border-top:1px solid #f0ead9}
+.vrow{display:flex;align-items:center;gap:10px;padding:8px 0}
+.vname{font-weight:600}
+.vExp{margin-left:auto;background:none;border:0;color:#372a9c;font-size:13px;cursor:pointer;font-family:inherit;padding:0;white-space:nowrap}
+.frow2{display:flex;gap:10px;align-items:stretch;margin:0 0 10px}
+.storeBox{flex:0 0 150px;display:flex;align-items:center;padding:9px 12px;background:#f7f2e7;border:1px solid #e7e0d2;border-radius:10px;font-weight:600;overflow:hidden}
+.storeSel{flex:0 0 150px;padding:9px 10px;background:#f7f2e7;border:1px solid #e7e0d2;border-radius:10px;font-weight:600;font-family:inherit;font-size:14px}
+.frow2 input{flex:1;min-width:0}
+.bmodeRow{display:block;margin:7px 0;cursor:pointer}
 .deepLead{font-size:15px;line-height:1.55;color:#4A4D52;margin:8px 0 0}
 .carriesLine{background:#F0EEFA;border:1px solid #DDD8F0;border-radius:10px;padding:10px 12px;font-size:13px;line-height:1.55;color:#2A2160;margin:14px 0 0}
 .carriesLine strong{color:#372A9C}
 /* Changes 2+3: one scan-pill language across the landing list and the
    Deep locker cards; calm check cards; collapsed note detail. */
-.scanPill{font-family:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;background:#E6E2F8;color:#372A9C;border-radius:980px;padding:2px 10px;white-space:nowrap;flex:none}
+.scanPill{font-family:"IBM Plex Sans",-apple-system,BlinkMacSystemFont,system-ui,sans-serif;font-size:11px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;background:#E6E2F8;color:#372A9C;border-radius:980px;padding:2px 10px;white-space:nowrap;flex:none}
 .ckT .scanPill{margin-left:auto}
 .dckT .scanPill{margin-left:auto}
 .groupSub{font-size:13px;color:#6E6E73;margin:0;line-height:1.45}
@@ -335,6 +357,18 @@ h1{font-weight:700;letter-spacing:-0.02em}
 .fbPanel .fbCard{border:none;margin:0;padding:6px 0 0}
 .fbCloseRow{display:flex;justify-content:flex-end}
 .fbPageEnd{text-align:center;margin:36px 0 0}
+#quickReport{font-size:15px;line-height:1.55}
+#quickReport .verdict{font-size:24px}
+.reportTitle{font-size:24px}
+.bandHead{font-size:15px}
+.tailBlock{margin:22px 0 0;background:#fff;border:1px solid #E3E3E7;border-radius:12px;padding:16px 18px 14px}
+.tailLine{margin:10px 0 0;color:#424245;line-height:1.55}
+button.deepRowHead{width:100%;background:none;border:0;padding:0;font:inherit;color:inherit;cursor:pointer}
+.deepHeadRight{display:flex;align-items:center;gap:8px;flex:none}
+.deepChev{color:#372A9C;font-size:13px}
+.deepPart{margin-top:14px;border-top:1px solid #e3e0ee;padding-top:6px}
+.deepSub{font-weight:600;color:#141416;margin:14px 0 2px}
+.deepBody .deepSub:first-child{margin-top:0}
 </style>
 </head>
 <body>
@@ -415,22 +449,22 @@ h1{font-weight:700;letter-spacing:-0.02em}
 </div>
 </div>
 <p class="checksIntro">MakerGuard tests your live app for real-world data exposure and gives you evidence-backed findings, not a checklist or a code review.</p>
+<p class="checksIntro">Fixed something? Run the scan again and watch the verdict change.</p>
 <h2 class="whead" id="whatwecheck">What we check</h2>
 <h3 class="groupHead">Quick Scan</h3>
 <p class="groupSub">Runs from your link alone.</p>
 <div class="checkGrid">
 <div class="ck"><p class="ckT"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#141416" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6z"/><circle cx="12" cy="12" r="3"/></svg>Public data exposure<span class="scanPill">Quick Scan</span></p><p class="ckQ">Can strangers read data without logging in?</p></div>
-<div class="ck"><p class="ckT"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#141416" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>File exposure<span class="scanPill">Quick Scan</span></p><p class="ckQ">Can someone retrieve files they shouldn&rsquo;t see?</p></div>
+<div class="ck"><p class="ckT"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#141416" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>File exposure<span class="scanPill">Quick Scan</span></p><p class="ckQ">Can someone retrieve the files your app itself uses, without logging in?</p></div>
 <div class="ck"><p class="ckT"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#141416" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="15" r="4.5"/><path d="M11.3 11.7L20 3M16.5 6.5L19 9M14 9l2.5 2.5"/></svg>Exposed credentials<span class="scanPill">Quick Scan</span></p><p class="ckQ">Are privileged keys present in shipped frontend code?</p></div>
 </div>
 <h3 class="groupHead">Deep Scan</h3>
 <p class="groupSub">Runs with one test sign-in.</p>
 <div class="checkGrid">
-<div class="ck"><p class="ckT"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#141416" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19c.6-3 2.8-4.5 5.5-4.5s4.9 1.5 5.5 4.5"/><path d="M15.5 5.3a3.2 3.2 0 0 1 0 5.9M17.3 14.8c1.6.6 2.6 2 2.9 4.2"/></svg>Cross-user access<span class="scanPill">Deep Scan</span></p><p class="ckQ">Can one user access another user&rsquo;s records?</p></div>
-<div class="ck"><p class="ckT"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#141416" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6z"/><circle cx="12" cy="12" r="3"/></svg>The signed-in surface<span class="scanPill">Deep Scan</span></p><p class="ckQ">What any signed-in account can read, including tables open to every signed-in user.</p></div>
-<div class="ck"><p class="ckT"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#141416" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>Cross-user files<span class="scanPill">Deep Scan</span></p><p class="ckQ">Whether one user can open another user&rsquo;s files.</p></div>
+<div class="ck"><p class="ckT"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#141416" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19c.6-3 2.8-4.5 5.5-4.5s4.9 1.5 5.5 4.5"/><path d="M15.5 5.3a3.2 3.2 0 0 1 0 5.9M17.3 14.8c1.6.6 2.6 2 2.9 4.2"/></svg>Cross-user access<span class="scanPill">Deep Scan</span></p><p class="ckQ">Can one user access another user&rsquo;s records or files?</p></div>
 <div class="ck"><p class="ckT"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#141416" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M8.5 12.2l2.4 2.4 4.6-4.9"/></svg>Settling open answers<span class="scanPill">Deep Scan</span></p><p class="ckQ">The answers Quick Scan left ambiguous, like whether an empty answer means an empty table or a protected one.</p></div>
 </div>
+<p class="groupSub" style="margin-top:10px">Deep Scan tests tables and views through the data API, signed in as a test user. It does not test database functions.</p>
 <p class="builtline">Built for web apps using Supabase, including apps created with Lovable, Bolt, and other AI coding tools.</p>
 <p class="builtline" style="margin-top:6px">So far, MakerGuard has examined 61 real AI-built apps.</p>
 
@@ -554,6 +588,10 @@ function telSend(payload) {
       const val = el.value ? el.value.trim() : "";
       if (val && val.length >= 4 && body.indexOf(val) >= 0) throw new Error("leak guard");
     });
+    document.querySelectorAll(".mgFileName").forEach(function(el){
+      const val = el.value ? el.value.trim() : "";
+      if (val && val.length >= 4 && body.indexOf(val) >= 0) throw new Error("leak guard");
+    });
     fetch(TELEMETRY_ENDPOINT, { method: "POST", mode: "no-cors", headers: { "Content-Type": "text/plain" }, body: body }).catch(function () {});
   } catch (e) {}
 }
@@ -583,6 +621,23 @@ telEvent("visited", {});
 function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
 function $(id){return document.getElementById(id);}
 function cleanUrl(u){ let v = u.trim().replace(/\/+$/,""); if(v.endsWith("/rest/v1")) v = v.slice(0, v.length - 8).replace(/\/+$/,""); return v; }
+// Keys and tokens are often copied out of settings files and code, where
+// they sit inside quote marks. Trimming removes spaces but not quotes,
+// and a quoted key is sent verbatim and rejected. Strip matching outer
+// quotes (and the spaces around them) on every typed key and token.
+// Passwords never pass through here: their spaces and case are real.
+function cleanCred(v){
+  let x = (v || "").trim();
+  while(x.length >= 2 && ((x.charAt(0) === '"' && x.charAt(x.length - 1) === '"') || (x.charAt(0) === "'" && x.charAt(x.length - 1) === "'"))){
+    x = x.slice(1, -1).trim();
+  }
+  return x;
+}
+function invalidKeyText(data){
+  if(!data) return false;
+  let m = (typeof data === "string") ? data : (data.message || data.msg || data.error_description || data.error || "");
+  return /invalid api key/i.test(String(m));
+}
 function levelRank(l){return ["LOW","MEDIUM","ELEVATED","HIGH","CRITICAL"].indexOf(l);}
 function maxLevel(a,b){return levelRank(a)>=levelRank(b)?a:b;}
 
@@ -637,7 +692,7 @@ $("showKey").addEventListener("change", function(){ $("anonKey").type = this.che
 const EXPLAIN = {
   P1: {headline: "Anyone can read this table",
        story: "Anyone can ask this table for rows using only your public key. No login needed. The rows are handed over.",
-       risk: "A stranger is not limited to the id column this check asked for. They can ask for every column and copy your users' data."},
+       risk: "This check asked for the smallest thing that proves the point, and touched no names, emails, or personal values. A stranger can ask for every column and copy it all."},
   P2: {headline: "One user can read another user's data",
        story: "Signed in as test user A, this check asked for test user B's row, and your project handed it over.",
        risk: "Anyone with a free account could do the same to your real customers."},
@@ -804,6 +859,7 @@ const REASON_LABELS = {
   "Assets could not be read": "Assets could not be read"
 };
 function reasonLabelFor(it){
+  if(it.reasonCode === "No file could be named" && it.storeAnswer === "public") return "No file could be named \u00B7 the store itself is public";
   if(it.reasonCode && REASON_LABELS[it.reasonCode]) return REASON_LABELS[it.reasonCode];
   if(it.reasonCode && typeof it.reasonCode === "string" && it.reasonCode.length) return it.reasonCode;
   let txt = ((it.findings || []).join(" ") + " " + (it.title || "")).toLowerCase();
@@ -883,7 +939,111 @@ function answerRowHTML(it, fixLabel){
   h += "</div></div>";
   return h;
 }
-function reportBodyHTML(results, overall, host, sampleLabel, scopeOverride){
+// The Quick report's tail (the still-open list, the Deep Scan
+// signpost, the closing line) is LIVE text, not a verdict
+// (changed 2026-11-05 on Swati's ruling). The verdicts, the
+// bands and the counts above it are frozen at Quick time and
+// never change. The tail describes what is still open, so it
+// must tell the truth at the moment it is read: before Deep
+// Scan it points at Deep Scan; once Deep Scan is set up the
+// setup button and the "not tested at all" lines go away;
+// once Deep Scan settles an open answer, that answer leaves
+// the still-open list and the signpost says how many were
+// settled. Items Deep Scan cannot settle (the master key
+// scan when no code could be read, a store where no file
+// could be named) stay on the list, because they are still
+// true. The page refreshes this block in place whenever Deep
+// state changes; the downloaded report builds it fresh, so
+// both always agree.
+function tailInputsFor(results){
+  let quick = results.filter(function(it){ return it.probe !== "P2"; });
+  let unverifiedItems = quick.filter(function(it){ return (it.status === "NOT_PROVEN" || it.status === "NOT_CHECKED") && !isStrayItem(it); });
+  let deepTbl = quick.filter(function(it){ return it.probe === "P1" && !isStrayItem(it) && (it.status === "PROVEN" || it.status === "BLOCKED"); }).length;
+  let deepStores = (function(){ let seen = {}; quick.forEach(function(it){ if(it.probe === "P3" && it.title && it.title.indexOf(": ") > -1) seen[rawSubject(it).split(" / ")[0]] = 1; }); return Object.keys(seen).length; })();
+  let deepSettle = quick.filter(function(it){ return it.probe === "P1" && !isStrayItem(it) && ((it.status === "BLOCKED" && it.sumLine && /received none/.test(it.sumLine)) || it.status === "NOT_PROVEN"); }).length;
+  let tailBits = [];
+  if(deepTbl || deepStores){
+    let cb = "cross-user access";
+    if(deepTbl) cb += " across " + deepTbl + " confirmed table" + (deepTbl === 1 ? "" : "s");
+    if(deepStores) cb += (deepTbl ? " and" : "") + " in " + deepStores + " file store" + (deepStores === 1 ? "" : "s");
+    tailBits.push(cb);
+  }
+  if(deepSettle) tailBits.push("settling " + deepSettle + " open answer" + (deepSettle === 1 ? "" : "s"));
+  return { quick: quick, unverifiedItems: unverifiedItems, tailBits: tailBits };
+}
+function quickTailState(quick){
+  let st = { phase: "none", settled: {}, settledCount: 0 };
+  let ds = (typeof deepState !== "undefined") ? deepState : null;
+  if(!ds) return st;
+  let settledTitles = {};
+  if(ds.rows && ds.rows.settle) ds.rows.settle.items.forEach(function(n){ if(n.settled) settledTitles[(n.title || "").toLowerCase()] = 1; });
+  (quick || []).forEach(function(it){
+    if(it.probe !== "P1") return;
+    let open = it.status === "NOT_PROVEN" || (it.status === "BLOCKED" && it.sumLine && /received none/.test(it.sumLine));
+    if(open && settledTitles[(rawSubject(it) || "").toLowerCase()]){ st.settled[(rawSubject(it) || "").toLowerCase()] = 1; st.settledCount++; }
+  });
+  let anyDeep = ds.setupOpen || ds.tokenA || ["cross", "files", "settle"].some(function(k){ return ds.rows[k] && (ds.rows[k].state === "done" || ds.rows[k].state === "running"); });
+  if(st.settledCount) st.phase = "settled";
+  else if(anyDeep) st.phase = "setup";
+  return st;
+}
+function quickTailHTML(unverifiedItems, tailBits, tst){
+  let remaining = unverifiedItems.filter(function(it){ return !(it.probe === "P1" && tst.settled[(rawSubject(it) || "").toLowerCase()]); });
+  let h = "<div id='quickTail'>";
+  if(tst.phase === "none"){
+    if(unverifiedItems.length || tailBits.length){
+      h += "<div class='tailBlock' data-band='3'>";
+      if(unverifiedItems.length){
+        h += "<p class='unverLine'><strong>Could not verify: " + unverifiedItems.length + (unverifiedItems.length === 1 ? " check." : " checks.") + "</strong></p>";
+        h += "<details class='unverDetails'><summary>Which checks, and why</summary><ul class='unverList'>";
+        unverifiedItems.forEach(function(it){
+          h += "<li><strong>" + esc(subjectOf(it)) + "</strong> &middot; " + esc(testNameFor(it)) + " &middot; " + esc(reasonLabelFor(it)) + "</li>";
+        });
+        h += "</ul></details>";
+      }
+      if(tailBits.length){
+        h += "<p class='tailLine'>Quick Scan never signs in, so these were not tested at all: " + tailBits.join("; ") + ".</p>";
+        h += "<p class='tailLine'>Deep Scan tests these. It starts from one test sign-in, and asks for more only when a test needs it.</p>";
+        h += "<p style='margin:12px 0 2px'><button type='button' class='navbtn' id='nudgeSetup'>Set up Deep Scan</button></p>";
+      }
+      h += "</div>";
+    }
+    h += "<p class='small quickEnd' style='text-align:center'>End of Quick Scan report. Deeper checks, when they run, appear below this snapshot and do not change it.</p>";
+  } else {
+    if(remaining.length || tailBits.length){
+      h += "<div class='tailBlock' data-band='3'>";
+      if(remaining.length){
+        h += "<p class='unverLine'><strong>Could not verify: " + remaining.length + (remaining.length === 1 ? " check." : " checks.") + "</strong></p>";
+        h += "<details class='unverDetails'><summary>Which checks, and why</summary><ul class='unverList'>";
+        remaining.forEach(function(it){
+          h += "<li><strong>" + esc(subjectOf(it)) + "</strong> &middot; " + esc(testNameFor(it)) + " &middot; " + esc(reasonLabelFor(it)) + "</li>";
+        });
+        h += "</ul></details>";
+      }
+      if(tst.phase === "settled"){
+        h += "<p class='tailLine'>Deep Scan settled " + tst.settledCount + " of the open answer" + (tst.settledCount === 1 ? "" : "s") + " from this scan. Its results are below this snapshot; the verdicts above do not change.</p>";
+      } else {
+        h += "<p class='tailLine'>Deep Scan is set up below. The checks Quick Scan never runs, and the open answers it left, are tested there. Its results appear under this snapshot; this snapshot does not change.</p>";
+      }
+      h += "</div>";
+    }
+    h += "<p class='small quickEnd' style='text-align:center'>End of Quick Scan report. The Deep Scan section below holds the deeper results.</p>";
+  }
+  h += "</div>";
+  return h;
+}
+function refreshQuickTail(){
+  let el = document.getElementById("quickTail");
+  if(!el || !lastResults) return;
+  let inputs = tailInputsFor(lastResults);
+  let tst = quickTailState(inputs.quick);
+  if(tst.phase === "none") return;
+  let tmp = document.createElement("div");
+  tmp.innerHTML = quickTailHTML(inputs.unverifiedItems, inputs.tailBits, tst);
+  let fresh = tmp.firstElementChild;
+  if(fresh && el.parentNode) el.parentNode.replaceChild(fresh, el);
+}
+function reportBodyHTML(results, overall, host, sampleLabel, scopeOverride, tailLive){
   // D-6 middle path: the Quick snapshot holds non-P2 results only.
   // Cross-user items never render as Quick cards: settled ones are seeded
   // into the Deep Scan evidence locker below the snapshot (one Deep
@@ -921,21 +1081,13 @@ function reportBodyHTML(results, overall, host, sampleLabel, scopeOverride){
     band2.forEach(function(it){ html += answerRowHTML(it); });
     html += "</div>";
   }
-  if(unverifiedItems.length){
-    html += "<div class='unverBlock' data-band='3'><p class='unverLine'><strong>Could not verify: " + unverified + (unverified === 1 ? " check." : " checks.") + "</strong></p>";
-    html += "<details class='unverDetails'><summary>Which checks, and why</summary><ul class='unverList'>";
-    unverifiedItems.forEach(function(it){
-      html += "<li><strong>" + esc(subjectOf(it)) + "</strong> &middot; " + esc(testNameFor(it)) + " &middot; " + esc(reasonLabelFor(it)) + "</li>";
-    });
-    html += "</ul></details></div>";
-  }
-  html += "<div class='card nudgeCard deepCard' style='text-align:center'><p style='margin:0 0 6px'><strong>Deep Scan</strong></p><p class='small' style='margin:0 0 8px'>Quick Scan never signs in. Deep Scan is the sign-in boundary investigation: the second half of the check, and the door behind the worst leaks. It covers four things:</p><p class='small' style='margin:0 0 4px'><strong>Cross-user access:</strong> whether one signed-in user can read another user's data.</p><p class='small' style='margin:0 0 4px'><strong>The signed-in surface:</strong> what any signed-in account can read, including tables open to every signed-in user.</p><p class='small' style='margin:0 0 4px'><strong>Cross-user files:</strong> whether one user can open another user's files.</p><p class='small' style='margin:0 0 10px'><strong>Settling open answers:</strong> the answers Quick Scan left ambiguous, like whether an empty answer means an empty table or a protected one.</p><p class='small' style='margin:0 0 10px'>It starts from one test sign-in, a fake user you create in your app, and asks for more only when a specific test needs it.</p><button type='button' class='navbtn' id='nudgeSetup'>Set up the second-user test</button></div>";
-  html += "<p class='small quickEnd' style='text-align:center'>End of Quick Scan report. Deeper checks, when they run, appear below this snapshot and do not change it.</p>";
+  let tailIn = tailInputsFor(results);
+  html += quickTailHTML(tailIn.unverifiedItems, tailIn.tailBits, tailLive ? quickTailState(tailIn.quick) : { phase: "none", settled: {}, settledCount: 0 });
   html += "</section>";
   // The Deep Scan section is the evidence locker, appended by render()
-  // from deepState (see buildDeepState / deepLockerHTML). Settled
-  // cross-user items from this run are seeded into it, so Deep results
-  // live in exactly one section and the snapshot is never edited.
+  // from deepState (see buildDeepState / deepLockerHTML). Deep results
+  // live in exactly one section; the Quick verdicts above the tail are
+  // never edited, and the tail itself is live text (see quickTailHTML).
   return html;
 }
 
@@ -1022,6 +1174,7 @@ function deepFireStarted(){
 function checkDeepCompleted(){
   let ds = deepState;
   if(!ds || ds.completedFired || currentReportIsSample) return;
+  try{ refreshQuickTail(); }catch(e){}
   let t = deepTotals();
   if(t.settled > 0){
     telEvent("deep_completed", { path: currentRunPath, settled: t.settled, issues: t.issues });
@@ -1045,7 +1198,8 @@ function buildDeepState(results, isSample){
     tokenA: "", userIdA: "", tokenB: "", userIdB: "",
     startedFired: false, completedFired: false, autoRan: false,
     columns: null, rowAsks: null, rowIds: {},
-    filesName: "", filesStore: "",
+    filesName: "", filesStore: "", filesSeedByStore: {}, filesListByStore: {},
+    bMode: null, provenRan: false, aReads: null, filesRows: null,
     settleCandidates: [],
     rows: {
       cross:   { state: "needs", pill: {text: "Needs one thing", cls: "tagNc"}, items: [], autoNotes: {} },
@@ -1080,7 +1234,7 @@ function buildDeepState(results, isSample){
   });
   results.forEach(function(it){
     if(it.probe === "P3" && it.title && it.title.indexOf(": ") > -1){
-      let nm = rawSubject(it);
+      let nm = rawSubject(it).split(" / ")[0];
       let missing = ((it.findings || []).join(" ").toLowerCase().indexOf("needs a bucket") > -1);
       if(nm && !missing && ds.stores.indexOf(nm) === -1) ds.stores.push(nm);
     }
@@ -1090,8 +1244,7 @@ function buildDeepState(results, isSample){
       else ds.p4Text = "the master-key question could not be verified";
     }
     if(it.probe === "P1" && it.title && it.title.indexOf(": ") > -1 && !isStrayItem(it)){
-      let body = (it.findings || []).join(" ");
-      if(it.status === "BLOCKED" && /does not establish whether the table is empty/.test(body)){
+      if(it.status === "BLOCKED" && it.sumLine && /received none/.test(it.sumLine)){
         ds.settleCandidates.push({ table: rawSubject(it), kind: "zero" });
       } else if(it.status === "NOT_PROVEN"){
         ds.settleCandidates.push({ table: rawSubject(it), kind: "offshape" });
@@ -1103,11 +1256,26 @@ function buildDeepState(results, isSample){
   try{
     let mt = document.querySelector('input[name="signinMethod"]:checked');
     if(mt && mt.value === "token"){
-      let tv = $("userToken").value.trim();
+      let tv = cleanCred($("userToken").value);
       if(tv){ ds.tokenA = tv; ds.userIdA = userIdFromToken(tv); }
     } else if(memoryToken){
       ds.tokenA = memoryToken;
       ds.userIdA = memoryUserId || userIdFromToken(memoryToken);
+    }
+  }catch(e){}
+  // A file the app's own code names (returned by the reader) prefills
+  // the Deep files ask for its store: the aim starts from evidence,
+  // and the builder can replace the name with another real file.
+  try{
+    let rdf = window.__mgReaderData;
+    if(rdf && Array.isArray(rdf.files) && ds.stores.length){
+      rdf.files.forEach(function(rf){
+        if(rf && rf.bucket && rf.path && ds.stores.indexOf(rf.bucket) > -1){
+          ds.filesSeedByStore[rf.bucket] = ds.filesSeedByStore[rf.bucket] || [];
+          if(ds.filesSeedByStore[rf.bucket].indexOf(rf.path) === -1 && ds.filesSeedByStore[rf.bucket].length < 10) ds.filesSeedByStore[rf.bucket].push(rf.path);
+          if(!ds.filesName){ ds.filesStore = rf.bucket; ds.filesName = rf.path; }
+        }
+      });
     }
   }catch(e){}
   // Initial row states.
@@ -1141,10 +1309,19 @@ function carriesHTML(){
 }
 function deepRowShell(key, title){
   let r = deepState.rows[key];
-  return "<div class='deepRow' id='deepRow-" + key + "'><div class='deepRowHead'><p class='deepRowTitle'>" + title + "</p><span class='atag deepState " + r.pill.cls + "' id='deepState-" + key + "'>" + r.pill.text + "</span></div><div class='deepBody' id='deepBody-" + key + "'>" + deepBodyHTML(key) + "</div></div>";
+  let open = !!r.open;
+  return "<div class='deepRow' id='deepRow-" + key + "'><button type='button' class='deepRowHead' data-deep-toggle='" + key + "' aria-expanded='" + (open ? "true" : "false") + "'><span class='deepRowTitle'>" + title + "</span><span class='deepHeadRight'><span class='atag deepState " + r.pill.cls + "' id='deepState-" + key + "'>" + r.pill.text + "</span><span class='deepChev'>" + (open ? "\u25B4" : "\u25BE") + "</span></span></button><div class='deepBody' id='deepBody-" + key + "'" + (open ? "" : " hidden") + ">" + deepBodyHTML(key) + "</div></div>";
+}
+function expandDeepRow(key){
+  let body = $("deepBody-" + key);
+  if(!body) return;
+  body.hidden = false;
+  let tg = document.querySelector("[data-deep-toggle='" + key + "']");
+  if(tg){ tg.setAttribute("aria-expanded", "true"); let ch = tg.querySelector(".deepChev"); if(ch) ch.textContent = "\u25B4"; }
+  if(deepState && deepState.rows[key]) deepState.rows[key].open = true;
 }
 function deepCheckCardsHTML(){
-  // Change 2: the locker leads with the four Deep checks as calm cards
+  // The locker leads with the two Deep sections as calm cards
   // in the landing's check-grid language (same names, same one-liners,
   // same Deep Scan pill), each with one plain needs chip. This replaces
   // prose listings of the four areas inside the locker.
@@ -1155,9 +1332,7 @@ function deepCheckCardsHTML(){
     check: "<svg width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='#141416' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><circle cx='12' cy='12' r='8.5'/><path d='M8.5 12.2l2.4 2.4 4.6-4.9'/></svg>"
   };
   let cards = [
-    { icon: ic.users, name: "Cross-user access", line: "Whether one signed-in user can read another user's data.", need: "Needs the other test user's sign-in, or one of their row numbers" },
-    { icon: ic.eye, name: "The signed-in surface", line: "What any signed-in account can read, including tables open to every signed-in user.", need: "Needs one test sign-in" },
-    { icon: ic.folder, name: "Cross-user files", line: "Whether one user can open another user's files.", need: "Needs one real file name" },
+    { icon: ic.users, name: "Cross-user access", line: "Can one signed-in user reach another user's records or files? Starts by reading what the test account itself can see.", need: "Needs one test sign-in to start" },
     { icon: ic.check, name: "Settling open answers", line: "The answers Quick Scan left ambiguous, re-tested with a sign-in.", need: "Runs once you sign in" }
   ];
   let h = "<div class='deepGrid'>";
@@ -1169,17 +1344,20 @@ function deepCheckCardsHTML(){
 }
 function deepLockerHTML(){
   if(!deepState) return "";
+  let ds = deepState;
   let h = "<section id='deepLocker' class='deepSection deepLocker' data-snapshot='deep'>";
   h += "<h2 class='deepTitle'>Deep Scan</h2>";
-  h += "<p class='deepLead'>The sign-in boundary investigation: the tests a link alone cannot reach, and where the worst leaks hide. It starts from one test sign-in, and asks only for what a specific test needs.</p>";
-  h += deepCheckCardsHTML();
-  h += "<p class='carriesLine'>" + carriesHTML() + "</p>";
+  h += "<p class='deepLead'>The tests a link alone cannot reach. It starts from one test sign-in, and asks for more only when a test needs it.</p>";
+  h += "<p class='small' style='margin:2px 0 0'>Deep Scan tests tables and views through the data API, signed in as a test user. It does not test database functions.</p>";
   h += "<div class='deepSetup' id='deepSetup'>" + deepSetupHTML() + "</div>";
   h += "<div id='deepRows'>";
-  h += deepRowShell("cross", "Cross-user access");
-  h += deepRowShell("surface", "The signed-in surface");
-  h += deepRowShell("files", "Cross-user files");
-  h += deepRowShell("settle", "Settling open answers");
+  // Clubbed 2026-11-05 (Swati's ruling): Deep Scan has two sections.
+  // Cross-user access holds two parts, Records (the cross row's own
+  // steps) and Files (the old cross-user files row, nested inside it,
+  // shown only when the app has file stores). Every row id, pill and
+  // renderer is unchanged; only the nesting and the names moved.
+  if(ds.tables.length || ds.stores.length) h += deepRowShell("cross", "Cross-user access");
+  if(ds.settleCandidates.length) h += deepRowShell("settle", "Settling open answers");
   h += "</div>";
   // ZIP-SLOT: a future evidence source (the project file, read locally,
   // behind its own release test plan) joins the locker here, above the
@@ -1211,8 +1389,12 @@ function deepSetupHTML(){
   if(!ds) return "";
   if(!ds.setupOpen){
     let bits = [];
-    if(ds.tables.length) bits.push("cross-user access and the signed-in surface across " + ds.tables.length + " confirmed table" + (ds.tables.length === 1 ? "" : "s"));
-    if(ds.stores.length) bits.push("cross-user files in " + ds.stores.length + " file store" + (ds.stores.length === 1 ? "" : "s"));
+    if(ds.tables.length || ds.stores.length){
+      let cb = "cross-user access";
+      if(ds.tables.length) cb += " across " + ds.tables.length + " confirmed table" + (ds.tables.length === 1 ? "" : "s");
+      if(ds.stores.length) cb += (ds.tables.length ? " and" : "") + " in " + ds.stores.length + " file store" + (ds.stores.length === 1 ? "" : "s");
+      bits.push(cb);
+    }
     if(ds.settleCandidates.length) bits.push("settling " + ds.settleCandidates.length + " open answer" + (ds.settleCandidates.length === 1 ? "" : "s"));
     if(!bits.length) return "<p class='deepUntested'>Quick Scan found nothing in this app that a sign-in can test further.</p>";
     return "<p class='deepUntested'>Not tested yet: " + bits.join("; ") + ". Deep Scan starts from one test sign-in and asks for more only when a test needs it.</p><p style='margin:6px 0 0'><button type='button' class='navbtn' data-deep='open-setup'>Set up Deep Scan</button></p>";
@@ -1235,6 +1417,7 @@ function deepSetupHTML(){
 function updateDeepSetup(){
   let el = $("deepSetup");
   if(el) el.innerHTML = deepSetupHTML();
+  try{ refreshQuickTail(); }catch(e){}
 }
 function setRowPill(key, text, cls){
   let ds = deepState;
@@ -1248,14 +1431,34 @@ function setRowState(key, state, pillText, pillCls){
   setRowPill(key, pillText, pillCls);
 }
 function updateDeepRow(key){
+  if(key === "surface"){
+    // The signed-in surface has no row of its own any more: its results
+    // render as step 1 inside the cross-user row.
+    let bc = $("deepBody-cross");
+    if(bc) bc.innerHTML = deepBodyHTML("cross");
+    try{ refreshQuickTail(); }catch(e){}
+    return;
+  }
   let b = $("deepBody-" + key);
   if(b) b.innerHTML = deepBodyHTML(key);
+  try{ refreshQuickTail(); }catch(e){}
 }
 function wireDeep(){
   ["cross", "surface", "files", "settle"].forEach(function(k){ updateDeepRow(k); });
 }
 function deepBodyHTML(key){
-  if(key === "cross") return crossBodyHTML();
+  if(key === "cross"){
+    let h = crossBodyHTML();
+    // The Files part lives at the end of the cross body (clubbed
+    // 2026-11-05). It is rendered here, not spliced into the locker,
+    // because row bodies are re-rendered independently whenever a
+    // row updates; anything merely nested into the locker markup
+    // would be wiped by the next cross re-render.
+    if(deepState && deepState.tokenA && deepState.stores && deepState.stores.length){
+      h += "<div class='deepPart'>" + deepRowShell("files", "Files") + "</div>";
+    }
+    return h;
+  }
   if(key === "surface") return surfaceBodyHTML();
   if(key === "files") return filesBodyHTML();
   return settleBodyHTML();
@@ -1295,82 +1498,193 @@ function deepCardHTML(it){
   }
   return h;
 }
+// Cross-user access as a step flow (Swati's redesign,
+// 2026-11-05): a one-line description, a progress line, and
+// ONE step visible at a time. Before test user A signs in,
+// nothing about B exists on the page. Step 1 reports only
+// what A can read, in one line, with no verdict words. Step
+// 2 offers two ways, chosen by radio, each opening only its
+// own fields. Verdicts render only after Step 2 completes,
+// one compact line per table, explanations behind Details.
+// The automatic look's per-table "could not run" notes are
+// no longer rendered anywhere; Step 2 is their answer.
+function flowProgHTML(ds){
+  let s1 = !!ds.tokenA, s2 = step2Done(ds);
+  function seg(done, now, label){
+    let cls = done ? "fdone" : (now ? "fnow" : "");
+    return "<span class='" + cls + "'><span class='fdot'></span>" + label + "</span>";
+  }
+  return "<p class='flowProg'>" + seg(s1, !s1, "Step 1") + "<span class='fbar'></span>" + seg(s2, s1 && !s2, "Step 2") + "<span class='fbar'></span>" + seg(s2, false, "Verdict") + "</p>";
+}
+function crossItemSettled(it){ return it.status === "PROVEN" || it.status === "BLOCKED"; }
+function step2Done(ds){
+  if(!ds.tokenA) return false;
+  if(ds.provenRan) return true;
+  if(ds.rowAsks && ds.rowAsks.length){
+    return ds.rowAsks.every(function(n){ return ds.rows.cross.items.some(function(it){ return rawSubject(it).toLowerCase() === n.toLowerCase() && crossItemSettled(it); }); });
+  }
+  return false;
+}
+function step2Pending(ds){
+  return ds.tables.some(function(t){ return !ds.rows.cross.items.some(function(it){ return rawSubject(it).toLowerCase() === t.name.toLowerCase() && crossItemSettled(it); }); });
+}
+function step1Line(ds){
+  let reads = ds.aReads || [];
+  if(!reads.length) return "A can read: nothing.";
+  let show = reads.slice(0, 3), rest = reads.length - show.length;
+  return "A can read: " + show.map(function(n){ return esc(n); }).join(", ") + (rest > 0 ? ", +" + rest + " more" : "") + ".";
+}
+function bModeOf(ds){ return ds.bMode || "signin"; }
+function verdictRowHTML(it){
+  let pill = it.status === "PROVEN" ? "<span class='atag tagIssue'>Issue</span>" : "<span class='atag tagProtected'>Protected</span>";
+  return "<div class='vwrap'><div class='vrow'><span class='vname'>" + esc(rawSubject(it)) + "</span>" + pill + "<button type='button' class='vExp' aria-expanded='false'>Details \u25be</button></div><div class='deepDet' hidden>" + deepCardHTML(it) + "</div></div>";
+}
+function compactNoteRow(n){
+  let pill = n.tag === "Issue" ? "<span class='atag tagIssue'>Issue</span>" : n.tag === "No issue found" ? "<span class='atag tagProtected'>Protected</span>" : "<span class='atag tagNc'>Could not verify</span>";
+  let det = "";
+  if(n.linked) det += "<p style='margin:2px 0'>" + esc(n.linked) + "</p>";
+  (n.lines || []).forEach(function(L){ det += "<p style='margin:2px 0'>" + esc(L) + "</p>"; });
+  return "<div class='vwrap'><div class='vrow'><span class='vname'>" + esc(n.title) + "</span>" + pill + "<button type='button' class='vExp' aria-expanded='false'>Details \u25be</button></div><div class='deepDet' hidden>" + det + "</div></div>";
+}
 function crossBodyHTML(){
   let ds = deepState, r = ds.rows.cross;
   if(r.state === "na"){
     return "<p class='small'>Quick Scan confirmed no tables in this app, so there is nothing to aim a cross-user test at.</p>" + reasonLineHTML("Resource not discovered");
   }
   let h = "";
-  r.items.forEach(function(it){ h += deepCardHTML(it); });
-  Object.keys(r.autoNotes || {}).forEach(function(tn){
-    h += "<p class='small'><strong>" + esc(tn) + ":</strong> " + esc(r.autoNotes[tn]) + "</p>";
-  });
-  if(r.state === "running"){ h += "<p class='small'>Running the cross-user tests&hellip;</p>"; return h; }
-  if(r.state === "done"){
-    if(r.items.length) h += "<p class='small'>Every confirmed table has a cross-user verdict above.</p>";
-    return h;
-  }
+  h += "<p class='flowDesc'>Two test users sign in. We compare what each can reach.</p>";
+  h += flowProgHTML(ds);
   if(!ds.tokenA){
-    h += "<p class='deepNeed'>Needs one thing: a test sign-in for user A, in the setup above. Nothing in this row can run until then.</p>";
+    h += "<p class='flowLine' style='margin-left:0'>Sign in as test user A in the setup above. Nothing else is asked until then.</p>";
     return h;
   }
-  if(ds.tokenB){
-    h += "<p class='small'>Test user B is signed in. The proven test can run for every table.</p>";
-    h += "<p style='margin:6px 0 0'><button type='button' class='navbtn' data-deep='run-proven'>Run the proven cross-user test</button></p>";
-    return h;
-  }
-  h += "<div class='deepRowAsk'><p style='margin:0 0 4px'><strong>Finish the proof, either way:</strong></p>";
-  h += "<p class='small'><strong>Way 1: test user B signs in too.</strong> The check then aims at rows from B's own session, and every verdict is graded Proven.</p>";
-  h += deepSigninBlockHTML("B");
-  h += "<p class='small' id='deepBStatus'></p>";
-  if(ds.rowAsks === null) ds.rowAsks = prioritiseRowAsks();
-  if(ds.rowAsks.length){
-    h += "<p class='small'><strong>Way 2: give B's row numbers.</strong> At most three tables are asked, the ones where the answer matters most first. These results are graded Probe: they rest on your word that each number is B's row in that table.</p>";
-    ds.rowAsks.forEach(function(name, i){
-      h += "<label for='deepRow" + i + "'>Row number in " + esc(name) + " that belongs to test user B</label><input id='deepRow" + i + "' type='text' autocomplete='off' spellcheck='false' value='" + esc(ds.rowIds[name] || "") + "'>";
-    });
-    h += "<p style='margin:6px 0 0'><button type='button' class='navbtn' data-deep='run-rows'>Run the exact-row test</button></p>";
-  }
+  h += "<div class='flowStep'><div class='flowHead'><span class='flowTick'>\u2713</span> Step 1 \u00b7 Test user A</div>";
+  if(ds.rows.surface.state === "running") h += "<p class='flowLine'>Reading what A can reach&hellip;</p>";
+  else h += "<p class='flowLine'>" + step1Line(ds) + "</p>";
+  let s2 = step2Done(ds);
+  let vShown = s2 || (ds.rowAsks && ds.rowAsks.some(function(n){ return ds.rows.cross.items.some(function(it){ return rawSubject(it).toLowerCase() === n.toLowerCase() && crossItemSettled(it); }); }));
+  if(!s2 && step2Pending(ds)) h += "<p class='flowMicro'>Step 2 settles the rest.</p>";
   h += "</div>";
+  if(!s2){
+    h += "<div class='flowStep'><div class='flowHead'><span class='flowNum'>2</span> Step 2 \u00b7 Test user B</div><div class='flowBody'>";
+    if(r.state === "running"){
+      h += "<p class='small'>Running the test&hellip;</p>";
+    } else {
+      let mode = bModeOf(ds);
+      h += "<label class='bmodeRow'><input type='radio' name='deepBMode' value='signin'" + (mode === "signin" ? " checked" : "") + "> Sign in as test user B</label>";
+      h += "<label class='bmodeRow'><input type='radio' name='deepBMode' value='row'" + (mode === "row" ? " checked" : "") + "> Give one row number from B's data</label>";
+      if(mode === "signin"){
+        if(ds.tokenB){
+          h += "<p class='small'>Test user B is signed in.</p><p style='margin:6px 0 0'><button type='button' class='navbtn' data-deep='run-proven'>Run the test</button></p>";
+        } else {
+          h += deepSigninBlockHTML("B");
+          h += "<p class='small' id='deepBStatus'></p>";
+        }
+      } else {
+        if(ds.rowAsks === null) ds.rowAsks = prioritiseRowAsks();
+        if(ds.rowAsks.length){
+          ds.rowAsks.forEach(function(name, i){
+            h += "<div class='frow2'><div class='storeBox'>" + esc(name) + "</div><input id='deepRow" + i + "' type='text' autocomplete='off' spellcheck='false' placeholder='Row number' value='" + esc(ds.rowIds[name] || "") + "'></div>";
+          });
+          h += "<p style='margin:6px 0 0'><button type='button' class='navbtn' data-deep='run-rows'>Run the test</button></p>";
+        } else {
+          h += "<p class='small'>No table needs a row number. B's sign-in covers this step.</p>";
+        }
+      }
+    }
+    h += "</div></div>";
+    if(vShown) h += verdictBlockHTML(ds);
+    return h;
+  }
+  h += "<div class='flowStep'><div class='flowHead'><span class='flowTick'>\u2713</span> Step 2 \u00b7 Test user B</div>";
+  h += "<p class='flowLine'>" + (ds.tokenB ? "B's own sign-in proved every answer below." : "Row numbers settled every answer below.") + "</p></div>";
+  h += verdictBlockHTML(ds);
+  return h;
+}
+function verdictBlockHTML(ds){
+  let r = ds.rows.cross;
+  let h = "<div class='flowStep'><div class='flowHead'><span class='flowTick'>\u2713</span> Verdict</div><div>";
+  let settledItems = r.items.filter(crossItemSettled);
+  settledItems.forEach(function(it){ h += verdictRowHTML(it); });
+  let settledNames = {};
+  settledItems.forEach(function(it){ settledNames[rawSubject(it).toLowerCase()] = 1; });
+  let unsettled = ds.tables.map(function(t){ return t.name; }).filter(function(n){ return !settledNames[n.toLowerCase()]; });
+  if(unsettled.length) h += "<p class='flowMicro' style='margin-left:0'>Not settled: " + unsettled.map(function(n){ return esc(n); }).join(", ") + "</p>";
+  h += "</div></div>";
   return h;
 }
 function surfaceBodyHTML(){
   let ds = deepState, r = ds.rows.surface;
   if(r.state === "na"){
-    return "<p class='small'>No confirmed tables, so there is no signed-in surface to test.</p>" + reasonLineHTML("Resource not discovered");
+    return "<p class='small'>No confirmed tables, so there is nothing for a signed-in account to read here.</p>" + reasonLineHTML("Resource not discovered");
   }
   let h = "";
   r.items.forEach(function(n){ h += deepNoteHTML(n); });
   if(r.state === "running"){ h += "<p class='small'>Reading every confirmed table as test user A&hellip;</p>"; return h; }
   if(!ds.tokenA){
-    h += "<p class='deepNeed'>Needs one thing: a test sign-in for user A, in the setup above. This row then runs on its own: every confirmed table is read again as A, and anything A can read that a stranger could not is reported here.</p>";
+    h += "<p class='deepNeed'>Needs one thing: a test sign-in for user A, in the setup above. Then every confirmed table is read again as A, and for each one you see exactly what came back for A.</p>";
     return h;
   }
   if(r.state === "done") h += "<p class='small'>Every confirmed table was read as test user A. Tables a stranger could already read are in the Quick Scan report above and are not repeated here.</p>";
   return h;
+}
+// The Files part (Swati's shape, 2026-11-05): one row per
+// file store, side by side: a dropdown that chooses the
+// store (so nobody types or guesses a bucket name) and one
+// field for that store's file names, comma separated. One
+// button checks everything at once. What is being asked is
+// written in one short line above the rows. Quick-found
+// files prefill their store's field.
+function initFilesRows(ds){
+  if(ds.filesRows) return;
+  ds.filesRows = ds.stores.map(function(st){
+    let seeds = (ds.filesSeedByStore && ds.filesSeedByStore[st]) || [];
+    return { store: st, text: seeds.join(", ") };
+  });
+}
+function saveFileRows(){
+  let ds = deepState;
+  if(!ds || !ds.filesRows) return;
+  document.querySelectorAll(".mgFileName").forEach(function(el){
+    let ix = parseInt(el.getAttribute("data-row"), 10);
+    if(ds.filesRows[ix]) ds.filesRows[ix].text = el.value;
+  });
+  document.querySelectorAll(".mgStoreSel").forEach(function(el){
+    let ix = parseInt(el.getAttribute("data-row"), 10);
+    if(ds.filesRows[ix]) ds.filesRows[ix].store = el.value;
+  });
+}
+if(!window.__mgDeepChangeWired){
+  window.__mgDeepChangeWired = 1;
+  document.addEventListener("change", function(e){
+    if(!e.target) return;
+    if(e.target.name === "deepBMode" && deepState){
+      deepState.bMode = e.target.value;
+      updateDeepRow("cross");
+    } else if(e.target.classList && e.target.classList.contains("mgStoreSel")){
+      saveFileRows();
+      updateDeepRow("files");
+    }
+  });
 }
 function filesBodyHTML(){
   let ds = deepState, r = ds.rows.files;
   if(!ds.stores.length){
     return "<p class='small'>No file stores were found in Quick Scan.</p>";
   }
-  let h = "";
-  r.items.forEach(function(n){ h += deepNoteHTML(n); });
-  if(r.state === "running"){ h += "<p class='small'>Trying to open the file as test user A&hellip;</p>"; return h; }
   if(!ds.tokenA){
-    h += "<p class='deepNeed'>Needs one thing: a test sign-in for user A, in the setup above. Then one file name settles this row.</p>";
-    return h;
+    return "<p class='deepNeed'>Needs one thing: a test sign-in for user A, in the setup above.</p>";
   }
-  if(ds.stores.length > 1){
-    h += "<label for='deepStoreSel'>File store</label><select id='deepStoreSel' style='width:100%;height:48px;padding:0 12px;font-size:17px;border:1px solid #d2d2d7;border-radius:12px;background:#fff;margin:0 0 8px'>";
-    ds.stores.forEach(function(s){ h += "<option value='" + esc(s) + "'" + (ds.filesStore === s ? " selected" : "") + ">" + esc(s) + "</option>"; });
-    h += "</select>";
-  } else {
-    h += "<p class='small'>File store: <strong>" + esc(ds.stores[0]) + "</strong></p>";
-  }
-  h += "<label for='deepFileName'>Name of a real file in this store that belongs to the other test user</label><input id='deepFileName' type='text' autocomplete='off' spellcheck='false' placeholder='Exactly as it appears in Storage' value='" + esc(ds.filesName || "") + "'>";
-  h += "<p style='margin:6px 0 0'><button type='button' class='navbtn' data-deep='run-files'>Try to open it as user A</button></p>";
+  initFilesRows(ds);
+  let h = "";
+  h += "<p class='small' style='margin:0 0 8px'>Files that belong to the other test user:</p>";
+  ds.filesRows.forEach(function(row, ix){
+    h += "<div class='frow2'><select class='mgStoreSel' data-row='" + ix + "' aria-label='File store'>" + ds.stores.map(function(st){ return "<option value='" + esc(st) + "'" + (row.store === st ? " selected" : "") + ">" + esc(st) + "</option>"; }).join("") + "</select><input class='mgFileName' data-row='" + ix + "' type='text' autocomplete='off' spellcheck='false' placeholder='File names, separated by commas' value='" + esc(row.text) + "'></div>";
+  });
+  h += "<p style='margin:4px 0 0'><button type='button' class='navbtn' data-deep='run-files'>Check all files as user A</button></p>";
   h += "<p class='small' id='deepFilesStatus'></p>";
+  if(r.state === "running") h += "<p class='small'>Trying to open the named files as test user A&hellip;</p>";
+  r.items.forEach(function(n){ h += compactNoteRow(n); });
   return h;
 }
 function settleBodyHTML(){
@@ -1379,13 +1693,12 @@ function settleBodyHTML(){
     return "<p class='small'>Quick Scan left no open answers that a sign-in can settle.</p>";
   }
   let h = "";
-  r.items.forEach(function(n){ h += deepNoteHTML(n); });
+  r.items.forEach(function(n){ h += compactNoteRow(n); });
   if(r.state === "running"){ h += "<p class='small'>Re-testing the open answers as test user A&hellip;</p>"; return h; }
   if(!ds.tokenA){
-    h += "<p class='deepNeed'>Needs one thing: a test sign-in for user A, in the setup above. The open answers (for " + ds.settleCandidates.map(function(c){ return c.table; }).join(", ") + ") are then re-tested as A, where a sign-in can change the answer.</p>";
+    h += "<p class='deepNeed'>Needs one thing: a test sign-in for user A, in the setup above.</p>";
     return h;
   }
-  if(r.state === "done") h += "<p class='small'>Each settled answer is linked to the Quick Scan snapshot above, never written into it.</p>";
   return h;
 }
 function openDeepSetup(){
@@ -1476,7 +1789,7 @@ async function deepUseTokenA(){
   let ds = deepState;
   let st = $("deepAStatus");
   let tokEl = $("deepTokenA");
-  let tok = tokEl ? tokEl.value.trim() : "";
+  let tok = tokEl ? cleanCred(tokEl.value) : "";
   if(!tok){ if(st) st.textContent = "Paste a test user's sign-in token first."; return; }
   if(masterKeyProblem(tok)){ if(st) st.textContent = "STOP: that is a master (service) key, not a test user's sign-in token. It can read every row, so it would fake a leak on every table. Paste a test user's token instead."; return; }
   if(st) st.textContent = "Checking the token against your app\u2026";
@@ -1516,7 +1829,7 @@ async function deepUseTokenB(){
   let ds = deepState;
   let st = $("deepBStatus");
   let tokEl = $("deepTokenB");
-  let tok = tokEl ? tokEl.value.trim() : "";
+  let tok = tokEl ? cleanCred(tokEl.value) : "";
   if(!tok){ if(st) st.textContent = "Paste test user B's sign-in token first."; return; }
   if(masterKeyProblem(tok)){ if(st) st.textContent = "STOP: that is a master (service) key, not a test user's sign-in token. Paste a test user's token instead."; return; }
   let ok = await deepVerifyToken(tok);
@@ -1531,10 +1844,9 @@ async function ensureColumns(){
     let fd = await discoverTables(ds.base, ds.anonKey, ds.tokenA);
     ds.columns = fd.columns || {};
   }catch(e){ ds.columns = {}; }
-  ds.tables.forEach(function(t){
-    let cols = ds.columns[t.name] || [];
-    t.ownerCol = OWNER_COLS.filter(function(c){ return cols.indexOf(c) > -1; })[0] || "";
-  });
+  // t.ownerCol is deliberately NOT set from column names here. Since
+  // the 2026-11-05 rebuild it is set only by the value-based look in
+  // probeCrossAuto, when a column is proven to carry user ids.
   return ds.columns;
 }
 function prioritiseRowAsks(){
@@ -1573,18 +1885,23 @@ async function runDeepAfterSignIn(){
   let ds = deepState;
   if(!ds || !ds.tokenA) return;
   deepFireStarted();
+  expandDeepRow("cross");
   updateDeepRow("files");
   await ensureColumns();
+  // The value-based cross-user look runs first: when it proves which
+  // column carries user ids, the surface batch below can use that
+  // proven column instead of guessing from names.
+  await runCrossAutoAttempt();
   await runSurfaceBatch();
   await runSettleBatch();
-  await runCrossAutoAttempt();
   checkDeepCompleted();
 }
 async function runSurfaceBatch(){
   let ds = deepState;
   if(!ds.tables.length) return;
+  ds.aReads = [];
   setRowState("surface", "running", "Running", "tagNc");
-  updateDeepRow("surface");
+  updateDeepRow("cross");
   for(let i = 0; i < ds.tables.length; i++){
     let t = ds.tables[i];
     let note = null;
@@ -1593,6 +1910,7 @@ async function runSurfaceBatch(){
     try{
       let r = await fetchJson(ds.base + "/rest/v1/" + encodeURIComponent(t.name) + "?select=" + encodeURIComponent(sel) + "&limit=25", ds.anonKey, ds.tokenA);
       if(r.status === 200 && Array.isArray(r.data)){
+        if(r.data.length && ds.aReads) ds.aReads.push(t.name);
         if(oc && ds.userIdA){
           // With an owner column, A's own rows can be told apart from
           // everyone else's, so the verdict never overclaims.
@@ -1620,20 +1938,20 @@ async function runSurfaceBatch(){
       } else if(r.status === 401 || r.status === 403){
         note = { tag: "No issue found", title: t.name, settled: true, lines: ["Your project refused the signed-in read for this table (" + r.status + "). Signed-in accounts are not let in either."] };
       } else {
-        note = { tag: "Could not verify", title: t.name, settled: false, lines: ["The signed-in read did not return a clear answer (status: " + r.status + "). Treat this as unknown, not safe."] };
+        note = { tag: "Could not verify", title: t.name, settled: false, lines: ["The signed-in read did not return a clear answer (status: " + r.status + "). Unknown, not safe."] };
       }
     }catch(e){
-      note = { tag: "Could not verify", title: t.name, settled: false, lines: ["The signed-in read could not be completed from this browser. Treat this as unknown, not safe."] };
+      note = { tag: "Could not verify", title: t.name, settled: false, lines: ["The signed-in read could not be completed from this browser. Unknown, not safe."] };
     }
     if(note){
       let ix = ds.rows.surface.items.findIndex(function(n){ return n.title.toLowerCase() === t.name.toLowerCase(); });
       if(ix > -1) ds.rows.surface.items[ix] = note;
       else ds.rows.surface.items.push(note);
-      updateDeepRow("surface");
+      updateDeepRow("cross");
     }
   }
   setRowState("surface", "done", "Done", "tagProtected");
-  updateDeepRow("surface");
+  updateDeepRow("cross");
 }
 async function runSettleBatch(){
   let ds = deepState;
@@ -1680,19 +1998,26 @@ async function runCrossAutoAttempt(){
   await ensureColumns();
   for(let i = 0; i < ds.tables.length; i++){
     let t = ds.tables[i];
-    if(!t.ownerCol) continue;
     let already = ds.rows.cross.items.some(function(it){
       return rawSubject(it).toLowerCase() === t.name.toLowerCase() && (it.status === "PROVEN" || it.status === "BLOCKED");
     });
     if(already) continue;
     let auto = await probeCrossAuto(ds.base, ds.anonKey, ds.tokenA, ds.userIdA, t.name, ds.columns[t.name] || []);
+    if(auto.ownerColFound) t.ownerCol = auto.ownerColFound;
     if(auto.status === "PROVEN"){
       auto.grade = "Probe";
       upsertCrossItem(auto);
     } else if(auto.status === "BLOCKED"){
       // The automatic attempt is probe evidence only: it can flag an
       // issue, it can never produce a Protected answer.
-      ds.rows.cross.autoNotes[t.name] = "The automatic look, signed in as test user A, saw none of anyone else's rows here. That is evidence, not a verdict: this attempt can never prove protection. The exact-row test or B's sign-in below settles it.";
+      ds.rows.cross.autoNotes[t.name] = "The automatic look, signed in as test user A, found the column that carries user ids by what it holds (" + (auto.ownerColFound || "an owner column") + "), and every row A could see carries A's own id in it. That is evidence, not a verdict: this attempt can never prove protection. The exact-row test or B's sign-in below settles it.";
+    } else if(auto.autoNote){
+      // Unsettled outcomes are always shown (2026-11-05 rebuild): a
+      // table the automatic look cannot settle appears here with its
+      // reason and the step that unblocks it, never silently absent.
+      let note = auto.autoNote;
+      if(auto.reasonCode === "Ownership not established") note += " The exact-row test or B's sign-in below settles it.";
+      ds.rows.cross.autoNotes[t.name] = note;
     }
     updateDeepRow("cross");
   }
@@ -1726,6 +2051,7 @@ async function runCrossProbe(){
   checkDeepCompleted();
 }
 async function runCrossProven(){
+  if(deepState) deepState.provenRan = true;
   let ds = deepState;
   if(!ds || !ds.tokenA || !ds.tokenB) return;
   deepFireStarted();
@@ -1741,14 +2067,14 @@ async function runCrossProven(){
     catch(e){ bErr = true; }
     let it;
     if(bErr || !br || br.status === 401 || br.status === 403){
-      it = { probe: "P2", title: "Cross-user row read: " + t.name, status: "NOT_CHECKED", level: "MEDIUM", grade: "Proven", reasonCode: "Authentication required", findings: ["Test user B's sign-in did not work for this request, for example a token that has expired. A test that could not run is not a pass, so this question stays unanswered."], fixes: ["Sign in as test user B again, then run the proven test again."] };
+      it = { probe: "P2", title: "Cross-user row read: " + t.name, status: "NOT_CHECKED", level: "MEDIUM", grade: "Proven", reasonCode: "Authentication required", findings: ["Test user B's sign-in did not work for this request, for example an expired token. A test that could not run is not a pass."], fixes: ["Sign in as test user B again, then run the proven test again."] };
     } else if(br.status === 200 && Array.isArray(br.data) && br.data.length > 0){
-      it = await probeCrossUser(ds.base, ds.anonKey, t.name, ds.tokenA, String(br.data[0].id));
+      it = await probeCrossUser(ds.base, ds.anonKey, t.name, ds.tokenA, String(br.data[0].id), true);
       it.grade = "Proven";
     } else if(br.status === 200 && Array.isArray(br.data)){
-      it = { probe: "P2", title: "Cross-user row read: " + t.name, status: "NOT_CHECKED", level: "MEDIUM", grade: "Proven", reasonCode: "Ownership not established", findings: ["Test user B can see no rows in this table, so there is no row of B's here for A to aim at. Add one fake row owned by B in this table, or use the row-number way instead. Do not read this as safe."], fixes: ["Add a fake row owned by test user B in this table, then run again."] };
+      it = { probe: "P2", title: "Cross-user row read: " + t.name, status: "NOT_CHECKED", level: "MEDIUM", grade: "Proven", reasonCode: "Ownership not established", findings: ["Test user B can see no rows in this table, so there is no row of B's here for A to aim at. Add one fake row owned by B in this table, or use the row-number way instead."], fixes: ["Add a fake row owned by test user B in this table, then run again."] };
     } else {
-      it = { probe: "P2", title: "Cross-user row read: " + t.name, status: "NOT_CHECKED", level: "MEDIUM", grade: "Proven", findings: ["Reading test user B's rows did not return a clear answer (status: " + (br ? br.status : "none") + "). Treat this as unknown, not safe."], fixes: ["Run the proven test again."] };
+      it = { probe: "P2", title: "Cross-user row read: " + t.name, status: "NOT_CHECKED", level: "MEDIUM", grade: "Proven", findings: ["Reading test user B's rows did not return a clear answer (status: " + (br ? br.status : "none") + "). Unknown, not safe."], fixes: ["Run the proven test again."] };
     }
     upsertCrossItem(it);
     updateDeepRow("cross");
@@ -1761,45 +2087,61 @@ async function runCrossProven(){
 async function runFilesTest(){
   let ds = deepState;
   if(!ds || !ds.tokenA || !ds.stores.length) return;
-  let nameEl = $("deepFileName");
-  let name = nameEl ? nameEl.value.trim() : "";
-  let store = ds.stores[0];
-  if(ds.stores.length > 1){
-    let sel = $("deepStoreSel");
-    if(sel && sel.value) store = sel.value;
-  }
+  saveFileRows();
   let st = $("deepFilesStatus");
-  if(!name){ if(st) st.textContent = "Give the exact name of one real file in this store that belongs to the other test user."; return; }
-  ds.filesName = name; ds.filesStore = store;
+  let byStore = {};
+  (ds.filesRows || []).forEach(function(row){
+    let seen = {};
+    (row.text || "").split(",").forEach(function(p){
+      let n = p.trim();
+      if(n && !seen[n]){ seen[n] = 1; (byStore[row.store] = byStore[row.store] || []).push(n); }
+    });
+  });
+  let storesToRun = Object.keys(byStore);
+  if(!storesToRun.length){ if(st) st.textContent = "Name at least one file in a store above."; return; }
   deepFireStarted();
   setRowState("files", "running", "Running", "tagNc");
   updateDeepRow("files");
+  for(let si = 0; si < storesToRun.length; si++){
+    let store = storesToRun[si];
+    let names = byStore[store].slice(0, 10);
+    ds.filesStore = store; ds.filesName = names[0];
+    for(let fi = 0; fi < names.length; fi++){
+      let note = await probeOneFileAsA(ds, store, names[fi]);
+      let ix = ds.rows.files.items.findIndex(function(n){ return n.key === note.key; });
+      if(ix > -1) ds.rows.files.items[ix] = note; else ds.rows.files.items.push(note);
+      updateDeepRow("files");
+    }
+  }
+  setRowState("files", "done", "Done", "tagProtected");
+  updateDeepRow("files");
+  checkDeepCompleted();
+}
+async function probeOneFileAsA(ds, store, name){
   let url = ds.base + "/storage/v1/object/authenticated/" + encodeURIComponent(store) + "/" + name.split("/").map(function(seg){ return encodeURIComponent(seg); }).join("/");
   addLog("GET " + ds.base + "/storage/v1/object/authenticated/" + store + "/" + name + " as test user A (token redacted)");
   let note;
   try{
     let resp = await fetchT(url, { method: "GET", headers: { "apikey": ds.anonKey, "Authorization": "Bearer " + ds.tokenA, "Range": "bytes=0-0" } });
     if(resp.status === 200 || resp.status === 206){
-      note = { tag: "Issue", title: store, settled: true, lines: ["Test user A opened the file " + name + " in this store, the file you named as the other test user's. Any signed-in user who knows or can guess a file's name could open it the same way. The file itself was not shown here. This rests on the file being the other user's, as you named it."] };
+      note = { tag: "Issue", title: store + " / " + name, settled: true, lines: ["Test user A opened the file " + name + " in this store, the file you named as the other test user's. Any signed-in user who knows or can guess a file's name could open it the same way. The file itself was not shown here. This rests on the file being the other user's, as you named it."] };
     } else if(resp.status === 401 || resp.status === 403 || resp.status === 404){
-      note = { tag: "No issue found", title: store, settled: true, lines: ["Test user A could not open the file " + name + " in this store (your storage answered " + resp.status + "). To a signed-in user who does not own it, that file is not reachable this way. This rests on the file name being exactly right: a wrong name would get the same answer."] };
+      note = { tag: "No issue found", title: store + " / " + name, settled: true, lines: ["Test user A could not open the file " + name + " in this store (your storage answered " + resp.status + "). To a signed-in user who does not own it, that file is not reachable this way. This rests on the file name being exactly right: a wrong name would get the same answer."] };
     } else {
-      note = { tag: "Could not verify", title: store, settled: false, lines: ["The signed-in file request did not return a clear answer (status: " + resp.status + "). Treat this as unknown, not safe."] };
+      note = { tag: "Could not verify", title: store + " / " + name, settled: false, lines: ["The signed-in file request did not return a clear answer (status: " + resp.status + "). Unknown, not safe."] };
     }
   }catch(e){
-    note = { tag: "Could not verify", title: store, settled: false, lines: ["The signed-in file request could not be completed from this browser. Treat this as unknown, not safe."] };
+    note = { tag: "Could not verify", title: store + " / " + name, settled: false, lines: ["The signed-in file request could not be completed from this browser. Unknown, not safe."] };
   }
-  ds.rows.files.items = [note];
-  setRowState("files", "done", "Done", "tagProtected");
-  updateDeepRow("files");
-  checkDeepCompleted();
+  note.key = store + "/" + name;
+  return note;
 }
 function deepDownloadHTML(){
   let ds = deepState;
   if(!ds) return "";
   if(deepTotals().settled === 0) return "";
   let h = "<section class='deepSection'><p class='secttl' style='text-align:center'>Deep Scan</p>";
-  h += "<p class='small deepIntro'>Sign-in boundary results from this run: cross-user access, the signed-in surface, cross-user files, and the answers Quick Scan left ambiguous. These ran with a test user signed in, so they sit outside the Quick Scan snapshot above.</p>";
+  h += "<p class='small deepIntro'>Results from this run's sign-in tests. They ran with a test user signed in, so they sit outside the Quick Scan snapshot above.</p>";
   ds.rows.cross.items.forEach(function(it){
     if(it.status === "PROVEN" || it.status === "BLOCKED") h += deepCardHTML(it);
   });
@@ -1817,6 +2159,20 @@ document.addEventListener("click", function(e){
   if(!e.target || !e.target.closest) return;
   let lk = e.target.closest("#deepLocker");
   if(!lk) return;
+  let tg = e.target.closest("[data-deep-toggle]");
+  if(tg){
+    let key = tg.getAttribute("data-deep-toggle");
+    let body = $("deepBody-" + key);
+    if(body){
+      let open = body.hidden;
+      body.hidden = !open;
+      tg.setAttribute("aria-expanded", open ? "true" : "false");
+      let ch = tg.querySelector(".deepChev");
+      if(ch) ch.textContent = open ? "\u25B4" : "\u25BE";
+      if(deepState && deepState.rows[key]) deepState.rows[key].open = open;
+    }
+    return;
+  }
   let asum = e.target.closest(".asum");
   if(asum){
     let det = asum.parentElement.querySelector(".adet");
@@ -1826,6 +2182,18 @@ document.addEventListener("click", function(e){
       det.hidden = !open;
       asum.setAttribute("aria-expanded", open ? "true" : "false");
       if(exp){ let cd2 = asum.closest(".acard"); exp.textContent = open ? "Hide \u25B4" : ((cd2 && cd2.getAttribute("data-fix") === "1") ? "Click for the fix \u25BE" : "Details \u25BE"); }
+    }
+    return;
+  }
+  let vx = e.target.closest(".vExp");
+  if(vx){
+    let wrap = vx.closest(".vwrap");
+    let det2 = wrap ? wrap.querySelector(".deepDet") : null;
+    if(det2){
+      let open2 = det2.hidden;
+      det2.hidden = !open2;
+      vx.setAttribute("aria-expanded", open2 ? "true" : "false");
+      vx.textContent = open2 ? "Hide \u25B4" : "Details \u25BE";
     }
     return;
   }
@@ -1907,7 +2275,7 @@ async function probeAnon(base, anonKey, table, token){
     let r = await fetchJson(url, anonKey, null);
     if(r.status === 200 && Array.isArray(r.data) && r.data.length > 0){
       item.status = "PROVEN"; item.level = "HIGH";
-      item.findings.push("Anyone using only your public anon key could read " + r.data.length + " row(s) from this table. Only the id column was asked for, on purpose, so no names, emails, or other personal values were touched. A table answers a stranger like this for one of two reasons: row level security is off for it, or it is on but a policy lets everyone through. From outside, the two look the same.");
+      item.findings.push("We asked this table for rows as a stranger, using only your public key, and it handed back " + r.data.length + " row(s). A table answers a stranger like this for one of two reasons: its lock, row level security, is off, or it is on but a policy lets everyone through. From outside, the two look the same.");
       item.fixes.push("Open this table in Supabase, under Table Editor, and match the step to what you see. If Row Level Security is off, turn it on. Then open the table's policies: if any policy lets everyone read, or lets any signed-in user read, delete it or narrow it. The read policy that should remain lets each user read only their own rows. Then run this check again.");
     } else if(r.status === 200 && Array.isArray(r.data)){
       // D-6 settled stranger rule: a valid request reached a confirmed
@@ -1923,18 +2291,23 @@ async function probeAnon(base, anonKey, table, token){
       item.status = "BLOCKED"; item.level = "LOW";
       item.sumLine = "A stranger requested data and received none";
       if(provenByComparison){
-        item.findings.push("A stranger asking for this table got nothing back, while your signed-in test user can see rows in it. So the table is not empty: your protection is what stopped the stranger.");
+        item.findings.push("Your signed-in test user can see rows in this table, so it is not empty. Your protection is what stopped the stranger.");
       } else {
-        item.findings.push("A stranger asked this table for data and received none. The request reached the table and was answered, so no data from this table is exposed to a stranger.");
-        item.findings.push("Zero rows returned to an unauthenticated request. This does not establish whether the table is empty or access is restricted.");
+        item.findings.push("The request reached the table, and the table answered. Note: an empty table answers the same way, so this does not prove a lock did it.");
       }
     } else if(r.status === 200){
       // Answered 200, but not the list of rows this check expects:
       // an off-shape answer settles nothing either way.
       item.status = "NOT_PROVEN"; item.level = "MEDIUM";
-      item.findings.push("The stranger's request was answered (status 200), but the answer was not the list of rows this check expects, so it could not be settled either way. Treat this as unknown, not safe.");
+      item.findings.push("The request was answered (status 200), but not with the list of rows this check expects. Nothing was settled. Unknown, not safe.");
       item.fixes.push("Run the check again. If this keeps happening, check the table's policies in Supabase > Authentication > Policies by hand.");
     } else if(r.status === 401 || r.status === 403){
+      if(invalidKeyText(r.data)){
+        item.status = "NOT_PROVEN"; item.level = "MEDIUM"; item.reasonCode = "Key not accepted";
+        item.findings.push("Your project rejected the public key itself (it answered: Invalid API key), so this test never really ran. A refusal like this is about the key, not about this table's protection. Nothing is proven either way.");
+        item.fixes.push("Copy the key again from Supabase, under Project Settings, then API. Paste it exactly as shown, with nothing around it, then run again.");
+        return item;
+      }
       item.status = "BLOCKED"; item.level = "LOW";
       item.findings.push("Your project refused the stranger's request (401 or 403). That is exactly what a protected table does.");
     } else if(r.status === 400){
@@ -1947,7 +2320,7 @@ async function probeAnon(base, anonKey, table, token){
       }catch(e){ counted = -1; }
       if(counted > 0){
         item.status = "PROVEN"; item.level = "HIGH";
-        item.findings.push("Anyone using only your public anon key could count " + counted + " row(s) in this table, which means row level security is letting a stranger see into it (this table has no id column, so the check counted rows instead of reading them). No row values were fetched.");
+        item.findings.push("Anyone using only your public anon key could count " + counted + " row(s) in this table, which means its lock is letting a stranger see into it. This table has no id column, so the check counted rows instead of reading them.");
         item.fixes.push("Open this table in Supabase, under Table Editor, and match the step to what you see. If Row Level Security is off, turn it on. Then open the table's policies: if any policy lets everyone read, or lets any signed-in user read, delete it or narrow it. The read policy that should remain lets each user read only their own rows. Then run this check again.");
       } else if(counted === 0){
         // D-6 settled stranger rule, count shape: the count request is a
@@ -1957,40 +2330,39 @@ async function probeAnon(base, anonKey, table, token){
         // unparseable count (counted < 0) stays unverified.
         item.status = "BLOCKED"; item.level = "LOW";
         item.sumLine = "A stranger requested data and received none";
-        item.findings.push("A stranger asked this table for data and received none. This table has no id column, so the check counted the rows a stranger can see instead of reading them, and the count came back zero. The request reached the table and was answered, so no data from this table is exposed to a stranger.");
-        item.findings.push("Zero rows returned to an unauthenticated request. This does not establish whether the table is empty or access is restricted.");
+        item.findings.push("This table has no id column, so the check counted the rows a stranger can see. The count was zero. Note: an empty table counts the same way, so this does not prove a lock did it.");
       } else {
         item.status = "NOT_CHECKED"; item.level = "MEDIUM";
-        item.findings.push("The stranger's request did not return a clear answer (status: 400, and counting rows did not settle it). This table may have no id column. Treat this as unknown, not safe.");
+        item.findings.push("The request did not return a clear answer (status: 400), and counting rows did not settle it. This table may have no id column. Unknown, not safe.");
         item.fixes.push("Check the table name is correct, then run again. If the table has no id column, check its policies in Supabase > Authentication > Policies by hand.");
       }
     } else if(r.status === 404){
       item.status = "NOT_CHECKED"; item.level = "MEDIUM"; item.reasonCode = "Resource not confirmed";
-      item.findings.push("No table answered to that name (404). The name may be spelled differently in your project, or this table may not be open to the data API at all. Treat this as unknown, not safe.");
+      item.findings.push("No table answered to that name (404). The name may be spelled differently in your project, or this table may not be open to the data API. Unknown, not safe.");
       item.fixes.push("Check the name letter for letter in Supabase, under Table Editor, then run again.");
     } else {
       item.status = "NOT_CHECKED"; item.level = "MEDIUM";
-      item.findings.push("The stranger's request did not return a clear answer (status: " + r.status + "). Treat this as unknown, not safe.");
+      item.findings.push("The stranger's request did not return a clear answer (status: " + r.status + "). Unknown, not safe.");
       item.fixes.push("Check that your Supabase address and the table name are correct, then run again.");
     }
   }catch(e){
     item.status = "NOT_CHECKED"; item.level = "MEDIUM";
     if(e && e.name === "AbortError"){
       item.reasonCode = "Test timed out";
-      item.findings.push("The stranger's request timed out before your project answered, so nothing was settled either way. Treat this as unknown, not safe.");
+      item.findings.push("The stranger's request timed out before your project answered. Nothing was settled. Unknown, not safe.");
       item.fixes.push("Run the check again. If it keeps timing out, check that the project is awake and the address is right.");
     } else {
-      item.findings.push("The stranger's request could not be completed from this browser. This can happen if Supabase blocks this origin, or if the address is wrong. Treat this as unknown, not safe.");
+      item.findings.push("The stranger's request could not be completed from this browser. This can happen if Supabase blocks this origin, or if the address is wrong. Unknown, not safe.");
     }
   }
   return item;
 }
 
-async function probeCrossUser(base, anonKey, table, userToken, rowId){
+async function probeCrossUser(base, anonKey, table, userToken, rowId, existenceProven){
   let item = {probe:"P2", title:"Cross-user row read: "+table, status:"NOT_CHECKED", level:"MEDIUM", findings:[], fixes:[]};
   if(!userToken || !rowId){
     item.reasonCode = !userToken ? "Authentication required" : "Ownership not established";
-    item.findings.push("Not checked: this needs test user A signed in and one row owned by test user B. Without both, cross-user access can neither be proven nor ruled out. Do not read this as safe.");
+    item.findings.push("Not checked: this needs test user A signed in and one row owned by test user B. Without both, cross-user access can be neither proven nor ruled out.");
     item.fixes.push("Create two test users and one row owned by user B, sign in as user A, then run again.");
     return item;
   }
@@ -2002,7 +2374,7 @@ async function probeCrossUser(base, anonKey, table, userToken, rowId){
     else if(cr.status === 200 && Array.isArray(cr.data) && cr.data.length > 0) control = "live";
     else if(cr.status === 200 || cr.status === 403) control = "blind";
     if(control === "dead"){
-      item.findings.push("This test could not run properly: signed in as test user A, the check first asked this table for any row at all, and the request was refused as unauthorised (401). The test sign-in is not working, for example a token that has expired (they last about an hour). A test that could not run is not a pass, so no verdict is shown for this table.");
+      item.findings.push("This test could not run: signed in as test user A, the check asked this table for any row and was refused (401). The test sign-in is not working, for example an expired token (they last about an hour). A test that could not run is not a pass.");
       item.fixes.push("Sign in as test user A again, or paste a fresh token, then run again.");
       return item;
     }
@@ -2011,26 +2383,30 @@ async function probeCrossUser(base, anonKey, table, userToken, rowId){
     let r = await fetchJson(url, anonKey, userToken);
     if(r.status === 200 && Array.isArray(r.data) && r.data.length > 0){
       item.status = "PROVEN"; item.level = "HIGH";
-      item.findings.push("Test user A could read row " + rowId + " in this table, the row you pointed at as test user B's. That is cross-user data exposure: any signed-in user can reach another user's data. Only the id column was asked for, so none of that row's personal values were touched. The number aimed at is printed here on purpose: if it is not B's row number in this table, this verdict is about the wrong row.");
-      if(control === "live") item.control = "the check first made sure the test itself was working. Signed in as A, it asked this table for any row and got rows back, so the sign-in was live when B's row was handed over.";
-      else if(control === "blind") item.control = "signed in as A, the check asked this table for any row and got nothing back, yet B's row was handed over when asked for by its number. Strange, and the leak is real either way.";
+      item.findings.push("Test user A could read row " + rowId + " in this table, the row you pointed at as test user B's. Only the id column was asked for, so none of that row's personal values were touched. The row number is printed on purpose: if it is not B's row number, this verdict is about the wrong row.");
+      if(control === "live") item.control = "Signed in as A, the check first asked this table for any row and got rows back, so the sign-in was live when B's row was handed over.";
+      else if(control === "blind") item.control = "Signed in as A, the check asked this table for any row and got nothing back, yet B's row was handed over when asked for by its number. The leak is real either way.";
       item.fixes.push("Open this table in Supabase, under Table Editor, and match the step to what you see. If Row Level Security is off, turn it on. Then open the table's policies: if any policy lets everyone read, or lets any signed-in user read (a rule that only asks whether someone is logged in still lets every user read every row), delete it or narrow it. The read policy that should remain checks the row's owner against the signed-in user, for example owner = auth.uid(). Then run again with the same test users.");
     } else if(r.status === 401){
       item.status = "NOT_CHECKED"; item.level = "MEDIUM";
-      item.findings.push("The signed-in request was refused as unauthorised (401), which means the test sign-in itself did not work for this request, for example a token that has expired (they last about an hour) or a token from a different project. A test that could not run is not a pass, so this question stays unanswered rather than showing as protected.");
+      item.findings.push("The signed-in request was refused (401). The test sign-in did not work for this request, for example an expired token (they last about an hour) or a token from a different project. A test that could not run is not a pass.");
       item.fixes.push("Sign in as test user A again, or paste a fresh token, then run again.");
     } else if(r.status === 200 || r.status === 403){
       item.status = "BLOCKED"; item.level = "LOW";
-      item.findings.push("Test user A could not read row " + rowId + " in this table, the row you pointed at as test user B's. That is exactly what working row level security looks like. The number aimed at is printed here on purpose: if it is not B's row number in this table, this verdict is about the wrong row.");
-      if(control === "live") item.control = "the check first made sure the test itself was working. Signed in as A, it asked this table for any row and got rows back, then asked for B's row and was refused. A working test was refused, and that is what protection looks like.";
-      else if(control === "blind") item.control = "signed in as A, the check asked this table for any row and got nothing back. This table shows a signed-in user nothing at all, which also covers B's row.";
+      if(existenceProven){
+        item.findings.push("Test user A could not read row " + rowId + " in this table. That row came out of test user B's own session, so it is known to be B's, and known to exist. A being refused it is exactly what working row level security looks like.");
+      } else {
+        item.findings.push("Test user A could not read row " + rowId + " in this table, the row you pointed at as test user B's. So no leak was found on that row. Read it with care: this is not proof the table is protected. If that number is wrong, or no such row exists, the answer looks exactly the same. To turn this into proof, use Way 1 above: test user B signs in, and the check aims at a row from B's own session instead.");
+      }
+      if(control === "live") item.control = "Signed in as A, the check first asked this table for any row and got rows back, then asked for B's row and was refused. A working test was refused: that is what protection looks like.";
+      else if(control === "blind") item.control = "Signed in as A, the check asked this table for any row and got nothing back. This table shows a signed-in user nothing at all, which also covers B's row.";
     } else {
       item.status = "NOT_CHECKED"; item.level = "MEDIUM";
-      item.findings.push("The signed-in request did not return a clear answer (status: " + r.status + "). Treat this as unknown, not safe.");
+      item.findings.push("The signed-in request did not return a clear answer (status: " + r.status + "). Unknown, not safe.");
     }
   }catch(e){
     item.status = "NOT_CHECKED"; item.level = "MEDIUM";
-    item.findings.push("The signed-in request could not be completed from this browser. Treat this as unknown, not safe.");
+    item.findings.push("The signed-in request could not be completed from this browser. Unknown, not safe.");
   }
   return item;
 }
@@ -2039,7 +2415,7 @@ async function probeBucket(base, bucket, objectName){
   let item = {probe:"P3", title:"Public storage bucket: "+bucket, status:"NOT_CHECKED", level:"MEDIUM", findings:[], fixes:[]};
   if(!bucket || !objectName){
     item.reasonCode = "Setup invalid";
-    item.findings.push("Not checked: this needs a bucket name and a file name. Without both, your files cannot be tested. Do not read this as safe.");
+    item.findings.push("Not checked: this needs a bucket name and a file name. Without both, your files cannot be tested.");
     item.fixes.push("Give a bucket and a file name you know exists, then run again.");
     return item;
   }
@@ -2047,6 +2423,7 @@ async function probeBucket(base, bucket, objectName){
   addLog("GET " + base + "/storage/v1/object/public/" + bucket + "/" + objectName + " (no login)");
   try{
     let resp = await fetchT(url, {method: "GET", headers: {"Range": "bytes=0-0"}});
+    item.httpCode = resp.status;
     if(resp.status === 200 || resp.status === 206){
       item.status = "PROVEN"; item.level = "HIGH";
       item.findings.push("Anyone without a login could fetch this file from a public bucket. The file itself was not opened or shown.");
@@ -2056,14 +2433,14 @@ async function probeBucket(base, bucket, objectName){
       item.findings.push("Your storage refused the no-login request (401 or 403). That is exactly what a private bucket does.");
     } else if(resp.status === 404){
       item.status = "BLOCKED"; item.level = "LOW";
-      item.findings.push("Your storage refused the no-login request for this file (404). A private bucket answers exactly this way: to a stranger, the file is simply not there. This answer rests on the file name you gave being exactly right, because a wrong name would get the same answer.");
+      item.findings.push("Your storage refused the no-login request for this file (404). A private bucket answers exactly this way: to a stranger, the file is simply not there. Note: a wrong file name gets the same answer, so this rests on the name you gave being exactly right.");
       item.fixes.push("If that file name is not exactly right, correct it and run again. A correct name with this answer means the file is not open to strangers.");
     } else if(resp.status === 400){
       let emsg = "";
       try{ let ej = await resp.json(); emsg = ((ej && (ej.message || ej.error)) || "") + ""; addLog("Storage answered 400: " + emsg); }catch(e2){ emsg = ""; }
       if(/bucket not found/i.test(emsg)){
         item.status = "BLOCKED"; item.level = "LOW";
-        item.findings.push("Your storage refused the no-login request. Supabase answers for a private bucket exactly as if the bucket was not there at all, the same answer a bucket that does not exist would get, so from outside there is no way in: a stranger cannot open this file, or even confirm the bucket exists. This answer covers the bucket named above; a bucket with a different name was not tested.");
+        item.findings.push("Your storage refused the no-login request. For a private bucket, Supabase answers as if the bucket was not there at all, the same answer a bucket that does not exist would get. A stranger cannot open this file, or even confirm the bucket exists. Note: this covers the bucket named above only.");
         item.fixes.push("If your bucket's real name is different from the one above, run again with its exact name. A correct name with this answer means your files are not open to strangers.");
       } else if(/not found/i.test(emsg)){
         item.status = "PROVEN"; item.level = "HIGH";
@@ -2073,23 +2450,66 @@ async function probeBucket(base, bucket, objectName){
         // would claim this file opens for anyone. It does not.
         item.configOnly = true;
         item.sumLine = "This file store is public. The file named above was not found in it.";
-        item.findings.push("Your bucket is public. That is proven, not guessed: Supabase gives this object not found answer only for a bucket it serves to strangers, while a private bucket answers as if it was not there at all, whatever file name is asked for. No file matched the name above, so this exact file was not the one fetched, but the bucket itself is open: anyone can fetch any file in it if they know or can guess its name.");
+        item.findings.push("Your bucket is public, proven, not guessed: Supabase gives this object-not-found answer only for a bucket it serves to strangers. A private bucket answers as if it was not there, whatever file name is asked for. No file matched the name above, so this exact file was not fetched. But anyone can fetch any file in this bucket if they know or can guess its name.");
         item.fixes.push("Make the bucket private if its files are not meant for everyone, then run again. To test one exact file, use its name letter for letter as it appears in Supabase, under Storage.");
       } else {
         item.status = "NOT_CHECKED"; item.level = "MEDIUM";
-        item.findings.push("The no-login file request did not return a clear answer (status: 400). Treat this as unknown, not safe.");
+        item.findings.push("The no-login file request did not return a clear answer (status: 400). Unknown, not safe.");
       }
     } else {
       item.status = "NOT_CHECKED"; item.level = "MEDIUM";
-      item.findings.push("The no-login file request did not return a clear answer (status: " + resp.status + "). Treat this as unknown, not safe.");
+      item.findings.push("The no-login file request did not return a clear answer (status: " + resp.status + "). Unknown, not safe.");
     }
   }catch(e){
     item.status = "NOT_CHECKED"; item.level = "MEDIUM";
-    item.findings.push("The no-login file request could not be completed from this browser. Treat this as unknown, not safe.");
+    item.findings.push("The no-login file request could not be completed from this browser. Unknown, not safe.");
   }
   return item;
 }
 
+// One stranger attempt to list a store's files (2026-11-05). The
+// storage list answer is honest evidence only when it names files:
+// Supabase answers an empty list for private stores, for stores with
+// no listing rule, and for stores that do not exist, so an empty or
+// failed list proves nothing either way and the caller reports the
+// store as unverified, never as safe.
+async function listBucketFiles(base, anonKey, bucket){
+  try{
+    let resp = await fetchT(base + "/storage/v1/object/list/" + encodeURIComponent(bucket), {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "apikey": anonKey, "Authorization": "Bearer " + anonKey },
+      body: JSON.stringify({ prefix: "", limit: 100, offset: 0, sortBy: { column: "name", order: "asc" } })
+    });
+    if(resp.status !== 200) return null;
+    let arr = await resp.json();
+    if(!Array.isArray(arr)) return null;
+    return arr.filter(function(e){ return e && e.name && e.id; }).map(function(e){ return e.name; });
+  }catch(e){ return null; }
+}
+// Is this store itself public? (2026-11-05, Swati approved it as
+// silent evidence inside the file check, never as its own finding:
+// public is a setting many apps choose on purpose, so it is reported
+// only where it sharpens a file result or an unknown.) The test asks
+// the public address for a file name that does not exist, and reads
+// the refusal with the measured grammar: "Object not found" means the
+// backend serves the store to strangers (public); "Bucket not found"
+// means it answers as if the store were not there (private, or the
+// store does not exist; the two cannot be told apart, and the copy
+// says exactly that). Anything else proves nothing and returns null.
+async function probeBucketPublic(base, anonKey, bucket){
+  try{
+    let resp = await fetchT(base + "/storage/v1/object/public/" + encodeURIComponent(bucket) + "/makerguard-missing-file-check.txt", {
+      headers: { "apikey": anonKey, "Authorization": "Bearer " + anonKey, "Range": "bytes=0-0" }
+    });
+    let txt = "";
+    try{ txt = await resp.text(); }catch(e){}
+    let msg = ""; try{ msg = (JSON.parse(txt).message || ""); }catch(e){}
+    let low = (msg + " " + txt).toLowerCase();
+    if(resp.status === 400 && /object not found|nosuchkey/.test(low)) return "public";
+    if(resp.status === 400 && /bucket not found|nosuchbucket/.test(low)) return "notpublic";
+    return null;
+  }catch(e){ return null; }
+}
 function scanForMasterKey(text){
   if(/sbp_[A-Za-z0-9]{20,}/.test(text)) return "service key pattern (sbp_)";
   if(/sb_secret_[A-Za-z0-9_\-]{8,}/.test(text)) return "secret key pattern (sb_secret_)";
@@ -2105,7 +2525,7 @@ async function probeBundle(productUrl){
   let item = {probe:"P4", title:"Key in client bundle", status:"NOT_CHECKED", level:"MEDIUM", findings:[], fixes:[], filesRead: 0};
   if(!productUrl){
     item.reasonCode = "Resource not discovered";
-    item.findings.push("Not checked: no homepage address was given, so your website code was not read. Do not read this as safe.");
+    item.findings.push("Not checked: no homepage address was given, so your website code was not read.");
     item.fixes.push("Give your homepage address, then run again.");
     return item;
   }
@@ -2114,7 +2534,7 @@ async function probeBundle(productUrl){
     let resp = await fetchT(clean, {method: "GET"});
     if(!resp.ok){
       item.reasonCode = "Invalid endpoint";
-      item.findings.push("Your homepage could not be fetched (status: " + resp.status + "). Treat this as unknown, not safe.");
+      item.findings.push("Your homepage could not be fetched (status: " + resp.status + "). Unknown, not safe.");
       return item;
     }
     let htmlText = await resp.text();
@@ -2151,12 +2571,12 @@ async function probeBundle(productUrl){
       item.fixes.push("Remove the key from your website code, rotate it immediately, and keep it only on a server. Never ship a master key in code a browser can download.");
     } else {
       item.status = "BLOCKED"; item.level = "LOW";
-      item.findings.push("No master key pattern showed up in your homepage or in the " + read + " of its code files that were read. That covers only those files, not your whole site.");
+      item.findings.push("No master key pattern showed up in your homepage or in the " + read + " code files read with it. Note: this covers only those files, not your whole site.");
     }
   }catch(e){
     item.status = "NOT_CHECKED"; item.level = "MEDIUM"; item.filesRead = 0; bundleFilesRead = 0;
     item.reasonCode = "Assets could not be read";
-    item.findings.push("Your homepage or its code files could not be read from this browser. Browsers block reading another site's pages unless that site allows it, which is normal. This question stays unanswered, it is not a pass. To answer it yourself, search your built JavaScript files for a master key pattern, or open this check page from your own website, where the read is allowed.");
+    item.findings.push("Your homepage or its code files could not be read from this browser. Browsers block reading another site's pages unless that site allows it, which is normal. This question stays unanswered. To answer it yourself, search your built JavaScript files for a master key pattern, or open this check page from your own website, where the read is allowed.");
     item.fixes.push("Search your built JavaScript for sbp_ and service_role, and rotate anything you find. Or open this check page from your own website and run again.");
   }
   return item;
@@ -2182,7 +2602,7 @@ function p4FromReader(productUrl){
     item.fixes.push("Remove the key from your website code, rotate it immediately, and keep it only on a server. Never ship a master key in code a browser can download.");
   } else {
     item.status = "BLOCKED"; item.level = "LOW";
-    item.findings.push("MakerGuard's reader read your app's code files from outside, the way a visitor's browser gets them" + (files ? ": " + files + " files, your homepage and the code files it loads" : "") + ". No master key pattern showed up in them. That covers only those files, not your whole site.");
+    item.findings.push("MakerGuard's reader read your app's code files from outside, the way a visitor's browser gets them" + (files ? ": " + files + " files, your homepage and the code files it loads" : "") + ". No master key pattern showed up. Note: this covers only those files, not your whole site.");
   }
   return item;
 }
@@ -2224,48 +2644,98 @@ async function probeCrossAuto(base, anonKey, token, myId, table, columns){
   let item = {probe:"P2", title:"Cross-user row read: "+table, status:"NOT_CHECKED", level:"MEDIUM", findings:[], fixes:[]};
   if(!token || !myId){
     item.reasonCode = "Authentication required";
-    item.findings.push("Not checked: sign in as test user A first. Signed in as you, the check can tell your rows from someone else's. Do not read this as safe.");
+    item.findings.push("Not checked: sign in as test user A first. Signed in as you, the check can tell your rows from someone else's.");
     item.fixes.push("Sign in as test user A in the form above, then run again.");
     return item;
   }
-  let ownerCols = ["user_id","owner_id","owner","created_by","author_id","profile_id","account_id","uid"];
-  let ownerCol = ownerCols.filter(function(c){ return (columns || []).indexOf(c) > -1; })[0] || "";
-  if(!ownerCol){
+  if(!columns || !columns.length){
     item.reasonCode = "Ownership not established";
-    item.findings.push("Not proven either way: this table has no owner column the check recognises, so your rows cannot be told apart from someone else's automatically. Use the exact row below for this table: test user B's row number, with test user A signed in. Do not read this as safe.");
+    item.findings.push("Not proven either way: the automatic look needs this table's column list, and that list could not be read, so it cannot run here. The exact row test still works: give one row number that belongs to test user B.");
+    item.autoNote = "The automatic look could not run here: this table's column list could not be read.";
     item.fixes.push("Use the exact row for this table: a row owned by test user B, with test user A signed in.");
     return item;
   }
-  let url = base + "/rest/v1/" + encodeURIComponent(table) + "?select=id," + encodeURIComponent(ownerCol) + "&limit=25";
-  addLog("GET " + base + "/rest/v1/" + table + " as test user A, automatic cross-user (token redacted)");
+  let crossFix = "Open this table in Supabase, under Table Editor, and match the step to what you see. If Row Level Security is off, turn it on. Then open the table's policies: if any policy lets everyone read, or lets any signed-in user read (a rule that only asks whether someone is logged in still lets every user read every row), delete it or narrow it. The read policy that should remain checks the row's owner against the signed-in user, for example owner = auth.uid(). Then run again.";
+  // Control ask first: if the test sign-in itself is refused, nothing in
+  // this test ran, and a refusal must never be read as protection.
   try{
-    let r = await fetchJson(url, anonKey, token);
-    if(r.status === 200 && Array.isArray(r.data)){
-      let others = r.data.filter(function(row){ return row && row[ownerCol] && String(row[ownerCol]) !== String(myId); });
-      if(others.length > 0){
-        item.status = "PROVEN"; item.level = "HIGH";
-        item.findings.push("Signed in as test user A, your project handed over " + others.length + " row(s) in this table whose owner is not user A. That is cross-user data exposure. Only the id and owner columns were asked for, no other personal values.");
-        item.fixes.push("Open this table in Supabase, under Table Editor, and match the step to what you see. If Row Level Security is off, turn it on. Then open the table's policies: if any policy lets everyone read, or lets any signed-in user read (a rule that only asks whether someone is logged in still lets every user read every row), delete it or narrow it. The read policy that should remain checks the row's owner against the signed-in user, for example owner = auth.uid(). Then run again.");
-      } else {
-        item.status = "BLOCKED"; item.level = "LOW";
-        item.findings.push("Signed in as test user A, none of the rows visible in this table belonged to someone else.");
-      }
-    } else if(r.status === 401 || r.status === 403){
-      item.status = "BLOCKED"; item.level = "LOW";
-      item.findings.push("Your project refused the signed-in request for this table.");
-    } else {
-      item.findings.push("The signed-in request did not return a clear answer (status: " + r.status + "). Treat this as unknown, not safe.");
+    let cr = await fetchJson(base + "/rest/v1/" + encodeURIComponent(table) + "?select=id&limit=1", anonKey, token);
+    if(cr.status === 401){
+      item.reasonCode = "Authentication required";
+      item.findings.push("This test could not run: signed in as test user A, the check asked this table for any row and was refused (401). The test sign-in is not working, for example an expired token (they last about an hour). A test that could not run is not a pass.");
+      item.autoNote = "The automatic look could not run here: the test sign-in did not work for this table (refused, 401). Sign in again above, then this runs.";
+      item.fixes.push("Sign in as test user A again, or paste a fresh token, then run again.");
+      return item;
     }
   }catch(e){
-    item.findings.push("The signed-in request could not be completed from this browser. Treat this as unknown, not safe.");
+    item.findings.push("The signed-in request could not be completed from this browser. Unknown, not safe.");
+    item.autoNote = "The automatic look could not run here: the request could not be completed from this browser.";
+    return item;
   }
+  // Owner detection by value (rebuilt 2026-11-05, her five review
+  // points): never assume a column is the owner column because of its
+  // name. Names, matched loosely (userId, USER_ID and user_id are the
+  // same hint), only choose which columns are checked first. A column
+  // counts as carrying user ids only when test user A's own id actually
+  // appears in it, in rows A can read. At most 10 columns are checked.
+  let hints = ["userid","ownerid","owner","createdby","authorid","profileid","accountid","uid"];
+  let norm = function(x){ return String(x).toLowerCase().replace(/[^a-z0-9]/g, ""); };
+  let cols = columns.filter(function(c){ return c !== "id"; });
+  let hinted = [], rest = [];
+  cols.forEach(function(c){ (hints.indexOf(norm(c)) > -1 ? hinted : rest).push(c); });
+  hinted.sort(function(a, b){ return hints.indexOf(norm(a)) - hints.indexOf(norm(b)); });
+  let candidates = hinted.concat(rest).slice(0, 10);
+  addLog("GET " + base + "/rest/v1/" + table + " as test user A, automatic cross-user look by value (token redacted)");
+  let anchoredClean = "", suspicious = "", tried = 0, refused = 0;
+  for(let ci = 0; ci < candidates.length; ci++){
+    let c = candidates[ci];
+    if(anchoredClean && hinted.indexOf(c) === -1) break;
+    let r = null;
+    try{ r = await fetchJson(base + "/rest/v1/" + encodeURIComponent(table) + "?select=id," + encodeURIComponent(c) + "&limit=25", anonKey, token); }
+    catch(e){ r = null; }
+    if(!r) continue;
+    tried++;
+    if(r.status === 401 || r.status === 403){ refused++; continue; }
+    if(r.status !== 200 || !Array.isArray(r.data)) continue;
+    let vals = [];
+    r.data.forEach(function(row){ if(row && row[c] !== null && row[c] !== undefined && row[c] !== "") vals.push(String(row[c])); });
+    if(!vals.length) continue;
+    let mine = 0;
+    vals.forEach(function(v){ if(v === String(myId)) mine++; });
+    let others = vals.length - mine;
+    if(mine > 0 && others > 0){
+      item.status = "PROVEN"; item.level = "HIGH"; item.ownerColFound = c;
+      item.findings.push("Signed in as test user A, your project handed over " + others + " row(s) in this table that carry a different user's id. The check found the column that carries user ids by what it holds (that column is called " + c + "), not by its name. Only the id column and that column were asked for, no other personal values.");
+      item.fixes.push(crossFix);
+      return item;
+    }
+    if(mine > 0 && !anchoredClean) anchoredClean = c;
+    if(mine === 0 && others > 0 && !suspicious && /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(vals[0])) suspicious = c;
+  }
+  if(anchoredClean){
+    item.status = "BLOCKED"; item.level = "LOW"; item.ownerColFound = anchoredClean;
+    item.findings.push("Signed in as test user A, every row visible in this table carries user A's own id in the column that holds user ids (found by what it holds; that column is called " + anchoredClean + ").");
+    return item;
+  }
+  item.reasonCode = "Ownership not established";
+  if(tried > 0 && refused === tried){
+    item.findings.push("Not proven either way: your project refused every signed-in read for this table, so there were no rows to compare. A refusal by itself does not prove whose rows are protected. The exact row test below settles it: give one row number that belongs to test user B.");
+    item.autoNote = "The automatic look was refused for this table, so there were no rows to compare.";
+  } else if(suspicious){
+    item.findings.push("Not proven either way: signed in as test user A, rows came back that carry other users' ids in one column (" + suspicious + "), but test user A has no rows in this table, so the check cannot tell whether that column is the owner column or something else, like a creator column. The exact row test below settles it: give one row number that belongs to test user B.");
+    item.autoNote = "The automatic look found rows A can read that carry other users' ids, but A has no rows here, so it cannot prove that column is the owner column.";
+  } else {
+    item.findings.push("Not proven either way: the automatic look found no column in this table that carries test user A's id in the rows A can read. Either A has no rows in this table yet, or ownership is kept somewhere else, for example in another table. The exact row test below settles it: give one row number that belongs to test user B.");
+    item.autoNote = "The automatic look could not settle this table: test user A has no rows here to learn from, or no column in it carries user ids.";
+  }
+  item.fixes.push("Use the exact row for this table: a row owned by test user B, with test user A signed in.");
   return item;
 }
 
 $("signInBtn").addEventListener("click", async function(){
   clearError();
   let base = cleanUrl($("supabaseUrl").value);
-  let anonKey = $("anonKey").value.trim();
+  let anonKey = cleanCred($("anonKey").value);
   let email = $("testEmail").value.trim();
   let password = $("testPassword").value;
   if(!base || !anonKey){ showError("Fill in Supabase URL and anon key first, above, then sign in as your test user."); return; }
@@ -2287,7 +2757,8 @@ $("signInBtn").addEventListener("click", async function(){
       addLog("POST " + base + "/auth/v1/token sign-in as test user (password and token redacted)");
     } else {
       memoryToken = ""; memoryTokenEmail = ""; memoryUserId = "";
-      $("signInStatus").textContent = "Sign-in failed. Check that the test user exists, that it is confirmed, and that the password matches that test account. The cross-user question will stay unanswered until a sign-in works.";
+      if(invalidKeyText(data)) $("signInStatus").textContent = "Sign-in failed: your project rejected the public key itself (Invalid API key). Copy the key again from Supabase, under Project Settings, then API, exactly as shown, then sign in again.";
+      else $("signInStatus").textContent = "Sign-in failed. Check that the test user exists, that it is confirmed, and that the password matches that test account. The cross-user question will stay unanswered until a sign-in works.";
     }
   }catch(e){
     $("testPassword").value = "";
@@ -2305,7 +2776,7 @@ $("runBtn").addEventListener("click", async function(){
   if(!autoRun) telEvent("manual_submitted", {});
   clearError();
   let base = cleanUrl($("supabaseUrl").value);
-  let anonKey = $("anonKey").value.trim();
+  let anonKey = cleanCred($("anonKey").value);
   let table = $("tableName").value.trim();
   let tableNamesIn = table ? table.split(/[,\n]/).map(function(s){ return s.trim(); }).filter(function(s, ix, arr){ return s.length && arr.indexOf(s) === ix; }) : [];
   if(!base || !anonKey){ telEvent("run_failed", { stage: "quick", reason: "invalid_input", path: runPath }); showError("Please fill in your Supabase URL, anon key, and at least one table name."); return; }
@@ -2318,7 +2789,7 @@ $("runBtn").addEventListener("click", async function(){
   try{ host = new URL(base).host; }catch(e){ host = base; }
   let results = [];
   let methodEl = document.querySelector('input[name="signinMethod"]:checked');
-  let effectiveToken = (methodEl && methodEl.value === "token") ? $("userToken").value.trim() : memoryToken;
+  let effectiveToken = (methodEl && methodEl.value === "token") ? cleanCred($("userToken").value) : memoryToken;
   if(methodEl && methodEl.value === "token" && masterKeyProblem(effectiveToken)){ telEvent("run_failed", { stage: "quick", reason: "master_key_refused", path: runPath }); showError("STOP: The token you pasted is a master (service) key, not a test user's sign-in token. It can read every row, so it would fake a leak on every table. Paste a test user's token, or use the email and password option instead."); $("runBtn").disabled = false; $("progress").textContent = ""; return; }
   // Validation has passed and the first probe is about to run: only now
   // do the "ran" and "quick_started" events fire.
@@ -2326,6 +2797,12 @@ $("runBtn").addEventListener("click", async function(){
   telEvent("quick_started", { path: runPath });
   // The Deep Scan locker works from this run's backend details. They stay
   // in this page's memory only, like the test sign-in token.
+  // There is deliberately no up-front judgement of the key (defect 3,
+  // 2026-11-05): the only honest judge of a key is a table request's own
+  // answer. Judging it from the table-list request was wrong, because
+  // that request refuses every public key and words the refusal
+  // differently per project, including "Invalid API key" for a good key.
+  // probeAnon's backstop reads a table refusal's wording instead.
   lastBase = base; lastAnonKey = anonKey;
   if(tableNamesIn.length){
     $("progress").textContent = "Question 1 of 4: can a stranger read your tables?";
@@ -2353,12 +2830,12 @@ $("runBtn").addEventListener("click", async function(){
         let cols = null;
         try{ let fd = await discoverTables(base, anonKey, effectiveToken); cols = fd.columns[tname2] || []; }catch(e){ cols = null; }
         if(cols === null){
-          results.push({probe:"P2", title:"Cross-user row read: " + tname2, status:"NOT_CHECKED", level:"MEDIUM", findings:["The automatic cross-user check needs this table's column list, and Supabase no longer shows that list to a public key, so it cannot run this way. The exact row check still works: give test user B's row number for this table and run again. Do not read this as safe."], fixes:["Add the row number of test user B's fake row in this table, then run again."]});
+          results.push({probe:"P2", title:"Cross-user row read: " + tname2, status:"NOT_CHECKED", level:"MEDIUM", findings:["The automatic cross-user check needs this table's column list, and Supabase no longer shows that list to a public key, so it cannot run this way. The exact row check still works: give test user B's row number for this table and run again."], fixes:["Add the row number of test user B's fake row in this table, then run again."]});
         } else {
           let autoItem = await probeCrossAuto(base, anonKey, effectiveToken, memoryUserId || userIdFromToken(effectiveToken), tname2, cols);
           if(autoItem.status === "BLOCKED"){
             autoItem.status = "NOT_PROVEN"; autoItem.level = "MEDIUM";
-            autoItem.findings = ["Nearly, but this test is not finished: test user A could not see anyone else's rows in an automatic look, and the test also needs test user B's row number to be complete. Add B's row number in the cross-user test section and run again. Do not read this as a pass yet."];
+            autoItem.findings = ["Not finished: in an automatic look, test user A could not see anyone else's rows, but this test also needs test user B's row number to be complete. Add it in the cross-user test section and run again. Not a pass yet."];
             autoItem.fixes = ["Add the row number of test user B's fake row in this table, then run again."];
           }
           results.push(autoItem);
@@ -2391,9 +2868,9 @@ $("runBtn").addEventListener("click", async function(){
       return;
     }
     if(!tableNames.length){
-      results.push({probe:"P1", title:"Anon table read: every table", status:"NOT_PROVEN", level:"LOW", findings:["Your project answered the table list request, and the list it shows is empty. No table is visible to a stranger, so a stranger read could not even be attempted. That is the protected shape for this question, but it only covers the tables your project shows in its list, and it says nothing about signed-in users reading each other's data."], fixes:["To check one specific table anyway, name it in Which tables above and run again."]});
+      results.push({probe:"P1", title:"Anon table read: every table", status:"NOT_PROVEN", level:"LOW", findings:["Your project answered the table list request with an empty list. No table is visible to a stranger, so a stranger read could not even be attempted. Note: this covers only the tables your project shows in its list, and says nothing about signed-in users reading each other's data."], fixes:["To check one specific table anyway, name it in Which tables above and run again."]});
       if(!effectiveToken){
-        results.push({probe:"P2", title:"Cross-user row read: all tables", status:"NOT_CHECKED", level:"MEDIUM", findings:["Not checked for any table: no test user sign-in. Sign in as test user A in the form, name your tables above, and give test user B's row number for the exact check. Do not read this as safe."], fixes:["Sign in as test user A, name your tables above, then run again."]});
+        results.push({probe:"P2", title:"Cross-user row read: all tables", status:"NOT_CHECKED", level:"MEDIUM", findings:["Not checked for any table: no test user sign-in. Sign in as test user A in the form, name your tables above, and give test user B's row number for the exact check."], fixes:["Sign in as test user A, name your tables above, then run again."]});
       }
     } else {
     let capped = tableNames.slice(0, 50);
@@ -2410,7 +2887,7 @@ $("runBtn").addEventListener("click", async function(){
         results.push(await probeCrossAuto(base, anonKey, effectiveToken, myId, tn, columnsByTable[tn] || []));
       } else if(!crossMissingPushed){
         crossMissingPushed = true;
-        let skip = {probe:"P2", title:"Cross-user row read: all tables", status:"NOT_CHECKED", level:"MEDIUM", findings:["Not checked for any table: no test user sign-in. Sign in as test user A in the form, name your tables above, and give test user B's row number for the exact check. Do not read this as safe."], fixes:["Sign in as test user A, name your tables above, then run again."]};
+        let skip = {probe:"P2", title:"Cross-user row read: all tables", status:"NOT_CHECKED", level:"MEDIUM", findings:["Not checked for any table: no test user sign-in. Sign in as test user A in the form, name your tables above, and give test user B's row number for the exact check."], fixes:["Sign in as test user A, name your tables above, then run again."]};
         results.push(skip);
       }
     }
@@ -2420,7 +2897,93 @@ $("runBtn").addEventListener("click", async function(){
     results.push({probe:"P2", title:"Cross-user exact row read", status:"NOT_CHECKED", level:"MEDIUM", findings:["Test user B's row number was given, but no single table was named, so the exact row could not be aimed at the right table. The automatic cross-user test above still ran. To try that exact row, type its table name in Which tables and run again."], fixes:["Type the table that holds test user B's row in Which tables, keep the row number, and run again."]});
   }
   $("progress").textContent = "Question 3 of 4: can anyone open your files without logging in?";
-  results.push(await probeBucket(base, $("bucketName").value.trim(), $("objectName").value.trim()));
+  let bucketVal = $("bucketName").value.trim(), objectVal = $("objectName").value.trim();
+  // File exposure, aimed automatically (redesigned 2026-11-05, on
+  // Swati's ruling that the builder must not have to name a file):
+  // the test aims at files from three sources, in this order: a file
+  // the builder typed, files the app's own code names (the reader
+  // returns bucket+file pairs), and files a stranger list attempt
+  // names. A store where no file can be named by any source is
+  // reported as could not verify, with that reason, never as safe
+  // and never as a blank line. No store at all: no file items.
+  let filePairs = [], knownBuckets = [], provenFetchByBucket = {};
+  function addBucketName(b){ if(b && knownBuckets.indexOf(b) === -1) knownBuckets.push(b); }
+  function addFilePair(b, p, origin){
+    if(!b || !p) return;
+    p = String(p).replace(/^\/+/, "");
+    if(!p) return;
+    if(filePairs.some(function(x){ return x.bucket === b && x.path === p; })) return;
+    filePairs.push({ bucket: b, path: p, origin: origin });
+    addBucketName(b);
+  }
+  addBucketName(bucketVal);
+  if(bucketVal && objectVal) addFilePair(bucketVal, objectVal, "typed");
+  let rdData = null;
+  try{ rdData = window.__mgReaderData; }catch(e){}
+  let rdMatches = false;
+  if(rdData && Array.isArray(rdData.projects) && rdData.projects.length){
+    try{ rdMatches = (new URL(base).host === rdData.projects[0] + ".supabase.co"); }catch(e){}
+  }
+  if(rdMatches){
+    if(Array.isArray(rdData.buckets)) rdData.buckets.forEach(addBucketName);
+    if(Array.isArray(rdData.files)) rdData.files.forEach(function(f){ if(f && f.bucket && f.path) addFilePair(f.bucket, f.path, "code"); });
+  }
+  let pairsToTest = filePairs.slice(0, 6);
+  for(let fpi = 0; fpi < pairsToTest.length; fpi++){
+    let fp = pairsToTest[fpi];
+    let fit = await probeBucket(base, fp.bucket, fp.path);
+    fit.title = "Public storage bucket: " + fp.bucket + " / " + fp.path;
+    fit.origin = fp.origin;
+    results.push(fit);
+    if(fit.status === "PROVEN" && (fit.httpCode === 200 || fit.httpCode === 206) && !provenFetchByBucket[fp.bucket]) provenFetchByBucket[fp.bucket] = fit;
+  }
+  let unnamedBuckets = knownBuckets.filter(function(b){ return !filePairs.some(function(x){ return x.bucket === b; }); });
+  for(let ubi = 0; ubi < Math.min(unnamedBuckets.length, 3); ubi++){
+    let ub = unnamedBuckets[ubi];
+    let listed = await listBucketFiles(base, anonKey, ub);
+    if(listed && listed.length){
+      let listedToTest = listed.slice(0, 4);
+      for(let lpi = 0; lpi < listedToTest.length; lpi++){
+        let lit = await probeBucket(base, ub, listedToTest[lpi]);
+        lit.title = "Public storage bucket: " + ub + " / " + listedToTest[lpi];
+        lit.origin = "listed";
+        results.push(lit);
+        if(lit.status === "PROVEN" && (lit.httpCode === 200 || lit.httpCode === 206) && !provenFetchByBucket[ub]) provenFetchByBucket[ub] = lit;
+      }
+    } else {
+      // No file could be named. The store's own answer (one request
+      // for a file that does not exist) decides how sharp this
+      // unknown is: a public store leaves every file in it one
+      // known-or-guessed name away from a stranger; a store that
+      // does not answer as public leaves the stranger door shut
+      // and only the signed-in question open.
+      let storeAnswer = await probeBucketPublic(base, anonKey, ub);
+      if(storeAnswer === "public"){
+        results.push({ probe: "P3", title: "Public storage bucket: " + ub, status: "NOT_CHECKED", level: "MEDIUM", reasonCode: "No file could be named", storeAnswer: "public",
+          findings: ["Not checked: no file in this store could be named, so no file in it was tested. The store itself is public, though: the backend serves it to strangers, so anyone who knows or guesses a file name in it can fetch that file."],
+          fixes: ["Make the bucket private, which settles every file in it at once. Or test one exact file: open Deep Scan and name it under Cross-user access, in the Files part."] });
+      } else if(storeAnswer === "notpublic"){
+        results.push({ probe: "P3", title: "Public storage bucket: " + ub, status: "NOT_CHECKED", level: "MEDIUM", reasonCode: "No file could be named",
+          findings: ["Not checked: no file in this store could be named, so no file in it was tested. The store did not answer as a public store: asked for a file that does not exist, it answered as if the store is not there, which is what a private store does. That covers strangers without a login. Whether a signed-in user can reach another user's files in it is a Deep Scan question."],
+          fixes: ["To test one exact file, open Deep Scan and name it under Cross-user access, in the Files part."] });
+      } else {
+        results.push({ probe: "P3", title: "Public storage bucket: " + ub, status: "NOT_CHECKED", level: "MEDIUM", reasonCode: "No file could be named",
+          findings: ["Not checked: no file in this store could be named. Your app's code does not name one, and the store did not let a stranger list its files. A file in this store could still be open to anyone who knows or guesses its name, so this is unknown, not safe."],
+          fixes: ["To test one exact file, open Deep Scan and name it under Cross-user access, in the Files part. Or make the bucket private, which settles every file in it at once."] });
+      }
+    }
+  }
+  // One store answer per bucket that handed a stranger a real file:
+  // the finding says whether the whole store stands open or this
+  // file is reachable another way, because the fix differs.
+  let provenBuckets = Object.keys(provenFetchByBucket);
+  for(let pbi = 0; pbi < provenBuckets.length; pbi++){
+    let pb = provenBuckets[pbi];
+    let pItem = provenFetchByBucket[pb];
+    let pAns = await probeBucketPublic(base, anonKey, pb);
+    if(pAns === "public") pItem.findings.push("The whole store is public, not just this file: anyone who has a file's address in this store can fetch it.");
+    else if(pAns === "notpublic") pItem.findings.push("The store did not answer as a public store, so this file is reachable another way: a rule on the store lets strangers read it.");
+  }
   $("progress").textContent = "Question 4 of 4: is a master key hiding in your website code?";
   let p4url = $("productUrl").value.trim();
   let p4reader = p4FromReader(p4url);
@@ -2438,11 +3001,11 @@ $("sampleBtn").addEventListener("click", function(){
   clearError();
   bundleFilesRead = 12;
   let results = [
-    {probe:"P1", title:"Anon table read: profiles", status:"PROVEN", level:"HIGH", findings:["Sample: anyone using only the public anon key could read rows from this table. Only the id column was asked for, so no personal values were touched."], fixes:["Turn on Row Level Security for this table in Supabase and add a policy so users read only their own rows. Then run this check again."]},
+    {probe:"P1", title:"Anon table read: profiles", status:"PROVEN", level:"HIGH", findings:["Sample: we asked this table for rows as a stranger, using only the public key, and it handed back rows."], fixes:["Turn on Row Level Security for this table in Supabase and add a policy so users read only their own rows. Then run this check again."]},
     {probe:"P1", title:"Anon table read: orders", status:"BLOCKED", level:"LOW", findings:["Sample: your project refused the stranger's request (401 or 403). That is exactly what a protected table does."], fixes:[]},
-    {probe:"P1", title:"Anon table read: invoices", status:"BLOCKED", level:"LOW", sumLine:"A stranger requested data and received none", findings:["Sample: a stranger asked this table for data and received none. Zero rows returned to an unauthenticated request. This does not establish whether the table is empty or access is restricted."], fixes:[]},
+    {probe:"P1", title:"Anon table read: invoices", status:"BLOCKED", level:"LOW", sumLine:"A stranger requested data and received none", findings:["Sample: the request reached the table and was answered. Note: an empty table answers the same way, so this does not prove a lock did it."], fixes:[]},
     {probe:"P3", title:"Public storage bucket: avatars", status:"BLOCKED", level:"LOW", findings:["Sample: your storage refused the no-login request."], fixes:[]},
-    {probe:"P1", title:"Anon table read: ghost_table", status:"NOT_CHECKED", level:"MEDIUM", origin:"builder", reasonCode:"Resource not confirmed", findings:["Sample: No table answered to that name (404). The name may be spelled differently in your project, or this table may not be open to the data API at all. Treat this as unknown, not safe."], fixes:["Check the name letter for letter in Supabase, under Table Editor, then run again."]},
+    {probe:"P1", title:"Anon table read: ghost_table", status:"NOT_CHECKED", level:"MEDIUM", origin:"builder", reasonCode:"Resource not confirmed", findings:["Sample: No table answered to that name (404). The name may be spelled differently in your project, or this table may not be open to the data API. Unknown, not safe."], fixes:["Check the name letter for letter in Supabase, under Table Editor, then run again."]},
     {probe:"P1", title:"Anon table read: chunk_limit", status:"NOT_CHECKED", level:"MEDIUM", origin:"code", reasonCode:"Resource not confirmed", findings:["Sample: a name found in the app's code did not answer as a table (404)."], fixes:[]},
     {probe:"P4", title:"Key in client bundle", status:"NOT_CHECKED", level:"MEDIUM", reasonCode:"Assets could not be read", findings:["Sample: your homepage code could not be read from this browser, so this question is unanswered. Browsers often block this read, which is normal."], fixes:["Search your built JavaScript for a master key pattern, or open this check page from your own website and run again."], filesRead: 12}
   ];
@@ -2565,9 +3128,9 @@ function downloadReport(){
   telEvent("acted", {});
   if(!currentReportIsSample) telEvent("downloaded", { path: currentRunPath });
   if(!lastResults) return;
-  let reportCss = "body{font-family:'IBM Plex Sans',-apple-system,system-ui,sans-serif;font-size:17px;font-weight:400;line-height:1.47;max-width:640px;margin:40px auto;padding:0 20px;color:#1d1d1f}strong{font-weight:600}.brandline{text-align:center;font-weight:600;margin:0 0 10px}.verdict{font-size:28px;font-weight:600;letter-spacing:-0.015em;text-align:center;margin:24px 0 6px}.verdictsub{text-align:center;color:#6e6e73;margin:0}.hostline,.issueno,.restline,.small{font-size:13px}.hostline{color:#86868b;text-align:center}.issueno{font-weight:600;color:#6e6e73}.issuePage{display:none}.issuePage.active{display:block}.issuePage h3{font-size:28px;font-weight:600;letter-spacing:-0.015em;margin:2px 0}.dot{color:#d70015}.dotG{color:#1a7f37}.dotGrey{color:#86868b}.stWord{font-weight:600}.story{margin:10px 0 4px}.atrisk{color:#424245}.fixbox{background:#f5f5f7;border-radius:16px;padding:6px 20px 12px;margin:20px 0}.lbl{font-weight:600;margin:10px 0 2px}ol.steps{margin:6px 0 6px 20px;padding:0}ol.steps li{margin:6px 0}.navRow{display:flex;justify-content:space-between;align-items:center}.navbtn{height:44px;padding:0 20px;border-radius:980px;border:1px solid #1d1d1f;background:#fff;font-size:17px;cursor:pointer}.navbtn:disabled{opacity:.25}.dots{font-size:13px;color:#86868b;letter-spacing:4px}.restline{text-align:center;color:#6e6e73}.rowline{padding:10px 4px;border-top:1px solid #e5e5e5}.qsec{margin:22px 0 0;background:#f5f5f7;border-radius:18px;padding:22px 18px 12px}.qhead{font-weight:600;margin:0 0 8px}.arow{padding:10px 2px;border-top:1px solid #e3e3e7}.qsec .fixbox{background:#ffffff}.acard{background:#fff;border:1px solid #e3e3e7;border-radius:14px;padding:12px 14px;margin:10px 0}.asum{display:flex;justify-content:space-between;align-items:flex-start;width:100%;background:none;border:0;padding:0;font:inherit;color:inherit;text-align:left;cursor:pointer}.aexp{font-size:13px;color:#0066cc;white-space:nowrap;margin-left:10px;padding-top:2px}.adet{border-top:1px solid #eee;margin-top:10px;padding-top:10px}.acard .fixbox{background:#f5f5f7}.promptBox{background:#fff;border:1px solid #e3e3e7;border-radius:12px;padding:12px 14px;font-size:13px;line-height:1.55;white-space:pre-wrap}.nudgeCard{display:none}.small{color:#6e6e73}.sampleNotice{background:#f5f5f7;border-radius:12px;padding:12px;text-align:center}details.proof summary,summary{font-size:13px;color:#0066cc;cursor:pointer}";
+  let reportCss = "body{font-family:'IBM Plex Sans',-apple-system,system-ui,sans-serif;font-size:15px;font-weight:400;line-height:1.55;max-width:640px;margin:40px auto;padding:0 20px;color:#1d1d1f}strong{font-weight:600}.brandline{text-align:center;font-weight:600;margin:0 0 10px}.verdict{font-size:24px;font-weight:600;letter-spacing:-0.015em;text-align:center;margin:24px 0 6px}.verdictsub{text-align:center;color:#6e6e73;margin:0}.hostline,.issueno,.restline,.small{font-size:13px}.hostline{color:#86868b;text-align:center}.issueno{font-weight:600;color:#6e6e73}.issuePage{display:none}.issuePage.active{display:block}.issuePage h3{font-size:28px;font-weight:600;letter-spacing:-0.015em;margin:2px 0}.dot{color:#d70015}.dotG{color:#1a7f37}.dotGrey{color:#86868b}.stWord{font-weight:600}.story{margin:10px 0 4px}.atrisk{color:#424245}.fixbox{background:#f5f5f7;border-radius:16px;padding:6px 20px 12px;margin:20px 0}.lbl{font-weight:600;margin:10px 0 2px}ol.steps{margin:6px 0 6px 20px;padding:0}ol.steps li{margin:6px 0}.navRow{display:flex;justify-content:space-between;align-items:center}.navbtn{height:44px;padding:0 20px;border-radius:980px;border:1px solid #1d1d1f;background:#fff;font-size:17px;cursor:pointer}.navbtn:disabled{opacity:.25}.dots{font-size:13px;color:#86868b;letter-spacing:4px}.restline{text-align:center;color:#6e6e73}.rowline{padding:10px 4px;border-top:1px solid #e5e5e5}.qsec{margin:22px 0 0;background:#f5f5f7;border-radius:18px;padding:22px 18px 12px}.qhead{font-weight:600;margin:0 0 8px}.arow{padding:10px 2px;border-top:1px solid #e3e3e7}.qsec .fixbox{background:#ffffff}.acard{background:#fff;border:1px solid #e3e3e7;border-radius:14px;padding:12px 14px;margin:10px 0}.asum{display:flex;justify-content:space-between;align-items:flex-start;width:100%;background:none;border:0;padding:0;font:inherit;color:inherit;text-align:left;cursor:pointer}.aexp{font-size:13px;color:#0066cc;white-space:nowrap;margin-left:10px;padding-top:2px}.adet{border-top:1px solid #eee;margin-top:10px;padding-top:10px}.acard .fixbox{background:#f5f5f7}.promptBox{background:#fff;border:1px solid #e3e3e7;border-radius:12px;padding:12px 14px;font-size:13px;line-height:1.55;white-space:pre-wrap}.nudgeCard{display:none}.small{color:#6e6e73}.sampleNotice{background:#f5f5f7;border-radius:12px;padding:12px;text-align:center}details.proof summary,summary{font-size:13px;color:#0066cc;cursor:pointer}";
   let navJs = "<script>document.addEventListener('click',function(e){var b=e.target.closest('.asum');if(!b)return;var d=b.parentElement.querySelector('.adet');var x=b.querySelector('.aexp');var o=d.hidden;d.hidden=!o;b.setAttribute('aria-expanded',o?'true':'false');var c=b.closest('.acard');if(x)x.textContent=o?'Hide \u25B4':(c&&c.getAttribute('data-fix')==='1'?'Click for the fix \u25BE':'Details \u25BE');});<\/script>";
-  let doc = "<!doctype html><html><head><meta charset='utf-8'><title>MakerGuard report</title><style>" + reportCss + ".reportTitle{font-size:26px;font-weight:700;letter-spacing:-0.02em;text-align:center;margin:6px 0 4px}.quickSnapshot{margin:0}.scopeLine{text-align:center;color:#6e6e73;font-size:13px;line-height:1.5;margin:10px auto 4px}.metaLine{text-align:center;color:#6e6e73;font-size:13px;line-height:1.55;margin:10px auto 4px}.band{margin:22px 0 0;background:#F0EEFA;border-radius:12px;padding:22px 18px 12px}.bandHead{font-weight:600;margin:0 0 8px}.bandCount{font-weight:400;color:#6e6e73;font-size:13px}.reasonTag{display:inline-block;font-size:13px;font-weight:600;background:#FBF0D9;color:#7A5410;border-radius:980px;padding:2px 10px;margin-top:6px}.reasonLine{display:block;font-size:13px;color:#7A5410;margin-top:4px}.secttl{font-size:13px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:#372A9C;text-align:center}.atag{display:inline-block;font-size:13px;font-weight:600;color:#fff;border-radius:980px;padding:3px 12px}.tagIssue{background:#B3261E}.tagProtected{background:#1A7F37}.tagNc{background:#FBF0D9;color:#7A5410}.ahead{display:flex;justify-content:space-between;align-items:center}.aobj{display:block;font-weight:600;margin-top:9px}.objkind{font-weight:400;font-size:13px;color:#86868B}.asumline{display:block;font-size:13px;color:#6E6E73;margin-top:3px;line-height:1.45}.acard{border-left:4px solid #D8D2C0}.acard.stIssue{border-left-color:#B3261E}.acard.stProtected{border-left-color:#1A7F37}.acard.stNc{border-left-color:#D9A83E}.quickEnd{border-top:1px solid #E3E3E7;margin-top:18px;padding-top:10px}.strayLine{text-align:center;color:#6e6e73;max-width:560px;margin:2px auto 4px}.unverBlock{margin:22px 0 0;background:#fbf6e9;border-radius:18px;padding:16px 18px 12px}.unverLine{margin:0}.unverList{margin:6px 0 6px 18px;padding:0}.unverList li{margin:4px 0;font-size:13px;color:#424245}.deepCard{display:none}.deepSection{margin:26px 0 0}.deepIntro{text-align:center;color:#6e6e73;max-width:560px;margin:4px auto 6px}.atag,.reasonTag,.bandCount,.metaLine{font-family:'IBM Plex Mono',ui-monospace,Menlo,monospace}.atag,.reasonTag{font-size:12px;letter-spacing:.05em;text-transform:uppercase}.bandHead{font-weight:700;letter-spacing:-0.01em}.acard{border-radius:10px}.deepNoteCard{background:#fff;border:1px solid #E7E2D6;border-left:4px solid #D8D2C0;border-radius:10px;padding:12px 14px;margin:10px 0}.deepNoteCard.stIssue{border-left-color:#B3261E}.deepNoteCard.stProtected{border-left-color:#1A7F37}.deepNoteCard.stNc{border-left-color:#D9A83E}.deepNoteTitle{font-weight:600;color:#141416;margin:8px 0 0}.deepNoteLine{font-size:13px;color:#424245;margin:4px 0 0;line-height:1.5}.linkedLine{font-size:13px;color:#372A9C;background:#F0EEFA;border-radius:8px;padding:6px 10px;margin:8px 0 0;line-height:1.5}.gradeLine{font-size:13px;color:#424245;margin:8px 0 0}</style></head><body>" + reportBodyHTML(lastResults, lastOverall, lastHost, false, lastScope) + deepDownloadHTML() + navJs + "</body></html>";
+  let doc = "<!doctype html><html><head><meta charset='utf-8'><title>MakerGuard report</title><style>" + reportCss + ".reportTitle{font-size:24px;font-weight:700;letter-spacing:-0.02em;text-align:center;margin:6px 0 4px}.quickSnapshot{margin:0}.scopeLine{text-align:center;color:#6e6e73;font-size:13px;line-height:1.5;margin:10px auto 4px}.metaLine{text-align:center;color:#6e6e73;font-size:13px;line-height:1.55;margin:10px auto 4px}.band{margin:22px 0 0;background:#F0EEFA;border-radius:12px;padding:22px 18px 12px}.bandHead{font-weight:600;margin:0 0 8px}.bandCount{font-weight:400;color:#6e6e73;font-size:13px}.reasonTag{display:inline-block;font-size:13px;font-weight:600;background:#FBF0D9;color:#7A5410;border-radius:980px;padding:2px 10px;margin-top:6px}.reasonLine{display:block;font-size:13px;color:#7A5410;margin-top:4px}.secttl{font-size:13px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:#372A9C;text-align:center}.atag{display:inline-block;font-size:13px;font-weight:600;color:#fff;border-radius:980px;padding:3px 12px}.tagIssue{background:#B3261E}.tagProtected{background:#1A7F37}.tagNc{background:#FBF0D9;color:#7A5410}.ahead{display:flex;justify-content:space-between;align-items:center}.aobj{display:block;font-weight:600;margin-top:9px}.objkind{font-weight:400;font-size:13px;color:#86868B}.asumline{display:block;font-size:13px;color:#6E6E73;margin-top:3px;line-height:1.45}.acard{border-left:4px solid #D8D2C0}.acard.stIssue{border-left-color:#B3261E}.acard.stProtected{border-left-color:#1A7F37}.acard.stNc{border-left-color:#D9A83E}.quickEnd{border-top:1px solid #E3E3E7;margin-top:18px;padding-top:10px}.strayLine{text-align:center;color:#6e6e73;max-width:560px;margin:2px auto 4px}.unverBlock{margin:22px 0 0;background:#fbf6e9;border-radius:18px;padding:16px 18px 12px}.unverLine{margin:0}.unverList{margin:6px 0 6px 18px;padding:0}.unverList li{margin:4px 0;font-size:13px;color:#424245}.deepCard{display:none}.asum{display:block}.ahead{display:flex;justify-content:space-between;align-items:center}.aobj{display:block;font-weight:600;font-size:16px;color:#141416;margin-top:9px}.aexp{color:#372A9C;padding-top:0}.tailBlock{margin:22px 0 0;background:#fff;border:1px solid #E3E3E7;border-radius:12px;padding:16px 18px 14px}.tailLine{margin:10px 0 0;color:#424245;line-height:1.55}#nudgeSetup{display:none}.deepSection{margin:26px 0 0}.deepIntro{text-align:center;color:#6e6e73;max-width:560px;margin:4px auto 6px}.atag,.reasonTag,.bandCount,.metaLine{font-family:'IBM Plex Sans',-apple-system,system-ui,sans-serif}.atag,.reasonTag{font-size:12px;letter-spacing:.05em;text-transform:uppercase}.bandHead{font-weight:700;letter-spacing:-0.01em}.acard{border-radius:10px}.deepNoteCard{background:#fff;border:1px solid #E7E2D6;border-left:4px solid #D8D2C0;border-radius:10px;padding:12px 14px;margin:10px 0}.deepNoteCard.stIssue{border-left-color:#B3261E}.deepNoteCard.stProtected{border-left-color:#1A7F37}.deepNoteCard.stNc{border-left-color:#D9A83E}.deepNoteTitle{font-weight:600;color:#141416;margin:8px 0 0}.deepNoteLine{font-size:13px;color:#424245;margin:4px 0 0;line-height:1.5}.linkedLine{font-size:13px;color:#372A9C;background:#F0EEFA;border-radius:8px;padding:6px 10px;margin:8px 0 0;line-height:1.5}.gradeLine{font-size:13px;color:#424245;margin:8px 0 0}</style></head><body>" + reportBodyHTML(lastResults, lastOverall, lastHost, false, lastScope, true) + deepDownloadHTML() + navJs + "</body></html>";
   let parts = [doc];
   let blob = new Blob([parts.join("\n")], {type: "text/html"});
   let a = document.createElement("a");
@@ -2783,6 +3346,7 @@ var MG_FETCHER = 'https://reader.midnightbuilds.fyi/fetch';
         if (inferred.length) rows += '<p class="foundRow"><b>Tables it likely uses</b> \u00B7 ' + esc(inferred.join(', ')) + '. Each one gets tested. A name that is not a real table is reported Not checked, never as safe and never as a problem.</p>';
         if (!confirmed.length && !inferred.length) rows += '<p class="foundRow"><b>Tables</b> \u00B7 none named in the code.</p>';
         if (d.buckets && d.buckets.length) rows += '<p class="foundRow"><b>File stores</b> \u00B7 ' + esc(d.buckets.join(', ')) + '</p>';
+        if (d.files && d.files.length) rows += '<p class="foundRow"><b>Files your app names</b> \u00B7 ' + esc(d.files.map(function(f){ return f.bucket + '/' + f.path; }).join(', ')) + '. Each one is tested as a stranger.</p>';
         if (d.projects.length > 1) rows += '<p class="small">More than one backend was found in this app (' + esc(d.projects.join(', ')) + '). This run covers the first one only.</p>';
         if (d.master_key_found) rows += '<p><strong>First finding: a master key pattern is sitting in your app\u2019s public code.</strong> That is the most serious thing this check looks for. The report covers it in full.</p>';
         rows += '<p class="small">This covers the tables your app\u2019s code names. A table your code never mentions cannot be seen from a link, so it is not covered here, and it will never be called safe.</p>';
