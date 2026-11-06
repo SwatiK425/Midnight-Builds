@@ -354,7 +354,7 @@ h1{font-weight:700;letter-spacing:-0.02em}
 .deepRowAsk{border-top:1px solid #EDE8DB;margin-top:12px;padding-top:12px}
 .deepRowAsk label{margin:12px 0 6px}
 
-/* Founder feedback (2026-11-04): one small form, three spots. */
+/* Feedback form (2026-11-04): one small form, three spots. */
 .fbCard{background:#fff;border:1px solid #E0D8C4;border-left:4px solid #372A9C;border-radius:12px;padding:16px 18px;margin:22px 0 6px;text-align:left}
 .fbCard p{margin:0 0 8px;line-height:1.5;color:#424245}
 .fbCard .fbTitle{font-weight:700;color:#141416}
@@ -510,7 +510,7 @@ button.deepRowHead{width:100%;background:none;border:0;padding:0;font:inherit;co
   <div class="fbPanel" role="dialog" aria-modal="true" aria-label="Feedback">
     <div class="fbCloseRow"><button id="fbCloseBtn" type="button" class="iconBtn" aria-label="Close" title="Close">&times;</button></div>
     <div class="fbCard" data-fbform>
-      <p class="fbTitle">From the founder</p>
+      <p class="fbTitle">From the one behind MakerGuard</p>
       <p><strong>Hi, I&rsquo;m Swati.</strong> I built MakerGuard on my own, and I keep it free, because an app built by one person deserves to be as secure as one built by a team of ten.</p>
       <p>Tried it? I&rsquo;d love to connect personally and hear what worked, what didn&rsquo;t, or what I should build next.</p>
       <div class="fbRow"><input class="fbEmail" type="email" autocomplete="email" placeholder="you@example.com" aria-label="Your email, only if you would like to chat"><button class="fbSend" type="button" data-spot="page_popup">Let&rsquo;s connect.</button></div>
@@ -544,7 +544,7 @@ button.deepRowHead{width:100%;background:none;border:0;padding:0;font:inherit;co
 <p class="small">Every Issue in your report is a request that actually came back with data, and the evidence is printed in its details. A test that could not be performed is marked Not checked, never guessed, and a name that is not a real table comes back Not checked, not an issue. No answer is given without the attempt behind it.</p>
 </details>
 <details class="drop"><summary>Who is behind MakerGuard?</summary>
-<p class="small">Swati, a solo founder. Ten years at Microsoft, six of them in data security. She builds MakerGuard in public, and the contact link at the bottom of this page reaches her directly.</p>
+<p class="small">Swati, the one behind MakerGuard. She builds it in public, and the contact link at the bottom of this page reaches her directly.</p>
 </details>
 <details class="drop"><summary>How much does it cost?</summary>
 <p class="small">Nothing. It is free.</p>
@@ -562,7 +562,7 @@ button.deepRowHead{width:100%;background:none;border:0;padding:0;font:inherit;co
 
 <div class="fbPageEnd"><p class="small" style="margin:0 0 4px">Questions, or a result you do not believe?</p><button id="fbOpenBtn" class="secondary" type="button">Let&rsquo;s connect.</button></div>
 <footer>
-<p style="display:flex;justify-content:space-between;margin:0 0 14px"><a href="#faq-data">Privacy</a><a href="https://instagram.com/midnightbuilds.fyi" target="_blank" rel="noopener">Contact us</a></p>
+<p style="display:flex;justify-content:space-between;margin:0 0 14px"><a href="#faq-data">Privacy</a><a href="https://www.linkedin.com/in/swatikumari425/" target="_blank" rel="noopener">Contact us</a></p>
 <p>This checks only the tables, bucket, and homepage you gave it. It is not a complete security audit.</p>
 <p>Fix the top finding, then run it again with the same inputs to prove the fix.</p>
 <p>Only test apps you own, or apps you have the owner&rsquo;s permission to test. If your app was tested and you want it left out, reach us through Contact us above.</p>
@@ -1094,7 +1094,7 @@ function quickTailState(quick){
     let open = it.status === "NOT_PROVEN" || (it.status === "BLOCKED" && it.sumLine && /received none/.test(it.sumLine));
     if(open && settledTitles[(rawSubject(it) || "").toLowerCase()]){ st.settled[(rawSubject(it) || "").toLowerCase()] = 1; st.settledCount++; }
   });
-  let anyDeep = ds.tokenA || ["cross", "files", "settle"].some(function(k){ return ds.rows[k] && (ds.rows[k].state === "done" || ds.rows[k].state === "running"); });
+  let anyDeep = ds.setupOpen || ds.tokenA || ["cross", "files", "settle"].some(function(k){ return ds.rows[k] && (ds.rows[k].state === "done" || ds.rows[k].state === "running"); });
   if(st.settledCount) st.phase = "settled";
   else if(anyDeep) st.phase = "setup";
   return st;
@@ -1537,9 +1537,9 @@ function deepLockerHTML(){
   h += "<h2 class='deepTitle'>Deep Scan</h2>";
   h += "<p class='deepLead'>The tests a link alone cannot reach. It starts from one test sign-in, and asks for more only when a test needs it.</p>";
   h += "<p class='small' style='margin:2px 0 0'>Deep Scan tests tables and views through the data API, signed in as a test user. It does not test database functions.</p>";
-  if(!ds.tokenA && !currentReportIsSample && (ds.tables.length || ds.stores.length || ds.settleCandidates.length)){
+  if(!ds.tokenA && !ds.setupOpen && !currentReportIsSample && (ds.tables.length || ds.stores.length || ds.settleCandidates.length)){
     h += "<p style='margin:12px 0 4px'><button type='button' class='navbtn deepCta' id='deepCtaBtn' data-deep='open-setup'>Set up Deep Scan</button></p>";
-    h += "<p class='small' style='margin:0 0 4px'>Opens the sign-in steps below. Nothing runs until you sign in.</p>";
+    h += "<p class='small' id='deepCtaNote' style='margin:0 0 4px'>Opens the sign-in steps below. Nothing runs until you sign in.</p>";
   }
   // There is no separate setup box any more (Swati, 2026-11-05):
   // the test user A sign-in lives inside Step 1 of Cross-user
@@ -1893,6 +1893,19 @@ function settleBodyHTML(){
 function openDeepSetup(){
   let ds = deepState;
   if(!ds) return;
+  // Once Deep Scan is opened, every "Set up Deep Scan" button goes
+  // away (Swati, 2026-11-06, from her live run: two buttons, the
+  // Quick tail's and the Deep section's own, kept blinking after
+  // the click). There are two buttons by design, one at the end of
+  // the Quick report and one at the top of the Deep section, but
+  // either click opens the same section, so either click retires
+  // both, plus the note line under the section's button.
+  ["nudgeSetup", "deepCtaBtn", "deepCtaNote"].forEach(function(id){
+    let el = document.getElementById(id);
+    if(!el) return;
+    let wrap = el.closest("p");
+    (wrap || el).style.display = "none";
+  });
   if(!ds.setupFired && !currentReportIsSample){
     telEvent("deep_setup_opened", { path: currentRunPath });
     ds.setupFired = true;
@@ -1907,6 +1920,7 @@ function openDeepSetup(){
   if(ds.setupOpen) return;
   ds.setupOpen = true;
   updateDeepSetup();
+  try{ refreshQuickTail(); }catch(e){}
   if(!ds.authDone) deepDetectAuth();
   if(ds.tokenA && !ds.autoRan){
     ds.autoRan = true;
@@ -3273,7 +3287,7 @@ $("emailBtn").addEventListener("click", function(){
     $("emailBtn").disabled = true;
   } catch (e) { $("emailStatus").textContent = "That did not send. Try once more."; }
 });
-/* ---------- Founder feedback (2026-11-04) ----------
+/* ---------- Feedback form (2026-11-04) ----------
    One small form in three spots: right under the fix inside an issue
    card (spot fix_card), at the end of the report (report_end), and in
    a popup from the Feedback button at the end of the page
@@ -3290,7 +3304,7 @@ $("emailBtn").addEventListener("click", function(){
 let fbConnected = false;
 function fbFormHTML(spot){
   return "<div class='fbCard' data-fbform>" +
-  "<p class='fbTitle'>From the founder</p>" +
+  "<p class='fbTitle'>From the one behind MakerGuard</p>" +
   "<p><strong>Hi, I\u2019m Swati.</strong> I built MakerGuard on my own, and I keep it free, because an app built by one person deserves to be as secure as one built by a team of ten.</p>" +
   "<p>Tried it? I\u2019d love to connect personally and hear what worked, what didn\u2019t, or what I should build next.</p>" +
   "<div class='fbRow'><input class='fbEmail' type='email' autocomplete='email' placeholder='you@example.com' aria-label='Your email, only if you would like to chat'><button class='fbSend' type='button' data-spot='" + spot + "'>Let\u2019s connect.</button></div>" +
@@ -3298,7 +3312,7 @@ function fbFormHTML(spot){
   "<p class='small' style='margin:6px 0 0'>Optional. Only for our 1:1 chat. Nothing else. Because I hate it too.</p></div>";
 }
 function fbMiniHTML(){
-  return "<div class='fbMini' data-fbform><p><strong>Did this fix help?</strong> I\u2019m Swati, the founder. I\u2019d love to connect personally and hear what worked, and what didn\u2019t.</p>" +
+  return "<div class='fbMini' data-fbform><p><strong>Did this fix help?</strong> I\u2019m Swati, the one behind MakerGuard. I\u2019d love to connect personally and hear what worked, and what didn\u2019t.</p>" +
   "<div class='fbRow'><input class='fbEmail' type='email' autocomplete='email' placeholder='you@example.com' aria-label='Your email, only if you would like to chat'><button class='fbSend' type='button' data-spot='fix_card'>Let\u2019s connect.</button></div>" +
   "<p class='small' style='margin:6px 0 0'>Optional. Only for our 1:1 chat. Nothing else. Because I hate it too.</p>" +
   "<p class='fbStatus small' aria-live='polite'></p></div>";
@@ -3349,6 +3363,14 @@ function sendFb(btn){
 }
 document.addEventListener("click", function(e){
   if(!e.target.closest) return;
+  // The footer's Privacy link points at the FAQ answer about
+  // storage; open that answer as the click lands, so the reader
+  // arrives at the answer itself, not a closed question (Swati,
+  // 2026-11-06). The anchor's own jump does the scrolling.
+  if(e.target.closest('a[href="#faq-data"]')){
+    let d = document.getElementById("faq-data");
+    if(d) d.open = true;
+  }
   if(e.target.closest("#fbOpenBtn")){ openFb(); return; }
   if(e.target.closest("#fbCloseBtn")){ closeFb(); return; }
   if(e.target === $("fbOverlay")){ closeFb(); return; }
