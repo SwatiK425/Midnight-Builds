@@ -784,6 +784,7 @@ function wireCards(){
     // The entrypoint card now leads to the Deep Scan evidence locker in
     // this report (the flagship section), not the manual form.
     openDeepSetup();
+    expandDeepRow("cross");
     let lk = document.getElementById("deepLocker");
     if(lk) lk.scrollIntoView({behavior:"smooth", block:"start"});
   });
@@ -982,7 +983,7 @@ function quickTailState(quick){
     let open = it.status === "NOT_PROVEN" || (it.status === "BLOCKED" && it.sumLine && /received none/.test(it.sumLine));
     if(open && settledTitles[(rawSubject(it) || "").toLowerCase()]){ st.settled[(rawSubject(it) || "").toLowerCase()] = 1; st.settledCount++; }
   });
-  let anyDeep = ds.setupOpen || ds.tokenA || ["cross", "files", "settle"].some(function(k){ return ds.rows[k] && (ds.rows[k].state === "done" || ds.rows[k].state === "running"); });
+  let anyDeep = ds.tokenA || ["cross", "files", "settle"].some(function(k){ return ds.rows[k] && (ds.rows[k].state === "done" || ds.rows[k].state === "running"); });
   if(st.settledCount) st.phase = "settled";
   else if(anyDeep) st.phase = "setup";
   return st;
@@ -1349,7 +1350,9 @@ function deepLockerHTML(){
   h += "<h2 class='deepTitle'>Deep Scan</h2>";
   h += "<p class='deepLead'>The tests a link alone cannot reach. It starts from one test sign-in, and asks for more only when a test needs it.</p>";
   h += "<p class='small' style='margin:2px 0 0'>Deep Scan tests tables and views through the data API, signed in as a test user. It does not test database functions.</p>";
-  h += "<div class='deepSetup' id='deepSetup'>" + deepSetupHTML() + "</div>";
+  // There is no separate setup box any more (Swati, 2026-11-05):
+  // the test user A sign-in lives inside Step 1 of Cross-user
+  // access, so there is exactly one door into Deep Scan.
   h += "<div id='deepRows'>";
   // Clubbed 2026-11-05 (Swati's ruling): Deep Scan has two sections.
   // Cross-user access holds two parts, Records (the cross row's own
@@ -1358,6 +1361,7 @@ function deepLockerHTML(){
   // renderer is unchanged; only the nesting and the names moved.
   if(ds.tables.length || ds.stores.length) h += deepRowShell("cross", "Cross-user access");
   if(ds.settleCandidates.length) h += deepRowShell("settle", "Settling open answers");
+  if(!ds.tables.length && !ds.stores.length && !ds.settleCandidates.length) h += "<p class='deepUntested'>Quick Scan found nothing in this app that a sign-in can test further.</p>";
   h += "</div>";
   // ZIP-SLOT: a future evidence source (the project file, read locally,
   // behind its own release test plan) joins the locker here, above the
@@ -1385,28 +1389,16 @@ function deepSigninBlockHTML(who){
   return h;
 }
 function deepSetupHTML(){
+  // The inner content of Step 1 in Cross-user access: the test
+  // user A sign-in itself. There is no separate setup box and
+  // no "set up" click before it; Step 1 is the sign-in.
   let ds = deepState;
   if(!ds) return "";
-  if(!ds.setupOpen){
-    let bits = [];
-    if(ds.tables.length || ds.stores.length){
-      let cb = "cross-user access";
-      if(ds.tables.length) cb += " across " + ds.tables.length + " confirmed table" + (ds.tables.length === 1 ? "" : "s");
-      if(ds.stores.length) cb += (ds.tables.length ? " and" : "") + " in " + ds.stores.length + " file store" + (ds.stores.length === 1 ? "" : "s");
-      bits.push(cb);
-    }
-    if(ds.settleCandidates.length) bits.push("settling " + ds.settleCandidates.length + " open answer" + (ds.settleCandidates.length === 1 ? "" : "s"));
-    if(!bits.length) return "<p class='deepUntested'>Quick Scan found nothing in this app that a sign-in can test further.</p>";
-    return "<p class='deepUntested'>Not tested yet: " + bits.join("; ") + ". Deep Scan starts from one test sign-in and asks for more only when a test needs it.</p><p style='margin:6px 0 0'><button type='button' class='navbtn' data-deep='open-setup'>Set up Deep Scan</button></p>";
-  }
-  if(ds.tokenA){
-    return "<div class='deepSigninOk'>Signed in as test user A. The signed-in tests below run from this sign-in. It stays in this page's memory only, is never sent to MakerGuard, and expires in about an hour.</div>";
-  }
+  if(ds.tokenA) return "";
   if(ds.auth === "pending" || ds.auth === "detecting"){
     return "<p class='small'>Reading your app's sign-in settings, so only the sign-in ways your app actually supports are offered&hellip;</p>";
   }
-  let h = "<p style='margin:0 0 4px'><strong>Test user A signs in</strong></p>";
-  h += "<p class='small'>Use a throwaway test user you created in your own app. MakerGuard never creates accounts. The password goes only to your app's own sign-in, and the sign-in stays in this page's memory, never stored.</p>";
+  let h = "<p class='small'>Use a throwaway test user you created in your own app. MakerGuard never creates accounts. The password goes only to your app's own sign-in, and the sign-in stays in this page's memory, never stored.</p>";
   if(ds.authNote === "google") h += "<div class='deepAuthNote'>Your app signs people in with Google, so there is no email and password to use here. Use a sign-in token instead.</div>";
   else if(ds.authNote === "noemail") h += "<div class='deepAuthNote'>Email sign-in is not switched on in your app, so there is no email and password to use here. Use a sign-in token instead.</div>";
   else if(ds.auth === "both") h += "<div class='deepAuthNote'>Your app's sign-in settings could not be read, so both sign-in ways are offered. Use whichever your app supports.</div>";
@@ -1417,6 +1409,7 @@ function deepSetupHTML(){
 function updateDeepSetup(){
   let el = $("deepSetup");
   if(el) el.innerHTML = deepSetupHTML();
+  else updateDeepRow("cross");
   try{ refreshQuickTail(); }catch(e){}
 }
 function setRowPill(key, text, cls){
@@ -1444,7 +1437,15 @@ function updateDeepRow(key){
   try{ refreshQuickTail(); }catch(e){}
 }
 function wireDeep(){
-  ["cross", "surface", "files", "settle"].forEach(function(k){ updateDeepRow(k); });
+  ["cross", "settle"].forEach(function(k){ updateDeepRow(k); });
+  // One door (Swati, 2026-11-05): for a real run with Deep work
+  // waiting, the Cross-user section starts open on Step 1, the
+  // sign-in fires its detection, and nothing sits outside the
+  // flow. The sample keeps its rows closed, as before.
+  if(deepState && !deepState.tokenA && !currentReportIsSample && (deepState.tables.length || deepState.stores.length || deepState.settleCandidates.length)){
+    openDeepSetup();
+    expandDeepRow("cross");
+  }
 }
 function deepBodyHTML(key){
   if(key === "cross"){
@@ -1454,13 +1455,13 @@ function deepBodyHTML(key){
     // because row bodies are re-rendered independently whenever a
     // row updates; anything merely nested into the locker markup
     // would be wiped by the next cross re-render.
-    if(deepState && deepState.tokenA && deepState.stores && deepState.stores.length){
-      h += "<div class='deepPart'>" + deepRowShell("files", "Files") + "</div>";
-    }
+    // The Deep files part was cut on 2026-11-05 (Swati's
+    // decision after the evidence review): Quick Scan's file
+    // check is the whole files story; the signed-in twin was
+    // never backed by a found case. Parked in the tracker.
     return h;
   }
   if(key === "surface") return surfaceBodyHTML();
-  if(key === "files") return filesBodyHTML();
   return settleBodyHTML();
 }
 function deepNoteHTML(n, expanded){
@@ -1555,12 +1556,13 @@ function crossBodyHTML(){
   h += "<p class='flowDesc'>Two test users sign in. We compare what each can reach.</p>";
   h += flowProgHTML(ds);
   if(!ds.tokenA){
-    h += "<p class='flowLine' style='margin-left:0'>Sign in as test user A in the setup above. Nothing else is asked until then.</p>";
+    h += "<div class='flowStep' style='border-top:0;margin-top:2px'><div class='flowHead'><span class='flowNum'>1</span> Step 1 \u00b7 Test user A</div><div class='flowBody'>" + deepSetupHTML() + "</div></div>";
     return h;
   }
   h += "<div class='flowStep'><div class='flowHead'><span class='flowTick'>\u2713</span> Step 1 \u00b7 Test user A</div>";
   if(ds.rows.surface.state === "running") h += "<p class='flowLine'>Reading what A can reach&hellip;</p>";
   else h += "<p class='flowLine'>" + step1Line(ds) + "</p>";
+  h += "<p class='flowMicro'>Signed in as test user A. The sign-in stays in this page's memory only, is never sent to MakerGuard, and expires in about an hour.</p>";
   let s2 = step2Done(ds);
   let vShown = s2 || (ds.rowAsks && ds.rowAsks.some(function(n){ return ds.rows.cross.items.some(function(it){ return rawSubject(it).toLowerCase() === n.toLowerCase() && crossItemSettled(it); }); }));
   if(!s2 && step2Pending(ds)) h += "<p class='flowMicro'>Step 2 settles the rest.</p>";
@@ -1622,38 +1624,15 @@ function surfaceBodyHTML(){
   r.items.forEach(function(n){ h += deepNoteHTML(n); });
   if(r.state === "running"){ h += "<p class='small'>Reading every confirmed table as test user A&hellip;</p>"; return h; }
   if(!ds.tokenA){
-    h += "<p class='deepNeed'>Needs one thing: a test sign-in for user A, in the setup above. Then every confirmed table is read again as A, and for each one you see exactly what came back for A.</p>";
+    h += "<p class='deepNeed'>Needs one thing: the Step 1 sign-in in Cross-user access above. Then every confirmed table is read again as A, and for each one you see exactly what came back for A.</p>";
     return h;
   }
   if(r.state === "done") h += "<p class='small'>Every confirmed table was read as test user A. Tables a stranger could already read are in the Quick Scan report above and are not repeated here.</p>";
   return h;
 }
-// The Files part (Swati's shape, 2026-11-05): one row per
-// file store, side by side: a dropdown that chooses the
-// store (so nobody types or guesses a bucket name) and one
-// field for that store's file names, comma separated. One
-// button checks everything at once. What is being asked is
-// written in one short line above the rows. Quick-found
-// files prefill their store's field.
-function initFilesRows(ds){
-  if(ds.filesRows) return;
-  ds.filesRows = ds.stores.map(function(st){
-    let seeds = (ds.filesSeedByStore && ds.filesSeedByStore[st]) || [];
-    return { store: st, text: seeds.join(", ") };
-  });
-}
-function saveFileRows(){
-  let ds = deepState;
-  if(!ds || !ds.filesRows) return;
-  document.querySelectorAll(".mgFileName").forEach(function(el){
-    let ix = parseInt(el.getAttribute("data-row"), 10);
-    if(ds.filesRows[ix]) ds.filesRows[ix].text = el.value;
-  });
-  document.querySelectorAll(".mgStoreSel").forEach(function(el){
-    let ix = parseInt(el.getAttribute("data-row"), 10);
-    if(ds.filesRows[ix]) ds.filesRows[ix].store = el.value;
-  });
-}
+// The Deep files part was cut on 2026-11-05; its form and
+// test lived here. The change listener below now serves only
+// the Step 2 radio choice in Cross-user access.
 if(!window.__mgDeepChangeWired){
   window.__mgDeepChangeWired = 1;
   document.addEventListener("change", function(e){
@@ -1661,31 +1640,8 @@ if(!window.__mgDeepChangeWired){
     if(e.target.name === "deepBMode" && deepState){
       deepState.bMode = e.target.value;
       updateDeepRow("cross");
-    } else if(e.target.classList && e.target.classList.contains("mgStoreSel")){
-      saveFileRows();
-      updateDeepRow("files");
     }
   });
-}
-function filesBodyHTML(){
-  let ds = deepState, r = ds.rows.files;
-  if(!ds.stores.length){
-    return "<p class='small'>No file stores were found in Quick Scan.</p>";
-  }
-  if(!ds.tokenA){
-    return "<p class='deepNeed'>Needs one thing: a test sign-in for user A, in the setup above.</p>";
-  }
-  initFilesRows(ds);
-  let h = "";
-  h += "<p class='small' style='margin:0 0 8px'>Files that belong to the other test user:</p>";
-  ds.filesRows.forEach(function(row, ix){
-    h += "<div class='frow2'><select class='mgStoreSel' data-row='" + ix + "' aria-label='File store'>" + ds.stores.map(function(st){ return "<option value='" + esc(st) + "'" + (row.store === st ? " selected" : "") + ">" + esc(st) + "</option>"; }).join("") + "</select><input class='mgFileName' data-row='" + ix + "' type='text' autocomplete='off' spellcheck='false' placeholder='File names, separated by commas' value='" + esc(row.text) + "'></div>";
-  });
-  h += "<p style='margin:4px 0 0'><button type='button' class='navbtn' data-deep='run-files'>Check all files as user A</button></p>";
-  h += "<p class='small' id='deepFilesStatus'></p>";
-  if(r.state === "running") h += "<p class='small'>Trying to open the named files as test user A&hellip;</p>";
-  r.items.forEach(function(n){ h += compactNoteRow(n); });
-  return h;
 }
 function settleBodyHTML(){
   let ds = deepState, r = ds.rows.settle;
@@ -1696,7 +1652,7 @@ function settleBodyHTML(){
   r.items.forEach(function(n){ h += compactNoteRow(n); });
   if(r.state === "running"){ h += "<p class='small'>Re-testing the open answers as test user A&hellip;</p>"; return h; }
   if(!ds.tokenA){
-    h += "<p class='deepNeed'>Needs one thing: a test sign-in for user A, in the setup above.</p>";
+    h += "<p class='deepNeed'>Needs one thing: the Step 1 sign-in in Cross-user access above.</p>";
     return h;
   }
   return h;
@@ -1886,7 +1842,6 @@ async function runDeepAfterSignIn(){
   if(!ds || !ds.tokenA) return;
   deepFireStarted();
   expandDeepRow("cross");
-  updateDeepRow("files");
   await ensureColumns();
   // The value-based cross-user look runs first: when it proves which
   // column carries user ids, the surface batch below can use that
@@ -2084,58 +2039,6 @@ async function runCrossProven(){
   updateDeepRow("cross");
   checkDeepCompleted();
 }
-async function runFilesTest(){
-  let ds = deepState;
-  if(!ds || !ds.tokenA || !ds.stores.length) return;
-  saveFileRows();
-  let st = $("deepFilesStatus");
-  let byStore = {};
-  (ds.filesRows || []).forEach(function(row){
-    let seen = {};
-    (row.text || "").split(",").forEach(function(p){
-      let n = p.trim();
-      if(n && !seen[n]){ seen[n] = 1; (byStore[row.store] = byStore[row.store] || []).push(n); }
-    });
-  });
-  let storesToRun = Object.keys(byStore);
-  if(!storesToRun.length){ if(st) st.textContent = "Name at least one file in a store above."; return; }
-  deepFireStarted();
-  setRowState("files", "running", "Running", "tagNc");
-  updateDeepRow("files");
-  for(let si = 0; si < storesToRun.length; si++){
-    let store = storesToRun[si];
-    let names = byStore[store].slice(0, 10);
-    ds.filesStore = store; ds.filesName = names[0];
-    for(let fi = 0; fi < names.length; fi++){
-      let note = await probeOneFileAsA(ds, store, names[fi]);
-      let ix = ds.rows.files.items.findIndex(function(n){ return n.key === note.key; });
-      if(ix > -1) ds.rows.files.items[ix] = note; else ds.rows.files.items.push(note);
-      updateDeepRow("files");
-    }
-  }
-  setRowState("files", "done", "Done", "tagProtected");
-  updateDeepRow("files");
-  checkDeepCompleted();
-}
-async function probeOneFileAsA(ds, store, name){
-  let url = ds.base + "/storage/v1/object/authenticated/" + encodeURIComponent(store) + "/" + name.split("/").map(function(seg){ return encodeURIComponent(seg); }).join("/");
-  addLog("GET " + ds.base + "/storage/v1/object/authenticated/" + store + "/" + name + " as test user A (token redacted)");
-  let note;
-  try{
-    let resp = await fetchT(url, { method: "GET", headers: { "apikey": ds.anonKey, "Authorization": "Bearer " + ds.tokenA, "Range": "bytes=0-0" } });
-    if(resp.status === 200 || resp.status === 206){
-      note = { tag: "Issue", title: store + " / " + name, settled: true, lines: ["Test user A opened the file " + name + " in this store, the file you named as the other test user's. Any signed-in user who knows or can guess a file's name could open it the same way. The file itself was not shown here. This rests on the file being the other user's, as you named it."] };
-    } else if(resp.status === 401 || resp.status === 403 || resp.status === 404){
-      note = { tag: "No issue found", title: store + " / " + name, settled: true, lines: ["Test user A could not open the file " + name + " in this store (your storage answered " + resp.status + "). To a signed-in user who does not own it, that file is not reachable this way. This rests on the file name being exactly right: a wrong name would get the same answer."] };
-    } else {
-      note = { tag: "Could not verify", title: store + " / " + name, settled: false, lines: ["The signed-in file request did not return a clear answer (status: " + resp.status + "). Unknown, not safe."] };
-    }
-  }catch(e){
-    note = { tag: "Could not verify", title: store + " / " + name, settled: false, lines: ["The signed-in file request could not be completed from this browser. Unknown, not safe."] };
-  }
-  note.key = store + "/" + name;
-  return note;
-}
 function deepDownloadHTML(){
   let ds = deepState;
   if(!ds) return "";
@@ -2228,7 +2131,6 @@ document.addEventListener("click", function(e){
   else if(act === "token-b") deepUseTokenB();
   else if(act === "run-rows") runCrossProbe();
   else if(act === "run-proven") runCrossProven();
-  else if(act === "run-files") runFilesTest();
 });
 
 function addLog(line){
