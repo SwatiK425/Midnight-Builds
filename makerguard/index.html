@@ -239,6 +239,9 @@ button.primary:hover{background:#000}
 .reasonLine{display:block;font-size:13px;color:#7A5410;margin-top:4px}
 .quickEnd{border-top:1px solid #E3E3E7;margin-top:18px;padding-top:10px}
 .reportTitle{font-size:28px;font-weight:700;letter-spacing:-0.02em;text-align:center;margin:2px 0 6px;color:#141416}
+.overallBlock{background:#F0EEFA;border:1px solid #D8D2F0;border-radius:12px;padding:14px 16px;margin:0 0 16px;text-align:center}
+.overallHead{font-size:20px;font-weight:700;color:#141416;margin:0}
+.overallBlock .small{margin:4px 0 0}
 /* D-6 middle path: unverified summary block, stray-names line, Deep Scan section */
 .strayLine{text-align:center;max-width:560px;margin:2px auto 4px}
 .unverBlock{margin:22px 0 0;background:#FBF6E9;border-radius:18px;padding:16px 18px 12px}
@@ -315,6 +318,17 @@ h1{font-weight:700;letter-spacing:-0.02em}
 .dckQ{font-size:13px;color:#6E6E73;margin:4px 0 0;line-height:1.45}
 .needChip{display:inline-block;font-size:12px;font-weight:600;background:#F0EEFA;color:#372A9C;border-radius:980px;padding:2px 10px;margin-top:8px}
 .deepExp{font:inherit;font-size:13px;color:#372A9C;background:none;border:0;padding:0;margin-top:8px;cursor:pointer}
+/* UX fixes (Swati's live run, 2026-11-06): the consent gate and the
+   Deep Scan setup button must catch the eye. Yellow highlight plus a
+   soft blink on the border glow only; the blink stops the moment the
+   step is taken, and reduced-motion settings turn it off. */
+@keyframes mgBlink{from{box-shadow:0 0 0 0 rgba(217,168,62,0)}to{box-shadow:0 0 0 7px rgba(217,168,62,.45)}}
+.consentGate{background:#FFF7DB;border:2px solid #D9A83E;border-radius:12px;padding:14px 16px;animation:mgBlink 1.1s ease-in-out infinite alternate}
+.consentGate.done{animation:none;box-shadow:none}
+.deepCta{font-weight:700;background:#FFF7DB;border:2px solid #D9A83E;color:#141416;animation:mgBlink 1.1s ease-in-out infinite alternate}
+.deepCta.done{animation:none;box-shadow:none;background:#fff}
+.rowRunNote{background:#FBF0D9;color:#7A5410;border-radius:8px;padding:8px 12px;font-size:13px;line-height:1.5;margin:10px 0 0}
+@media (prefers-reduced-motion: reduce){.consentGate,.deepCta{animation:none}}
 .deepSetup{margin:16px 0 0}
 .deepSetup input[type=text],.deepSetup input[type=password],.deepRow input[type=text],.deepRow input[type=password]{background:#fff;margin:0 0 8px}
 .deepUntested{font-size:13px;color:#6E6E73;line-height:1.6;margin:0 0 4px}
@@ -445,7 +459,7 @@ button.deepRowHead{width:100%;background:none;border:0;padding:0;font:inherit;co
 </div>
 
 <p class="small" style="text-align:center">Nothing you type here is sent to MakerGuard, and neither are your results. The tests run in your browser, talking directly to your Supabase and to the homepage you give it.</p>
-<label class="check" style="display:block;text-align:center"><input id="mgConsentManual" type="checkbox"> I own this app, or I have the owner&rsquo;s permission to test it.</label>
+<label class="check consentGate" id="mgConsentManualBox" style="display:block;text-align:center"><input id="mgConsentManual" type="checkbox"> I own this app, or I have the owner&rsquo;s permission to test it.</label>
 <button id="runBtn" class="primary">Run check</button>
 <p class="small" style="text-align:center">Runs everything you filled in. Anything left blank is skipped, not an error.</p>
 </div>
@@ -762,7 +776,7 @@ function showError(msg){let e=$("errorMsg"); e.textContent=msg; e.classList.remo
 function clearError(){$("errorMsg").classList.add("hidden"); $("errorMsg").textContent="";}
 
 $("showKey").addEventListener("change", function(){ $("anonKey").type = this.checked ? "text" : "password"; });
-$("mgConsentManual").addEventListener("change", function(){ if(this.checked){ window.__mgConsent = true; telEvent("consent_ticked", { path: "manual" }); } });
+$("mgConsentManual").addEventListener("change", function(){ var box = document.getElementById("mgConsentManualBox"); if(box) box.classList.toggle("done", this.checked); if(this.checked){ window.__mgConsent = true; telEvent("consent_ticked", { path: "manual" }); } });
 
 const EXPLAIN = {
   P1: {headline: "Anyone can read this table",
@@ -1102,7 +1116,7 @@ function quickTailHTML(unverifiedItems, tailBits, tst){
       if(tailBits.length){
         h += "<p class='tailLine'>Quick Scan never signs in, so these were not tested at all: " + tailBits.join("; ") + ".</p>";
         h += "<p class='tailLine'>Deep Scan tests these. It starts from one test sign-in, and asks for more only when a test needs it.</p>";
-        h += "<p style='margin:12px 0 2px'><button type='button' class='navbtn' id='nudgeSetup'>Set up Deep Scan</button></p>";
+        h += "<p style='margin:12px 0 2px'><button type='button' class='navbtn deepCta' id='nudgeSetup'>Set up Deep Scan</button></p>";
       }
       h += "</div>";
     }
@@ -1131,6 +1145,7 @@ function quickTailHTML(unverifiedItems, tailBits, tst){
   return h;
 }
 function refreshQuickTail(){
+  try{ refreshOverall(); }catch(e){}
   let el = document.getElementById("quickTail");
   if(!el || !lastResults) return;
   let inputs = tailInputsFor(lastResults);
@@ -1138,6 +1153,71 @@ function refreshQuickTail(){
   if(tst.phase === "none") return;
   let tmp = document.createElement("div");
   tmp.innerHTML = quickTailHTML(inputs.unverifiedItems, inputs.tailBits, tst);
+  let fresh = tmp.firstElementChild;
+  if(fresh && el.parentNode) el.parentNode.replaceChild(fresh, el);
+}
+function overallSummaryHTML(useDeep){
+  // The overall picture (Swati, 2026-11-06): each scan's section
+  // keeps its own count, but the report as a whole must tell the
+  // truth in one place. This block counts every distinct problem
+  // once, across both scans: Quick Scan's issues, plus problems
+  // Deep Scan proved that Quick Scan did not have. A table the
+  // signed-in surface flagged counts only when the cross-user
+  // test did not settle that same table either way; when the
+  // cross test settles it, its verdict is the one that counts.
+  // Settled open answers and answers still open get their own
+  // lines, never folded into the problem count.
+  if(!lastResults) return "";
+  let quick = lastResults.filter(function(it){ return it.probe !== "P2"; });
+  let quickIssues = {}, confirmCount = 0;
+  quick.forEach(function(it){
+    if(it.status !== "PROVEN") return;
+    if(it.tier === "confirm") confirmCount++;
+    else quickIssues[(rawSubject(it) || "").toLowerCase()] = 1;
+  });
+  let ds = (useDeep && typeof deepState !== "undefined") ? deepState : null;
+  let deepRan = !!(ds && (ds.tokenA || ["cross", "settle"].some(function(k){ return ds.rows[k] && (ds.rows[k].state === "done" || ds.rows[k].state === "running"); })));
+  let deepNew = {}, crossSettled = {}, deepUnsettled = {};
+  let settledOpen = 0, remainingOpen = 0;
+  if(deepRan){
+    ds.rows.cross.items.forEach(function(it){
+      let key = (rawSubject(it) || "").toLowerCase();
+      if(it.status === "PROVEN"){ crossSettled[key] = 1; if(!quickIssues[key]) deepNew[key] = 1; }
+      else if(it.status === "BLOCKED"){ crossSettled[key] = 1; }
+      else deepUnsettled[key] = 1;
+    });
+    (ds.rows.surface ? ds.rows.surface.items : []).forEach(function(n){
+      if(n.tag === "Issue" && n.settled){
+        let key = (n.title || "").toLowerCase();
+        if(!quickIssues[key] && !deepNew[key] && !crossSettled[key]) deepNew[key] = 1;
+      }
+    });
+    let tst = quickTailState(quick);
+    settledOpen = tst.settledCount;
+    let tin = tailInputsFor(lastResults);
+    remainingOpen = tin.unverifiedItems.filter(function(it){ return !tst.settled[(rawSubject(it) || "").toLowerCase()]; }).length;
+    Object.keys(deepUnsettled).forEach(function(k){ if(!tst.settled[k]) remainingOpen++; });
+  } else {
+    remainingOpen = quick.filter(function(it){ return (it.status === "NOT_PROVEN" || it.status === "NOT_CHECKED") && !isStrayItem(it); }).length;
+  }
+  let total = Object.keys(quickIssues).length + Object.keys(deepNew).length;
+  let h = "<div class='overallBlock' id='mgOverall'>";
+  if(total > 0) h += "<p class='overallHead'>Overall: " + total + (total === 1 ? " problem" : " problems") + " to fix.</p>";
+  else h += "<p class='overallHead'>Overall: no problems found in the checks that finished.</p>";
+  h += "<p class='small'>Quick Scan found " + Object.keys(quickIssues).length + ".";
+  if(deepRan) h += " Deep Scan found " + Object.keys(deepNew).length + " more.</p>";
+  else h += "</p><p class='small'>Deep Scan has not run yet, so what a signed-in user can reach is not counted here.</p>";
+  if(confirmCount) h += "<p class='small'>Plus " + confirmCount + (confirmCount === 1 ? " readable table" : " readable tables") + " to confirm: only a problem if it was not meant to be public.</p>";
+  if(deepRan && settledOpen) h += "<p class='small'>Deep Scan settled " + settledOpen + " open answer" + (settledOpen === 1 ? "" : "s") + " from Quick Scan.</p>";
+  if(remainingOpen) h += "<p class='small'>" + remainingOpen + (remainingOpen === 1 ? " answer is" : " answers are") + " still open: could not verify.</p>";
+  h += "</div>";
+  return h;
+}
+function refreshOverall(){
+  let el = document.getElementById("mgOverall");
+  if(!el || !lastResults) return;
+  let tmp = document.createElement("div");
+  tmp.innerHTML = overallSummaryHTML(true);
   let fresh = tmp.firstElementChild;
   if(fresh && el.parentNode) el.parentNode.replaceChild(fresh, el);
 }
@@ -1157,6 +1237,7 @@ function reportBodyHTML(results, overall, host, sampleLabel, scopeOverride, tail
   let unverifiedItems = quick.filter(function(it){ return (it.status === "NOT_PROVEN" || it.status === "NOT_CHECKED") && !isStrayItem(it); });
   let unverified = unverifiedItems.length;
   let html = "";
+  html += overallSummaryHTML(!!tailLive && !sampleLabel);
   html += "<section id='quickReport' class='quickSnapshot' data-snapshot='quick'>";
   html += "<p class='brandline'>MakerGuard</p>";
   html += "<h2 class='reportTitle'>Quick Scan report</h2>";
@@ -1164,14 +1245,18 @@ function reportBodyHTML(results, overall, host, sampleLabel, scopeOverride, tail
   let hardCount = band1.filter(function(it){ return it.tier !== "confirm"; }).length;
   let confirmCount = band1.length - hardCount;
   if(band1.length > 0){
+    // The count names its scan (clarity fix, 2026-11-06, from
+    // Swati's own read of a downloaded report): the headline used
+    // to read as the whole report's total, but it counts Quick
+    // Scan only. Deep Scan's own line sits in its section below.
     let v = "";
-    if(hardCount) v += hardCount + (hardCount === 1 ? " issue to fix." : " issues to fix.");
-    if(confirmCount) v += (v ? " " : "") + confirmCount + (confirmCount === 1 ? " readable table to confirm." : " readable tables to confirm.");
-    html += "<p class='verdict'>" + v + "</p>";
+    if(hardCount) v += hardCount + (hardCount === 1 ? " issue to fix" : " issues to fix");
+    if(confirmCount) v += (v ? " " : "") + confirmCount + (confirmCount === 1 ? " readable table to confirm" : " readable tables to confirm");
+    html += "<p class='verdict'>" + v + " in Quick Scan.</p>";
   } else if(unverified === 0){
     html += "<p class='verdict'>No issues found in this quick scan.</p>";
   } else {
-    html += "<p class='verdict'>No issues found in the checks that completed.</p>";
+    html += "<p class='verdict'>No issues found in the Quick Scan checks that completed.</p>";
   }
   html += metaLineHTML(scope, strays, host);
   if(band1.length){
@@ -1452,6 +1537,10 @@ function deepLockerHTML(){
   h += "<h2 class='deepTitle'>Deep Scan</h2>";
   h += "<p class='deepLead'>The tests a link alone cannot reach. It starts from one test sign-in, and asks for more only when a test needs it.</p>";
   h += "<p class='small' style='margin:2px 0 0'>Deep Scan tests tables and views through the data API, signed in as a test user. It does not test database functions.</p>";
+  if(!ds.tokenA && !currentReportIsSample && (ds.tables.length || ds.stores.length || ds.settleCandidates.length)){
+    h += "<p style='margin:12px 0 4px'><button type='button' class='navbtn deepCta' id='deepCtaBtn' data-deep='open-setup'>Set up Deep Scan</button></p>";
+    h += "<p class='small' style='margin:0 0 4px'>Opens the sign-in steps below. Nothing runs until you sign in.</p>";
+  }
   // There is no separate setup box any more (Swati, 2026-11-05):
   // the test user A sign-in lives inside Step 1 of Cross-user
   // access, so there is exactly one door into Deep Scan.
@@ -1540,14 +1629,10 @@ function updateDeepRow(key){
 }
 function wireDeep(){
   ["cross", "settle"].forEach(function(k){ updateDeepRow(k); });
-  // One door (Swati, 2026-11-05): for a real run with Deep work
-  // waiting, the Cross-user section starts open on Step 1, the
-  // sign-in fires its detection, and nothing sits outside the
-  // flow. The sample keeps its rows closed, as before.
-  if(deepState && !deepState.tokenA && !currentReportIsSample && (deepState.tables.length || deepState.stores.length || deepState.settleCandidates.length)){
-    openDeepSetup();
-    expandDeepRow("cross");
-  }
+  // Closed until asked (Swati's live run, 2026-11-06, reversing the
+  // 2026-11-05 auto-open): the Deep rows start closed and the form
+  // opens only when the builder clicks the Set up Deep Scan button.
+  // Nothing fires before that click, not even sign-in detection.
 }
 function deepBodyHTML(key){
   if(key === "cross"){
@@ -1643,7 +1728,7 @@ function verdictRowHTML(it){
   return "<div class='vwrap'><div class='vrow'><span class='vname'>" + esc(rawSubject(it)) + "</span>" + pill + "<button type='button' class='vExp' aria-expanded='false'>Details \u25be</button></div><div class='deepDet' hidden>" + deepCardHTML(it) + "</div></div>";
 }
 function compactNoteRow(n){
-  let pill = n.tag === "Issue" ? "<span class='atag tagIssue'>Issue</span>" : n.tag === "No issue found" ? "<span class='atag tagProtected'>Protected</span>" : "<span class='atag tagNc'>Could not verify</span>";
+  let pill = n.tag === "Issue" ? "<span class='atag tagIssue'>Issue</span>" : n.tag === "No issue found" ? "<span class='atag tagProtected'>Protected</span>" : n.tag === "Settled" ? "<span class='atag tagNc'>Settled</span>" : "<span class='atag tagNc'>Could not verify</span>";
   let det = "";
   if(n.linked) det += "<p style='margin:2px 0'>" + esc(n.linked) + "</p>";
   (n.lines || []).forEach(function(L){ det += "<p style='margin:2px 0'>" + esc(L) + "</p>"; });
@@ -1676,7 +1761,7 @@ function crossBodyHTML(){
     } else {
       let mode = bModeOf(ds);
       h += "<label class='bmodeRow'><input type='radio' name='deepBMode' value='signin'" + (mode === "signin" ? " checked" : "") + "> Sign in as test user B</label>";
-      h += "<label class='bmodeRow'><input type='radio' name='deepBMode' value='row'" + (mode === "row" ? " checked" : "") + "> Give one row number from B's data</label>";
+      h += "<label class='bmodeRow'><input type='radio' name='deepBMode' value='row'" + (mode === "row" ? " checked" : "") + "> Give one row id from B's data</label>";
       if(mode === "signin"){
         if(ds.tokenB){
           h += "<p class='small'>Test user B is signed in.</p><p style='margin:6px 0 0'><button type='button' class='navbtn' data-deep='run-proven'>Run the test</button></p>";
@@ -1687,22 +1772,48 @@ function crossBodyHTML(){
       } else {
         if(ds.rowAsks === null) ds.rowAsks = prioritiseRowAsks();
         if(ds.rowAsks.length){
+          h += "<p class='small'>Copy the id of one row that belongs to test user B, exactly as it sits in the table. In many apps that id is a long code, not a small number.</p>";
           ds.rowAsks.forEach(function(name, i){
-            h += "<div class='frow2'><div class='storeBox'>" + esc(name) + "</div><input id='deepRow" + i + "' type='text' autocomplete='off' spellcheck='false' placeholder='Row number' value='" + esc(ds.rowIds[name] || "") + "'></div>";
+            h += "<div class='frow2'><div class='storeBox'>" + esc(name) + "</div><input id='deepRow" + i + "' type='text' autocomplete='off' spellcheck='false' placeholder='B\u2019s row id' value='" + esc(ds.rowIds[name] || "") + "'></div>";
           });
           h += "<p style='margin:6px 0 0'><button type='button' class='navbtn' data-deep='run-rows'>Run the test</button></p>";
         } else {
-          h += "<p class='small'>No table needs a row number. B's sign-in covers this step.</p>";
+          h += "<p class='small'>No table needs a row id. B's sign-in covers this step.</p>";
         }
       }
+      h += crossPendingHTML(ds);
     }
     h += "</div></div>";
     if(vShown) h += verdictBlockHTML(ds);
     return h;
   }
   h += "<div class='flowStep'><div class='flowHead'><span class='flowTick'>\u2713</span> Step 2 \u00b7 Test user B</div>";
-  h += "<p class='flowLine'>" + (ds.tokenB ? "B's own sign-in proved every answer below." : "Row numbers settled every answer below.") + "</p></div>";
+  let anyUnsettled = ds.tables.some(function(t){ return !ds.rows.cross.items.some(function(it){ return rawSubject(it).toLowerCase() === t.name.toLowerCase() && crossItemSettled(it); }); });
+  h += "<p class='flowLine'>" + (anyUnsettled
+    ? "The tables Step 2 was asked to settle are answered below. Any table it could not settle is listed with its reason."
+    : (ds.tokenB ? "B's own sign-in proved every answer below." : "Row ids settled every answer below.")) + "</p></div>";
   h += verdictBlockHTML(ds);
+  return h;
+}
+function crossPendingHTML(ds){
+  // Unsettled cross-user results, shown inside Step 2 (UX fix,
+  // 2026-11-06): a run that could not settle a table used to render
+  // nothing at all, so the form simply came back and the builder
+  // could not tell anything had run. Every unsettled item now shows
+  // its reason and its next step, here where the run happened.
+  let items = ds.rows.cross.items.filter(function(it){ return it.status === "NOT_CHECKED"; });
+  if(!items.length && !ds.rowRunNote) return "";
+  let h = "";
+  if(ds.rowRunNote) h += "<p class='rowRunNote'>" + esc(ds.rowRunNote) + "</p>";
+  items.forEach(function(it){
+    // Reason and next step are visible, not hidden behind a
+    // Details tap: this row is the thing the builder must act on,
+    // and a collapsed reason is how the silent loop felt.
+    h += "<div class='vwrap'><div class='vrow'><span class='vname'>" + esc(rawSubject(it)) + "</span><span class='atag tagNc'>Could not verify</span></div>";
+    if(it.findings && it.findings[0]) h += "<p class='flowMicro' style='margin-left:0'>" + esc(it.findings[0]) + "</p>";
+    if(it.fixes && it.fixes[0]) h += "<p class='flowMicro' style='margin-left:0'><strong>Next:</strong> " + esc(it.fixes[0]) + "</p>";
+    h += "</div>";
+  });
   return h;
 }
 function verdictBlockHTML(ds){
@@ -1712,8 +1823,13 @@ function verdictBlockHTML(ds){
   settledItems.forEach(function(it){ h += verdictRowHTML(it); });
   let settledNames = {};
   settledItems.forEach(function(it){ settledNames[rawSubject(it).toLowerCase()] = 1; });
-  let unsettled = ds.tables.map(function(t){ return t.name; }).filter(function(n){ return !settledNames[n.toLowerCase()]; });
-  if(unsettled.length) h += "<p class='flowMicro' style='margin-left:0'>Not settled: " + unsettled.map(function(n){ return esc(n); }).join(", ") + "</p>";
+  // Tables with a run result show their reason inside Step 2
+  // (crossPendingHTML). A table with no result at all is named
+  // here, plainly, as not settled yet.
+  let itemNames = {};
+  r.items.forEach(function(it){ itemNames[rawSubject(it).toLowerCase()] = 1; });
+  let unrun = ds.tables.map(function(t){ return t.name; }).filter(function(n){ return !settledNames[n.toLowerCase()] && !itemNames[n.toLowerCase()]; });
+  if(unrun.length) h += "<p class='flowMicro' style='margin-left:0'>Not settled yet: " + unrun.map(function(n){ return esc(n); }).join(", ") + "</p>";
   h += "</div></div>";
   return h;
 }
@@ -1742,6 +1858,21 @@ if(!window.__mgDeepChangeWired){
     if(e.target.name === "deepBMode" && deepState){
       deepState.bMode = e.target.value;
       updateDeepRow("cross");
+    }
+  });
+}
+// Row id fields save as you type (UX fix, 2026-11-06): Step 2
+// re-renders whenever a background batch updates, and a re-render
+// rebuilds the fields from ds.rowIds. Saving on every keystroke
+// means a re-render can never wipe an id the builder already typed.
+if(!window.__mgDeepInputWired){
+  window.__mgDeepInputWired = 1;
+  document.addEventListener("input", function(e){
+    if(!e.target || typeof deepState === "undefined" || !deepState) return;
+    let m = /^deepRow(\d+)$/.exec(e.target.id || "");
+    if(m && deepState.rowAsks){
+      let name = deepState.rowAsks[parseInt(m[1], 10)];
+      if(name) deepState.rowIds[name] = e.target.value.trim();
     }
   });
 }
@@ -2024,7 +2155,16 @@ async function runSettleBatch(){
         if(c.kind === "zero"){
           note = { tag: "No issue found", title: c.table, settled: true, linked: linkedLineNow(), lines: ["Signed in as test user A, " + r.data.length + " row(s) came back from this table, so the table is not empty. The Quick Scan answer stands, with the reason now proven: a stranger receives nothing from this table because your protection stops them, not because there is nothing to take."] };
         } else {
-          note = { tag: "Could not verify", title: c.table, settled: true, linked: linkedLineNow(), lines: ["Signed in as test user A, this table answered with rows, so it is real and signed-in accounts can read it. The stranger answer stays exactly as Quick Scan recorded it; Deep Scan verified the table, not the stranger's side of it."] };
+          // Settled, under its own honest tag (2026-11-06): the open
+          // question for an off-shape Quick answer was whether the
+          // table is real and readable at all, and the signed-in
+          // read settles exactly that (the tail counts it settled,
+          // per the 2026-11-05 ruling). What a stranger receives
+          // stays as Quick Scan recorded it, and the lines say so.
+          // The tag is "Settled", not "Could not verify": the old
+          // pairing (settled in the counts, Could not verify on the
+          // card, Done in green on the section) read as a glitch.
+          note = { tag: "Settled", title: c.table, settled: true, linked: linkedLineNow(), lines: ["Settled: signed in as test user A, this table answered with rows, so the table is real and signed-in accounts can read it. What a stranger receives from it stays exactly as Quick Scan recorded it; Deep Scan verified the table, not the stranger's side of it."] };
         }
       } else if(r.status === 200 && Array.isArray(r.data)){
         note = { tag: "Could not verify", title: c.table, settled: false, lines: ["Still open. Signed in as test user A, no rows came back either. An empty table and a table where A simply has no rows of their own look exactly the same from outside, so this answer stays unverified."] };
@@ -2045,8 +2185,11 @@ async function runSettleBatch(){
   let allSettled = ds.settleCandidates.every(function(c){
     return ds.rows.settle.items.some(function(n){ return n.title.toLowerCase() === c.table.toLowerCase() && n.settled; });
   });
+  // The pill tells the truth about the batch (UX fix, 2026-11-06):
+  // green Done only when every open answer settled.
   if(allSettled) setRowState("settle", "done", "Done", "tagProtected");
-  else if(anySettled) setRowState("settle", "done", "Done", "tagProtected");
+  else if(anySettled) setRowState("settle", "done", "Partly done", "tagNc");
+  else setRowState("settle", "done", "Could not verify", "tagNc");
   updateDeepRow("settle");
 }
 async function runCrossAutoAttempt(){
@@ -2090,6 +2233,15 @@ async function runCrossProbe(){
     let el = $("deepRow" + i);
     if(el && el.value.trim()) ds.rowIds[name] = el.value.trim();
   });
+  // No silent returns (UX fix, 2026-11-06): a Run click with every
+  // field blank used to skip every table and hand the same form
+  // back with no word. Say what is missing, on the form itself.
+  if(!ds.rowAsks.some(function(name){ return ds.rowIds[name]; })){
+    ds.rowRunNote = "Nothing ran yet. Type at least one row id first: the id of a row that belongs to test user B, copied exactly as it sits in the table.";
+    updateDeepRow("cross");
+    return;
+  }
+  ds.rowRunNote = "";
   deepFireStarted();
   setRowState("cross", "running", "Running", "tagNc");
   updateDeepRow("cross");
@@ -2102,13 +2254,18 @@ async function runCrossProbe(){
     upsertCrossItem(it);
     updateDeepRow("cross");
   }
+  let skippedNames = ds.rowAsks.filter(function(name){ return !ds.rowIds[name]; });
+  if(skippedNames.length) ds.rowRunNote = "No row id was given for: " + skippedNames.join(", ") + ". Those tables were not tested.";
   if(crossSettledAll()) setRowState("cross", "done", "Done", "tagProtected");
   else setRowState("cross", "needs", "Needs one thing", "tagNc");
   updateDeepRow("cross");
   checkDeepCompleted();
 }
 async function runCrossProven(){
-  if(deepState) deepState.provenRan = true;
+  // provenRan is set only at the end, and only when every table
+  // settled (UX fix, 2026-11-06). Setting it at the start marked
+  // Step 2 done with a green tick before any table was tested,
+  // even when B had no row in a table and nothing was settled.
   let ds = deepState;
   if(!ds || !ds.tokenA || !ds.tokenB) return;
   deepFireStarted();
@@ -2136,7 +2293,7 @@ async function runCrossProven(){
     upsertCrossItem(it);
     updateDeepRow("cross");
   }
-  if(crossSettledAll()) setRowState("cross", "done", "Done", "tagProtected");
+  if(crossSettledAll()){ ds.provenRan = true; setRowState("cross", "done", "Done", "tagProtected"); }
   else setRowState("cross", "needs", "Needs one thing", "tagNc");
   updateDeepRow("cross");
   checkDeepCompleted();
@@ -2226,7 +2383,13 @@ document.addEventListener("click", function(e){
   let b = e.target.closest("[data-deep]");
   if(!b) return;
   let act = b.getAttribute("data-deep");
-  if(act === "open-setup") openDeepSetup();
+  if(act === "open-setup"){
+    b.classList.add("done");
+    openDeepSetup();
+    expandDeepRow("cross");
+    let bc = $("deepBody-cross");
+    if(bc) bc.scrollIntoView({behavior:"smooth", block:"start"});
+  }
   else if(act === "signin-a") deepDoSignInA();
   else if(act === "token-a") deepUseTokenA();
   else if(act === "signin-b") deepDoSignInB();
@@ -2428,6 +2591,10 @@ async function probeCrossUser(base, anonKey, table, userToken, rowId, existenceP
       item.status = "NOT_CHECKED"; item.level = "MEDIUM";
       item.findings.push("The signed-in request was refused (401). The test sign-in did not work for this request, for example an expired token (they last about an hour) or a token from a different project. A test that could not run is not a pass.");
       item.fixes.push("Sign in as test user A again, or paste a fresh token, then run again.");
+    } else if(r.status === 400){
+      item.status = "NOT_CHECKED"; item.level = "MEDIUM";
+      item.findings.push("Your app refused that ask (400). This often means the id you gave does not fit this table: in many apps the id is a long code, not a small number, and an ask with the wrong kind of id is refused before any row is read. Nothing was settled.");
+      item.fixes.push("Copy B's row id exactly as it sits in the table, long code and all, or use test user B's sign-in instead, which needs no id at all.");
     } else if(r.status === 200 || r.status === 403){
       item.status = "BLOCKED"; item.level = "LOW";
       if(existenceProven){
@@ -3216,7 +3383,7 @@ function downloadReport(){
   if(!lastResults) return;
   let reportCss = "body{font-family:'IBM Plex Sans',-apple-system,system-ui,sans-serif;font-size:15px;font-weight:400;line-height:1.55;max-width:640px;margin:40px auto;padding:0 20px;color:#1d1d1f}strong{font-weight:600}.brandline{text-align:center;font-weight:600;margin:0 0 10px}.verdict{font-size:24px;font-weight:600;letter-spacing:-0.015em;text-align:center;margin:24px 0 6px}.verdictsub{text-align:center;color:#6e6e73;margin:0}.hostline,.issueno,.restline,.small{font-size:13px}.hostline{color:#86868b;text-align:center}.issueno{font-weight:600;color:#6e6e73}.issuePage{display:none}.issuePage.active{display:block}.issuePage h3{font-size:28px;font-weight:600;letter-spacing:-0.015em;margin:2px 0}.dot{color:#d70015}.dotG{color:#1a7f37}.dotGrey{color:#86868b}.stWord{font-weight:600}.story{margin:10px 0 4px}.atrisk{color:#424245}.fixbox{background:#f5f5f7;border-radius:16px;padding:6px 20px 12px;margin:20px 0}.lbl{font-weight:600;margin:10px 0 2px}ol.steps{margin:6px 0 6px 20px;padding:0}ol.steps li{margin:6px 0}.navRow{display:flex;justify-content:space-between;align-items:center}.navbtn{height:44px;padding:0 20px;border-radius:980px;border:1px solid #1d1d1f;background:#fff;font-size:17px;cursor:pointer}.navbtn:disabled{opacity:.25}.dots{font-size:13px;color:#86868b;letter-spacing:4px}.restline{text-align:center;color:#6e6e73}.rowline{padding:10px 4px;border-top:1px solid #e5e5e5}.qsec{margin:22px 0 0;background:#f5f5f7;border-radius:18px;padding:22px 18px 12px}.qhead{font-weight:600;margin:0 0 8px}.arow{padding:10px 2px;border-top:1px solid #e3e3e7}.qsec .fixbox{background:#ffffff}.acard{background:#fff;border:1px solid #e3e3e7;border-radius:14px;padding:12px 14px;margin:10px 0}.asum{display:flex;justify-content:space-between;align-items:flex-start;width:100%;background:none;border:0;padding:0;font:inherit;color:inherit;text-align:left;cursor:pointer}.aexp{font-size:13px;color:#0066cc;white-space:nowrap;margin-left:10px;padding-top:2px}.adet{border-top:1px solid #eee;margin-top:10px;padding-top:10px}.acard .fixbox{background:#f5f5f7}.promptBox{background:#fff;border:1px solid #e3e3e7;border-radius:12px;padding:12px 14px;font-size:13px;line-height:1.55;white-space:pre-wrap}.nudgeCard{display:none}.small{color:#6e6e73}.sampleNotice{background:#f5f5f7;border-radius:12px;padding:12px;text-align:center}details.proof summary,summary{font-size:13px;color:#0066cc;cursor:pointer}";
   let navJs = "<script>document.addEventListener('click',function(e){var b=e.target.closest('.asum');if(!b)return;var d=b.parentElement.querySelector('.adet');var x=b.querySelector('.aexp');var o=d.hidden;d.hidden=!o;b.setAttribute('aria-expanded',o?'true':'false');var c=b.closest('.acard');if(x)x.textContent=o?'Hide \u25B4':(c&&c.getAttribute('data-fix')==='1'&&c.getAttribute('data-tier')!=='confirm'?'Click for the fix \u25BE':'Details \u25BE');});<\/script>";
-  let doc = "<!doctype html><html><head><meta charset='utf-8'><title>MakerGuard report</title><style>" + reportCss + ".reportTitle{font-size:24px;font-weight:700;letter-spacing:-0.02em;text-align:center;margin:6px 0 4px}.quickSnapshot{margin:0}.scopeLine{text-align:center;color:#6e6e73;font-size:13px;line-height:1.5;margin:10px auto 4px}.metaLine{text-align:center;color:#6e6e73;font-size:13px;line-height:1.55;margin:10px auto 4px}.band{margin:22px 0 0;background:#F0EEFA;border-radius:12px;padding:22px 18px 12px}.bandHead{font-weight:600;margin:0 0 8px}.bandCount{font-weight:400;color:#6e6e73;font-size:13px}.reasonTag{display:inline-block;font-size:13px;font-weight:600;background:#FBF0D9;color:#7A5410;border-radius:980px;padding:2px 10px;margin-top:6px}.reasonLine{display:block;font-size:13px;color:#7A5410;margin-top:4px}.secttl{font-size:13px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:#372A9C;text-align:center}.atag{display:inline-block;font-size:13px;font-weight:600;color:#fff;border-radius:980px;padding:3px 12px}.tagIssue{background:#B3261E}.tagProtected{background:#1A7F37}.tagNc{background:#FBF0D9;color:#7A5410}.ahead{display:flex;justify-content:space-between;align-items:center}.aobj{display:block;font-weight:600;margin-top:9px}.objkind{font-weight:400;font-size:13px;color:#86868B}.asumline{display:block;font-size:13px;color:#6E6E73;margin-top:3px;line-height:1.45}.acard{border-left:4px solid #D8D2C0}.acard.stIssue{border-left-color:#B3261E}.acard.stProtected{border-left-color:#1A7F37}.acard.stNc{border-left-color:#D9A83E}.quickEnd{border-top:1px solid #E3E3E7;margin-top:18px;padding-top:10px}.strayLine{text-align:center;color:#6e6e73;max-width:560px;margin:2px auto 4px}.unverBlock{margin:22px 0 0;background:#fbf6e9;border-radius:18px;padding:16px 18px 12px}.unverLine{margin:0}.unverList{margin:6px 0 6px 18px;padding:0}.unverList li{margin:4px 0;font-size:13px;color:#424245}.deepCard{display:none}.asum{display:block}.ahead{display:flex;justify-content:space-between;align-items:center}.aobj{display:block;font-weight:600;font-size:16px;color:#141416;margin-top:9px}.aexp{color:#372A9C;padding-top:0}.tailBlock{margin:22px 0 0;background:#fff;border:1px solid #E3E3E7;border-radius:12px;padding:16px 18px 14px}.tailLine{margin:10px 0 0;color:#424245;line-height:1.55}#nudgeSetup{display:none}.deepSection{margin:26px 0 0}.deepIntro{text-align:center;color:#6e6e73;max-width:560px;margin:4px auto 6px}.atag,.reasonTag,.bandCount,.metaLine{font-family:'IBM Plex Sans',-apple-system,system-ui,sans-serif}.atag,.reasonTag{font-size:12px;letter-spacing:.05em;text-transform:uppercase}.bandHead{font-weight:700;letter-spacing:-0.01em}.acard{border-radius:10px}.deepNoteCard{background:#fff;border:1px solid #E7E2D6;border-left:4px solid #D8D2C0;border-radius:10px;padding:12px 14px;margin:10px 0}.deepNoteCard.stIssue{border-left-color:#B3261E}.deepNoteCard.stProtected{border-left-color:#1A7F37}.deepNoteCard.stNc{border-left-color:#D9A83E}.deepNoteTitle{font-weight:600;color:#141416;margin:8px 0 0}.deepNoteLine{font-size:13px;color:#424245;margin:4px 0 0;line-height:1.5}.linkedLine{font-size:13px;color:#372A9C;background:#F0EEFA;border-radius:8px;padding:6px 10px;margin:8px 0 0;line-height:1.5}.gradeLine{font-size:13px;color:#424245;margin:8px 0 0}</style></head><body>" + reportBodyHTML(lastResults, lastOverall, lastHost, false, lastScope, true) + deepDownloadHTML() + navJs + "</body></html>";
+  let doc = "<!doctype html><html><head><meta charset='utf-8'><title>MakerGuard report</title><style>" + reportCss + ".reportTitle{font-size:24px;font-weight:700;letter-spacing:-0.02em;text-align:center;margin:6px 0 4px}.quickSnapshot{margin:0}.overallBlock{background:#F0EEFA;border:1px solid #D8D2F0;border-radius:12px;padding:14px 16px;margin:0 0 16px;text-align:center}.overallHead{font-size:20px;font-weight:700;color:#141416;margin:0}.scopeLine{text-align:center;color:#6e6e73;font-size:13px;line-height:1.5;margin:10px auto 4px}.metaLine{text-align:center;color:#6e6e73;font-size:13px;line-height:1.55;margin:10px auto 4px}.band{margin:22px 0 0;background:#F0EEFA;border-radius:12px;padding:22px 18px 12px}.bandHead{font-weight:600;margin:0 0 8px}.bandCount{font-weight:400;color:#6e6e73;font-size:13px}.reasonTag{display:inline-block;font-size:13px;font-weight:600;background:#FBF0D9;color:#7A5410;border-radius:980px;padding:2px 10px;margin-top:6px}.reasonLine{display:block;font-size:13px;color:#7A5410;margin-top:4px}.secttl{font-size:13px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:#372A9C;text-align:center}.atag{display:inline-block;font-size:13px;font-weight:600;color:#fff;border-radius:980px;padding:3px 12px}.tagIssue{background:#B3261E}.tagProtected{background:#1A7F37}.tagNc{background:#FBF0D9;color:#7A5410}.ahead{display:flex;justify-content:space-between;align-items:center}.aobj{display:block;font-weight:600;margin-top:9px}.objkind{font-weight:400;font-size:13px;color:#86868B}.asumline{display:block;font-size:13px;color:#6E6E73;margin-top:3px;line-height:1.45}.acard{border-left:4px solid #D8D2C0}.acard.stIssue{border-left-color:#B3261E}.acard.stProtected{border-left-color:#1A7F37}.acard.stNc{border-left-color:#D9A83E}.quickEnd{border-top:1px solid #E3E3E7;margin-top:18px;padding-top:10px}.strayLine{text-align:center;color:#6e6e73;max-width:560px;margin:2px auto 4px}.unverBlock{margin:22px 0 0;background:#fbf6e9;border-radius:18px;padding:16px 18px 12px}.unverLine{margin:0}.unverList{margin:6px 0 6px 18px;padding:0}.unverList li{margin:4px 0;font-size:13px;color:#424245}.deepCard{display:none}.asum{display:block}.ahead{display:flex;justify-content:space-between;align-items:center}.aobj{display:block;font-weight:600;font-size:16px;color:#141416;margin-top:9px}.aexp{color:#372A9C;padding-top:0}.tailBlock{margin:22px 0 0;background:#fff;border:1px solid #E3E3E7;border-radius:12px;padding:16px 18px 14px}.tailLine{margin:10px 0 0;color:#424245;line-height:1.55}#nudgeSetup{display:none}.deepSection{margin:26px 0 0}.deepIntro{text-align:center;color:#6e6e73;max-width:560px;margin:4px auto 6px}.atag,.reasonTag,.bandCount,.metaLine{font-family:'IBM Plex Sans',-apple-system,system-ui,sans-serif}.atag,.reasonTag{font-size:12px;letter-spacing:.05em;text-transform:uppercase}.bandHead{font-weight:700;letter-spacing:-0.01em}.acard{border-radius:10px}.deepNoteCard{background:#fff;border:1px solid #E7E2D6;border-left:4px solid #D8D2C0;border-radius:10px;padding:12px 14px;margin:10px 0}.deepNoteCard.stIssue{border-left-color:#B3261E}.deepNoteCard.stProtected{border-left-color:#1A7F37}.deepNoteCard.stNc{border-left-color:#D9A83E}.deepNoteTitle{font-weight:600;color:#141416;margin:8px 0 0}.deepNoteLine{font-size:13px;color:#424245;margin:4px 0 0;line-height:1.5}.linkedLine{font-size:13px;color:#372A9C;background:#F0EEFA;border-radius:8px;padding:6px 10px;margin:8px 0 0;line-height:1.5}.gradeLine{font-size:13px;color:#424245;margin:8px 0 0}</style></head><body>" + reportBodyHTML(lastResults, lastOverall, lastHost, false, lastScope, true) + deepDownloadHTML() + navJs + "</body></html>";
   let parts = [doc];
   let blob = new Blob([parts.join("\n")], {type: "text/html"});
   let a = document.createElement("a");
@@ -3470,17 +3637,19 @@ var MG_FETCHER = 'https://reader.midnightbuilds.fyi/fetch';
         }
         function gateOrRun(picked){
           if(window.__mgConsent){ autoRun(picked); return; }
-          var gate = '<div style="margin-top:12px">'
+          var gate = '<div class="consentGate" id="mgConsentGate" style="margin-top:12px">'
             + '<p style="font-weight:600;margin:0 0 6px">One thing before the tests run</p>'
             + '<p class="small" style="margin:0 0 8px">Reading your app\u2019s public code is done. The tests themselves ask your app\u2019s backend for data, the way a stranger would. They only run on an app you own, or one you have permission to test.</p>'
-            + '<label style="display:block;margin:6px 0"><input type="checkbox" id="mgConsentTick"> I own this app, or I have the owner\u2019s permission to test it.</label>'
+            + '<label style="display:block;margin:6px 0;font-weight:600"><input type="checkbox" id="mgConsentTick"> I own this app, or I have the owner\u2019s permission to test it.</label>'
             + '<p style="margin:10px 0 0"><button id="mgConsentBtn" class="primary" type="button" disabled>Run the tests</button></p>'
             + '<p class="small" style="margin:8px 0 0">If your app was tested and you want it left out, reach us through Contact us at the bottom of this page.</p>'
             + '</div>';
           foundEl.innerHTML = rows + (multi ? '<p class="small">Project ' + esc(picked) + ' is the one that will be tested. The other backend named in the code is not tested in this run.</p>' : '') + gate;
+          var gateEl = document.getElementById('mgConsentGate');
+          if(gateEl) gateEl.scrollIntoView({behavior:'smooth', block:'center'});
           var tick = document.getElementById('mgConsentTick');
           var go = document.getElementById('mgConsentBtn');
-          tick.addEventListener('change', function(){ go.disabled = !tick.checked; });
+          tick.addEventListener('change', function(){ go.disabled = !tick.checked; if(gateEl) gateEl.classList.toggle('done', tick.checked); });
           go.addEventListener('click', function(){
             window.__mgConsent = true;
             var mc = document.getElementById('mgConsentManual'); if(mc) mc.checked = true;
