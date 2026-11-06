@@ -351,6 +351,7 @@ h1{font-weight:700;letter-spacing:-0.02em}
 .fbSend{height:44px;padding:0 24px;border-radius:980px;border:none;background:#111;color:#fff;font-weight:600;cursor:pointer}
 .fbSend:disabled{opacity:.35;cursor:default}
 .fbStatus{min-height:18px;margin-top:8px}
+.emailSug{background:none;border:0;padding:0;color:#4B3CC4;font:inherit;text-decoration:underline;cursor:pointer}
 .fbMini{margin-top:14px;background:#fff;border:1px solid #E0D8C4;border-radius:12px;padding:12px 14px}
 .fbMini p{margin:0;line-height:1.5}
 .fbPanel{background:#fff;border-radius:16px;width:100%;max-width:520px;max-height:calc(100vh - 36px);max-height:calc(100dvh - 36px);overflow-y:auto;padding:10px 22px 22px;box-shadow:0 24px 70px rgba(0,0,0,.3)}
@@ -437,13 +438,14 @@ button.deepRowHead{width:100%;background:none;border:0;padding:0;font:inherit;co
 <input id="bucketName" type="text" placeholder="avatars" autocomplete="off" spellcheck="false"><div class="labRow"><label for="objectName">File in that bucket</label><span class="tipWrap"><button type="button" class="tipBtn" data-tip="tip-objectName" aria-label="Help for File in that bucket">!</button><p class="tipText hidden" id="tip-objectName">The exact name of one file inside that bucket, like test.png, exactly as it appears in Storage.</p></span></div>
 <input id="objectName" type="text" placeholder="test.png" autocomplete="off" spellcheck="false">
 </details>
-<details class="drop"><summary>Find out if a secret master key is hiding in your website code</summary>
-<div class="labRow"><label for="productUrl">Product homepage URL</label><span class="tipWrap"><button type="button" class="tipBtn" data-tip="tip-productUrl" aria-label="Help for Product homepage URL">!</button><p class="tipText hidden" id="tip-productUrl">Your app's homepage address. Its public code files get read, the same files any visitor's browser downloads, looking only for a master key pattern. A key value is never shown. Browsers sometimes block this read; then this question stays unanswered, which is not a pass.</p></span></div>
+<details class="drop"><summary>Find out if a secret key is hiding in your website code</summary>
+<div class="labRow"><label for="productUrl">Product homepage URL</label><span class="tipWrap"><button type="button" class="tipBtn" data-tip="tip-productUrl" aria-label="Help for Product homepage URL">!</button><p class="tipText hidden" id="tip-productUrl">Your app's homepage address. Its public code files get read, the same files any visitor's browser downloads, looking only for secret key patterns. A key value is never shown. Browsers sometimes block this read; then this question stays unanswered, which is not a pass.</p></span></div>
 <input id="productUrl" type="text" placeholder="https://your-app.com" autocomplete="off" spellcheck="false">
 </details>
 </div>
 
 <p class="small" style="text-align:center">Nothing you type here is sent to MakerGuard, and neither are your results. The tests run in your browser, talking directly to your Supabase and to the homepage you give it.</p>
+<label class="check" style="display:block;text-align:center"><input id="mgConsentManual" type="checkbox"> I own this app, or I have the owner&rsquo;s permission to test it.</label>
 <button id="runBtn" class="primary">Run check</button>
 <p class="small" style="text-align:center">Runs everything you filled in. Anything left blank is skipped, not an error.</p>
 </div>
@@ -549,6 +551,7 @@ button.deepRowHead{width:100%;background:none;border:0;padding:0;font:inherit;co
 <p style="display:flex;justify-content:space-between;margin:0 0 14px"><a href="#faq-data">Privacy</a><a href="https://instagram.com/midnightbuilds.fyi" target="_blank" rel="noopener">Contact us</a></p>
 <p>This checks only the tables, bucket, and homepage you gave it. It is not a complete security audit.</p>
 <p>Fix the top finding, then run it again with the same inputs to prove the fix.</p>
+<p>Only test apps you own, or apps you have the owner&rsquo;s permission to test. If your app was tested and you want it left out, reach us through Contact us above.</p>
 </footer>
 
 <script>
@@ -620,6 +623,7 @@ telReturnedCheck();
 telEvent("visited", {});
 function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
 function $(id){return document.getElementById(id);}
+function mgConsentGiven(){ if(window.__mgConsent) return true; var m = document.getElementById("mgConsentManual"); if(m && m.checked){ window.__mgConsent = true; return true; } var l = document.getElementById("mgConsentTick"); return !!(l && l.checked); }
 function cleanUrl(u){ let v = u.trim().replace(/\/+$/,""); if(v.endsWith("/rest/v1")) v = v.slice(0, v.length - 8).replace(/\/+$/,""); return v; }
 // Keys and tokens are often copied out of settings files and code, where
 // they sit inside quote marks. Trimming removes spaces but not quotes,
@@ -632,6 +636,76 @@ function cleanCred(v){
     x = x.slice(1, -1).trim();
   }
   return x;
+}
+// ---- Email validation (vanilla, no dependencies) ----
+// Cleanup first: pasted addresses arrive with spaces around them, a
+// mailto: prefix, angle brackets, or a trailing comma from the
+// sentence they were copied out of. Lowercasing the whole address is
+// standard for contact capture and helps dedupe.
+function normalizeEmail(raw){
+  var s = (raw || "").trim();
+  s = s.replace(/^mailto:/i, "").trim();
+  s = s.replace(/[),.;:]+$/, "");
+  s = s.replace(/^<+/, "").replace(/>+$/, "").trim();
+  return s.toLowerCase();
+}
+// A sane shape check, not the full standard: it rejects the garbage
+// that actually shows up (no @, two @, spaces, no dot in the domain,
+// a 1-letter ending, double dots, a name part that starts or ends
+// with a dot). It cannot prove the mailbox exists.
+function emailShapeOk(email){
+  if(!email || /\s/.test(email)) return false;
+  if((email.match(/@/g) || []).length !== 1) return false;
+  var p = email.split("@"), local = p[0], domain = p[1];
+  if(!local || !domain) return false;
+  if(/^\.|\.$|\.\./.test(local)) return false;
+  if(/^[-.]|[-.]$|\.\./.test(domain)) return false;
+  if(domain.indexOf(".") < 0) return false;
+  if(!/^[a-z]{2,}$/.test(domain.split(".").pop())) return false;
+  if(!/^[a-z0-9.!#$%&'*+\/=?^_`{|}~-]+$/.test(local)) return false;
+  if(!/^[a-z0-9.-]+$/.test(domain)) return false;
+  return true;
+}
+// "Did you mean ...?" for the most common unreachable cause: a typo
+// in the domain or in its ending. Small edit distance against short
+// lists, so a real custom domain is always too far away to fire.
+// A suggestion never blocks: pressing send again sends what was typed.
+var EMAIL_DOMAINS = ["gmail.com","googlemail.com","yahoo.com","outlook.com","hotmail.com","hotmail.co.uk","icloud.com","me.com","proton.me","protonmail.com","live.com","msn.com","aol.com"];
+var EMAIL_TLDS = ["com","net","org","edu","gov","io","co","in","me","dev","app"];
+function _lev(a, b){
+  var m = a.length, n = b.length, d = [], i, j;
+  for(i = 0; i <= m; i++){ d[i] = [i]; }
+  for(j = 0; j <= n; j++){ d[0][j] = j; }
+  for(i = 1; i <= m; i++) for(j = 1; j <= n; j++)
+    d[i][j] = Math.min(d[i-1][j] + 1, d[i][j-1] + 1, d[i-1][j-1] + (a[i-1] === b[j-1] ? 0 : 1));
+  return d[m][n];
+}
+function _closest(token, list, maxDist){
+  if(list.indexOf(token) > -1) return null;
+  var best = null, bestD = maxDist + 1, i, x;
+  for(i = 0; i < list.length; i++){ x = _lev(token, list[i]); if(x < bestD){ bestD = x; best = list[i]; } }
+  return bestD <= maxDist ? best : null;
+}
+function suggestEmail(email){
+  if(!emailShapeOk(email)) return null;
+  var p = email.split("@"), local = p[0], domain = p[1];
+  var domFix = _closest(domain, EMAIL_DOMAINS, 2);
+  if(domFix) return local + "@" + domFix;
+  var dot = domain.lastIndexOf("."), host = domain.slice(0, dot), tld = domain.slice(dot + 1);
+  var tldFix = _closest(tld, EMAIL_TLDS, 1);
+  if(tldFix) return local + "@" + host + "." + tldFix;
+  return null;
+}
+// The suggestion is built from DOM nodes and text, never from HTML,
+// so the typed address can never become page code.
+function showEmailSuggestion(statusEl, suggestion, onAccept){
+  if(!statusEl) return;
+  statusEl.textContent = "Did you mean ";
+  var b = document.createElement("button");
+  b.type = "button"; b.className = "emailSug"; b.textContent = suggestion;
+  b.addEventListener("click", onAccept);
+  statusEl.appendChild(b);
+  statusEl.appendChild(document.createTextNode("? Or press again to use what you typed."));
 }
 function invalidKeyText(data){
   if(!data) return false;
@@ -688,6 +762,7 @@ function showError(msg){let e=$("errorMsg"); e.textContent=msg; e.classList.remo
 function clearError(){$("errorMsg").classList.add("hidden"); $("errorMsg").textContent="";}
 
 $("showKey").addEventListener("change", function(){ $("anonKey").type = this.checked ? "text" : "password"; });
+$("mgConsentManual").addEventListener("change", function(){ if(this.checked){ window.__mgConsent = true; telEvent("consent_ticked", { path: "manual" }); } });
 
 const EXPLAIN = {
   P1: {headline: "Anyone can read this table",
@@ -699,9 +774,9 @@ const EXPLAIN = {
   P3: {headline: "Anyone can open this file",
        story: "This file opens for anyone who has its address. No login, no account, nothing.",
        risk: "Anyone who gets the link can open it. Links get shared and leaked."},
-  P4: {headline: "Your master key is in your website code",
-       story: "Your homepage code is public, any visitor can download it. Your master key is sitting inside it.",
-       risk: "Whoever takes that key owns your whole project. They can read, change, or delete everything."}
+  P4: {headline: "A secret key is in your website code",
+       story: "Your homepage code is public, any visitor can download it. A secret key is sitting inside it. The finding below names the kind.",
+       risk: "Whoever takes that key can use it in the service that issued it, with whatever access that key carries. A Supabase master key hands over the whole project: read, change, or delete everything."}
 };
 const FIXSTEPS = {
   P1: ["Supabase, Table Editor, this table. If Row Level Security is off, turn it ON. If it is already on, the policies are the problem, next step.",
@@ -713,23 +788,39 @@ const FIXSTEPS = {
   P3: ["Supabase, Storage: make this bucket Private.",
        "Share files only inside your app, after checking the owner.",
        "Run this check again."],
-  P4: ["Rotate the key now. Supabase, Settings, API.",
+  P4: ["Rotate the key now, in the service that issued it.",
        "Delete it from your website code and any public repo.",
        "Keep it only on a server. Then run this check again."]
+};
+const TIEREXPLAIN = {
+  P1: {headline: "This table is readable by anyone",
+       story: "Anyone can ask this table for rows using only your public key. No login needed. Its column list, which this check read, shows no owner column and nothing that looks like personal data.",
+       risk: "If the table is meant to be public, this is fine. If it is not, anyone can copy every row, including rows added later."}
+};
+const TIERSTEPS = {
+  P1: ["Only if this table is not meant to be public: Supabase, Table Editor, this table. If Row Level Security is off, turn it ON.",
+       "Open the table's policies. Delete any policy that lets everyone read, or narrow it so each user reads only their own rows.",
+       "Run this check again."]
+};
+const CONFIRM_PROMPTS = {
+  P1: "A security check found that my table {name} can be read by anyone using only the public key, with no login. Its columns show no owner column and nothing that looks like personal data, so it may be public on purpose. Do not change anything yet. First, from how the app uses this table, tell me whether it looks meant to be public. If it is not meant to be public, turn on Row Level Security for it in Supabase and remove any policy that lets everyone read. If it is meant to be public, say so and change nothing."
 };
 const PASSLINE = {
   P1: "a stranger with only your public key could not read this table",
   P2: "test user A could not read test user B's row",
   P3: "this file could not be opened without logging in",
-  P4: "no master key showed up in your website's public files"
+  P4: "no secret key pattern showed up in the files that were read"
 };
 
 function issuePageHTML(item, n, total){
   let ex = EXPLAIN[item.probe] || {headline: item.title, story: item.findings.join(" "), risk: ""};
-  let steps = (FIXSTEPS[item.probe] || item.fixes).map(function(f){return "<li>"+esc(f)+"</li>";}).join("");
+  if(item.tier === "confirm" && TIEREXPLAIN[item.probe]) ex = TIEREXPLAIN[item.probe];
+  let steps = ((item.tier === "confirm" ? (TIERSTEPS[item.probe] || item.fixes) : (FIXSTEPS[item.probe] || item.fixes))).map(function(f){return "<li>"+esc(f)+"</li>";}).join("");
   let proof = item.findings.map(function(f){return esc(f);}).join(" ") + (item.control ? " Why you can trust this: " + esc(item.control) : "");
   let h = "<div class='issuePage"+(n === 1 ? " active" : "")+"' data-idx='"+n+"'>";
-  h += "<p class='issueno' style='color:#d70015'>Issue "+n+" of "+total+", needs fixing</p>";
+  h += item.tier === "confirm"
+    ? "<p class='issueno' style='color:#7A5410'>Readable by anyone "+n+" of "+total+", to confirm</p>"
+    : "<p class='issueno' style='color:#d70015'>Issue "+n+" of "+total+", needs fixing</p>";
   h += "<h3><span class='dot'>\u25CF</span> "+esc(ex.headline)+"</h3>";
   h += "<p class='story'>"+esc(ex.story)+"</p>";
   let subj = item.title.indexOf(": ") > -1 ? item.title.split(": ").slice(1).join(": ") : "";
@@ -754,11 +845,11 @@ const FIXPROMPTS = {
   P1: "A security check found a real problem in my app. In my Supabase project, the table {name} can be read by anyone on the internet using only the public anon key, with no login at all.\n\nFix it like this:\n1. Turn on Row Level Security for the table {name}.\n2. Make sure no policy on {name} lets the anon role read rows.\n3. If signed-in users need this data, add a policy that lets each user read only rows that belong to them.\n\nDo not change my screens, my fields, or any other table. When you finish, tell me exactly which policies now exist on {name}.",
   P2: "A security check found a real problem in my app. In my Supabase project, a signed-in user can read another user's row in the table {name}.\n\nFix it like this:\n1. Turn on Row Level Security for the table {name}, if it is not on already.\n2. Change the policies on {name} so a user can read only rows that belong to them: the row's owner must match the signed-in user (auth.uid()).\n3. Remove any policy that lets all signed-in users read all rows.\n\nDo not change my screens, my fields, or any other table. When you finish, tell me exactly which policies now exist on {name}.",
   P3: "A security check found a real problem in my app. In my Supabase project, the storage bucket {name} is public, so anyone who has a file's address can open the file without logging in.\n\nFix it like this:\n1. Make the bucket {name} private.\n2. Change the app so these files open only for the person they belong to, using signed URLs or storage policies that check the owner.\n3. Check every screen that shows these files still works after the change.\n\nDo not change any other bucket. When you finish, tell me what you changed and how the files are protected now.",
-  P4: "A security check found a real problem in my app. A Supabase service_role key, the master key that bypasses all protection, is present in my app's shipped frontend code, where every visitor can see it.\n\nFix it like this:\n1. Remove the service_role key from all frontend code completely.\n2. Anything that truly needs it must move to a server-side function that reads the key from a secret setting, never from code sent to the browser.\n3. Search the whole project for the key and for the words service_role, and remove every copy in frontend code.\n\nWhen you finish, tell me where the key was and what you moved. I will rotate the key myself in Supabase."
+  P4: "A security check found a real problem in my app. A secret key (the report above names the kind, for example a Supabase service_role key, the master key that bypasses all protection) is present in my app's shipped frontend code, where every visitor can see it.\n\nFix it like this:\n1. Remove the secret key from all frontend code completely.\n2. Anything that truly needs it must move to a server-side function that reads the key from a secret setting, never from code sent to the browser.\n3. Search the whole project for the key and for its kind's markers (service_role, sb_secret_, sbp_, sk_live, private key blocks), and remove every copy in frontend code.\n\nWhen you finish, tell me where the key was and what you moved. I will rotate the key myself in the service that issued it."
 };
 function promptFor(it){
   let raw = it.title.indexOf(": ") > -1 ? it.title.split(": ").slice(1).join(": ") : "";
-  let tpl = FIXPROMPTS[it.probe] || "";
+  let tpl = (it.tier === "confirm" ? (CONFIRM_PROMPTS[it.probe] || "") : (FIXPROMPTS[it.probe] || ""));
   return tpl.split("{name}").join(raw || "the table");
 }
 function wireCards(){
@@ -795,7 +886,7 @@ function wireCards(){
       let open = det.hidden;
       det.hidden = !open;
       btn.setAttribute("aria-expanded", open ? "true" : "false");
-      if(exp){ let cd = btn.closest(".acard"); exp.textContent = open ? "Hide \u25B4" : ((cd && cd.getAttribute("data-fix") === "1") ? "Click for the fix \u25BE" : "Details \u25BE"); }
+      if(exp){ let cd = btn.closest(".acard"); exp.textContent = open ? "Hide \u25B4" : ((cd && cd.getAttribute("data-fix") === "1" && cd.getAttribute("data-tier") !== "confirm") ? "Click for the fix \u25BE" : "Details \u25BE"); }
       if(open && !currentReportIsSample){
         let card = btn.closest(".acard");
         let probe = card ? (card.getAttribute("data-probe") || "") : "";
@@ -809,13 +900,13 @@ const QUESTIONS = {
   P1: "Can a stranger read your users' data?",
   P2: "Can a signed-in user read another user's data?",
   P3: "Can anyone open your files without logging in?",
-  P4: "Is a secret master key hiding in your website code?"
+  P4: "Is a secret key hiding in your website code?"
 };
 const CAVEAT = {
   P1: "Nothing came back when a stranger asked. Either your protection stopped the request, or the table is empty. From outside there is no way to tell which, so this is not a guaranteed pass.",
   P2: "Test user A could not see another user's rows in this table. Reassuring, but not a guarantee for every single row.",
   P3: "The file did not open, but it did not clearly refuse either. Treat this as unproven, not as safe.",
-  P4: "No master key pattern showed up in the files that could be read. If some of your site's files could not be read, this stays unproven."
+  P4: "No secret key pattern showed up in the files that could be read. If some of your site's files could not be read, this stays unproven."
 };
 function chipHTML(st){
   if(st === "PROVEN") return "<span class='dot'>\u25CF</span> <span class='stWord'>Issue.</span>";
@@ -834,7 +925,7 @@ function rawSubject(it){
   if(it.title && it.title.indexOf(": ") > -1) return it.title.split(": ").slice(1).join(": ");
   return subjectOf(it);
 }
-const TESTNAMES = { P1: "Stranger read", P2: "Cross-user read", P3: "File store check", P4: "Master key scan" };
+const TESTNAMES = { P1: "Stranger read", P2: "Cross-user read", P3: "File store check", P4: "Secret key scan" };
 function testNameFor(it){ return TESTNAMES[it.probe] || "Check"; }
 function isStrayItem(it){
   return it.probe === "P1" && it.status === "NOT_CHECKED" && it.origin === "code" && reasonLabelFor(it) === "Resource not confirmed";
@@ -910,26 +1001,32 @@ function metaLineHTML(scope, strays, host){
   let h = s.filesRead + " code files read &middot; " + s.tablesTested + " tables tested &middot; " + s.storesFound + " file stores";
   if(names.length) h += " &middot; skipped code names: " + esc(names.join(", "));
   h += " &middot; Checked: " + esc(host) + (lastRunLabel ? " &middot; " + esc(lastRunLabel) : "");
+  let bn = null;
+  try{ bn = window.__mgBackendNote; }catch(e){}
+  if(bn && bn.others && bn.others.length && host === bn.picked + ".supabase.co"){
+    h += " &middot; This app also names " + (bn.others.length === 1 ? "another backend" : "other backends") + " (project " + esc(bn.others.join(", ")) + "), not tested in this run";
+  }
   return "<p class='metaLine'>" + h + "</p>";
 }
 function answerRowHTML(it, fixLabel){
   let ex = EXPLAIN[it.probe] || {};
+  if(it.tier === "confirm" && TIEREXPLAIN[it.probe]) ex = TIEREXPLAIN[it.probe];
   let sum;
   if(it.status === "PROVEN" && it.sumLine) sum = it.sumLine.replace(/\.$/, "") + ".";
   else if(it.status === "PROVEN") sum = firstSent(ex.story || it.findings.join(" "));
   else if(it.status === "BLOCKED") sum = it.sumLine ? (it.sumLine.replace(/\.$/, "") + ".") : ((PASSLINE[it.probe] || "The attempt was made and your project stopped it") + ".");
   else if(it.status === "NOT_PROVEN") sum = CAVEAT[it.probe] || "The check ran and found nothing, but could not prove this either way.";
   else sum = firstSent(it.findings.join(" "));
-  let stCls = it.status === "PROVEN" ? "stIssue" : it.status === "BLOCKED" ? "stProtected" : "stNc";
-  let tag = it.status === "PROVEN" ? "<span class='atag tagIssue'>Issue</span>" : it.status === "BLOCKED" ? "<span class='atag tagProtected'>Protected</span>" : it.status === "NOT_PROVEN" ? "<span class='atag tagNc'>Could not verify</span>" : "<span class='atag tagNc'>Not checked</span>";
+  let stCls = it.tier === "confirm" ? "stNc" : it.status === "PROVEN" ? "stIssue" : it.status === "BLOCKED" ? "stProtected" : "stNc";
+  let tag = it.tier === "confirm" ? "<span class='atag tagNc'>Confirm</span>" : it.status === "PROVEN" ? "<span class='atag tagIssue'>Issue</span>" : it.status === "BLOCKED" ? (it.coverageOnly ? "<span class='atag tagProtected'>No issue found</span>" : "<span class='atag tagProtected'>Protected</span>") : it.status === "NOT_PROVEN" ? "<span class='atag tagNc'>Could not verify</span>" : "<span class='atag tagNc'>Not checked</span>";
   let kind = it.probe === "P3" ? "file store" : ((it.probe === "P1" || it.probe === "P2") && it.title.indexOf(": ") > -1 ? "table" : "");
   let reasonHtml = (it.status === "NOT_PROVEN" || it.status === "NOT_CHECKED") ? "<span class='reasonLine'>Reason: <span class='reasonTag'>" + esc(reasonLabelFor(it)) + "</span></span>" : "";
-  let h = "<div class='acard " + stCls + "' data-status='" + esc(it.status) + "' data-probe='" + esc(it.probe) + "'" + ((fixLabel && it.status === "PROVEN") ? " data-fix='1'" : "") + "><button type='button' class='asum' aria-expanded='false'><span class='ahead'>" + tag + "<span class='aexp'>" + ((fixLabel && it.status === "PROVEN") ? "Click for the fix \u25BE" : "Details \u25BE") + "</span></span><span class='aobj'>" + esc(subjectOf(it)) + (kind ? " <span class='objkind'>" + kind + "</span>" : "") + "</span><span class='asumline'>" + esc(sum) + "</span>" + reasonHtml + "</button>";
+  let h = "<div class='acard " + stCls + "' data-status='" + esc(it.status) + "' data-probe='" + esc(it.probe) + "'" + (it.tier === "confirm" ? " data-tier='confirm'" : "") + ((fixLabel && it.status === "PROVEN") ? " data-fix='1'" : "") + "><button type='button' class='asum' aria-expanded='false'><span class='ahead'>" + tag + "<span class='aexp'>" + ((fixLabel && it.status === "PROVEN" && it.tier !== "confirm") ? "Click for the fix \u25BE" : "Details \u25BE") + "</span></span><span class='aobj'>" + esc(subjectOf(it)) + (kind ? " <span class='objkind'>" + kind + "</span>" : "") + "</span><span class='asumline'>" + esc(sum) + "</span>" + reasonHtml + "</button>";
   h += "<div class='adet' hidden>";
   let body = it.findings.join(" ");
   if(body && body !== sum) h += "<p style='margin:2px 0 0'>" + esc(body) + "</p>";
   if(it.status === "PROVEN"){
-    let steps = (FIXSTEPS[it.probe] || it.fixes).map(function(f){ return "<li>" + esc(f) + "</li>"; }).join("");
+    let steps = ((it.tier === "confirm" ? (TIERSTEPS[it.probe] || it.fixes) : (FIXSTEPS[it.probe] || it.fixes))).map(function(f){ return "<li>" + esc(f) + "</li>"; }).join("");
     if(ex.risk && !it.configOnly) h += "<p class='small' style='margin:8px 0 0'><strong>Why it matters:</strong> " + esc(ex.risk) + "</p>";
     if(it.control) h += "<p class='small' style='margin:6px 0 0'><strong>Why you can trust this:</strong> " + esc(it.control) + "</p>";
     h += "<div class='fixbox'><p class='lbl'>Fix it with your builder tool</p><p class='small'>Copy this into Lovable, Bolt, or whichever tool built your app:</p><div class='promptBox'>" + esc(promptFor(it)) + "</div><p style='margin:10px 0 0'><button type='button' class='navbtn copyBtn'>Copy the prompt</button></p><details class='proof' style='margin-top:12px'><summary>Fix it myself instead</summary><ol class='steps'>" + steps + "</ol></details></div>";
@@ -1064,8 +1161,13 @@ function reportBodyHTML(results, overall, host, sampleLabel, scopeOverride, tail
   html += "<p class='brandline'>MakerGuard</p>";
   html += "<h2 class='reportTitle'>Quick Scan report</h2>";
   if(sampleLabel){ html += "<div class='sampleNotice'><strong>Sample.</strong> Fake data. No real product was checked.</div>"; }
+  let hardCount = band1.filter(function(it){ return it.tier !== "confirm"; }).length;
+  let confirmCount = band1.length - hardCount;
   if(band1.length > 0){
-    html += "<p class='verdict'>" + band1.length + (band1.length === 1 ? " issue to fix." : " issues to fix.") + "</p>";
+    let v = "";
+    if(hardCount) v += hardCount + (hardCount === 1 ? " issue to fix." : " issues to fix.");
+    if(confirmCount) v += (v ? " " : "") + confirmCount + (confirmCount === 1 ? " readable table to confirm." : " readable tables to confirm.");
+    html += "<p class='verdict'>" + v + "</p>";
   } else if(unverified === 0){
     html += "<p class='verdict'>No issues found in this quick scan.</p>";
   } else {
@@ -1073,7 +1175,7 @@ function reportBodyHTML(results, overall, host, sampleLabel, scopeOverride, tail
   }
   html += metaLineHTML(scope, strays, host);
   if(band1.length){
-    html += "<div class='band bandIssues' data-band='1'><p class='bandHead'>Issues <span class='bandCount'>" + band1.length + "</span></p>";
+    html += "<div class='band bandIssues' data-band='1'><p class='bandHead'>" + (hardCount ? "Issues" : "To confirm") + " <span class='bandCount'>" + band1.length + "</span></p>";
     band1.forEach(function(it){ html += answerRowHTML(it, true); });
     html += "</div>";
   }
@@ -1240,8 +1342,8 @@ function buildDeepState(results, isSample){
       if(nm && !missing && ds.stores.indexOf(nm) === -1) ds.stores.push(nm);
     }
     if(it.probe === "P4"){
-      if(it.status === "PROVEN") ds.p4Text = "a master key pattern was found in the code files that were read";
-      else if(it.status === "BLOCKED") ds.p4Text = "no master key pattern was found in the code files that were read";
+      if(it.status === "PROVEN") ds.p4Text = "a secret key pattern was found in the code files that were read";
+      else if(it.status === "BLOCKED") ds.p4Text = "no secret key pattern was found in the code files that were read";
       else ds.p4Text = "the master-key question could not be verified";
     }
     if(it.probe === "P1" && it.title && it.title.indexOf(": ") > -1 && !isStrayItem(it)){
@@ -1304,7 +1406,7 @@ function carriesHTML(){
   let names = ds.tables.map(function(x){ return x.name; }).join(", ");
   let h = "<strong>What carries over from Quick Scan:</strong> " + t + " confirmed table" + (t === 1 ? "" : "s") + (names ? " (" + esc(names) + ")" : "");
   h += " &middot; " + (ds.stores.length ? esc(ds.stores.join(", ")) + " file store" + (ds.stores.length === 1 ? "" : "s") : "no file stores");
-  if(ds.p4Text) h += " &middot; master key: " + esc(ds.p4Text);
+  if(ds.p4Text) h += " &middot; secret key: " + esc(ds.p4Text);
   h += ". Nothing here is asked twice.";
   return h;
 }
@@ -2084,7 +2186,7 @@ document.addEventListener("click", function(e){
       let open = det.hidden;
       det.hidden = !open;
       asum.setAttribute("aria-expanded", open ? "true" : "false");
-      if(exp){ let cd2 = asum.closest(".acard"); exp.textContent = open ? "Hide \u25B4" : ((cd2 && cd2.getAttribute("data-fix") === "1") ? "Click for the fix \u25BE" : "Details \u25BE"); }
+      if(exp){ let cd2 = asum.closest(".acard"); exp.textContent = open ? "Hide \u25B4" : ((cd2 && cd2.getAttribute("data-fix") === "1" && cd2.getAttribute("data-tier") !== "confirm") ? "Click for the fix \u25BE" : "Details \u25BE"); }
     }
     return;
   }
@@ -2169,6 +2271,39 @@ async function fetchJson(url, anonKey, userToken){
   return {status: resp.status, data: data};
 }
 
+// Severity tiers for the stranger read (review C6, 2026-11-06).
+// A stranger receiving rows stays a HIGH issue. One lower tier
+// exists, "confirm this is meant to be public", earned only when
+// both hold: the table's column list was actually read, and no
+// column in it looks like an owner column or carries personal-data
+// signal. When the column list could not be read, nothing is
+// downgraded. Columns can only add doubt, never remove it.
+const TIER_OWNER_COLS = ["user_id", "userid", "owner_id", "ownerid", "owner", "created_by", "createdby", "author_id", "authorid", "author", "profile_id", "account_id", "member_id", "member", "customer_id", "customer", "tenant_id", "tenant", "org_id", "organization_id", "organisation_id", "uid", "user"];
+const TIER_PERSONAL_COLS = ["email", "email_address", "phone", "phone_number", "mobile", "mobile_number", "name", "full_name", "first_name", "last_name", "firstname", "lastname", "address", "street_address", "home_address", "zip", "zip_code", "postal_code", "dob", "date_of_birth", "birth_date", "birthday", "age", "gender", "ssn", "tax_id", "password", "password_hash", "passwd", "token", "access_token", "refresh_token", "secret", "api_key", "ip", "ip_address", "latitude", "longitude", "lat", "lng", "location", "bio"];
+function columnSignal(name){
+  let n = String(name || "").toLowerCase();
+  if(!n || n === "id") return false;
+  if(TIER_OWNER_COLS.indexOf(n) > -1 || TIER_PERSONAL_COLS.indexOf(n) > -1) return true;
+  if(/_(id|uid|uuid)$/.test(n)) return true;
+  if(n.indexOf("email") > -1 || n.indexOf("phone") > -1 || n.indexOf("password") > -1) return true;
+  return false;
+}
+function maybeConfirmTier(item, columns){
+  if(!item || item.probe !== "P1" || item.status !== "PROVEN") return;
+  if(!columns || !columns.length) return;
+  for(let i = 0; i < columns.length; i++){ if(columnSignal(columns[i])) return; }
+  let colList = columns.slice(0, 12).join(", ") + (columns.length > 12 ? ", +" + (columns.length - 12) + " more" : "");
+  item.tier = "confirm"; item.level = "MEDIUM";
+  item.sumLine = "Readable by anyone, and its columns show nothing that looks private. Confirm it is meant to be public";
+  let mid = "This check also read the table's column list: " + colList + ". No column looks like an owner column, and none looks like personal data. A table like this is often public on purpose, for example posts or a catalogue. If yours is meant to be public, there is nothing to fix. ";
+  if(item.evidence === "count"){
+    item.findings = ["Anyone using only your public anon key could count " + item.rowsSeen + " row(s) in this table, which means a stranger can see into it. " + mid + "If it is not meant to be public, anyone can see into this table."];
+  } else {
+    item.findings = ["We asked this table for rows as a stranger, using only your public key, and it handed back " + (item.rowsSeen || 0) + " row(s). " + mid + "If it is not meant to be public, anyone can read every row in it."];
+  }
+  item.fixes = ["If this table is not meant to be public, lock it down with the steps in this card. If it is meant to be public, leave it as it is."];
+}
+
 async function probeAnon(base, anonKey, table, token){
   let item = {probe:"P1", title:"Anon table read: "+table, status:"NOT_CHECKED", level:"MEDIUM", findings:[], fixes:[]};
   let url = base + "/rest/v1/" + encodeURIComponent(table) + "?select=id&limit=5";
@@ -2176,7 +2311,7 @@ async function probeAnon(base, anonKey, table, token){
   try{
     let r = await fetchJson(url, anonKey, null);
     if(r.status === 200 && Array.isArray(r.data) && r.data.length > 0){
-      item.status = "PROVEN"; item.level = "HIGH";
+      item.status = "PROVEN"; item.level = "HIGH"; item.evidence = "rows"; item.rowsSeen = r.data.length;
       item.findings.push("We asked this table for rows as a stranger, using only your public key, and it handed back " + r.data.length + " row(s). A table answers a stranger like this for one of two reasons: its lock, row level security, is off, or it is on but a policy lets everyone through. From outside, the two look the same.");
       item.fixes.push("Open this table in Supabase, under Table Editor, and match the step to what you see. If Row Level Security is off, turn it on. Then open the table's policies: if any policy lets everyone read, or lets any signed-in user read, delete it or narrow it. The read policy that should remain lets each user read only their own rows. Then run this check again.");
     } else if(r.status === 200 && Array.isArray(r.data)){
@@ -2221,7 +2356,7 @@ async function probeAnon(base, anonKey, table, token){
         if(!isNaN(total)) counted = total;
       }catch(e){ counted = -1; }
       if(counted > 0){
-        item.status = "PROVEN"; item.level = "HIGH";
+        item.status = "PROVEN"; item.level = "HIGH"; item.evidence = "count"; item.rowsSeen = counted;
         item.findings.push("Anyone using only your public anon key could count " + counted + " row(s) in this table, which means its lock is letting a stranger see into it. This table has no id column, so the check counted rows instead of reading them.");
         item.fixes.push("Open this table in Supabase, under Table Editor, and match the step to what you see. If Row Level Security is off, turn it on. Then open the table's policies: if any policy lets everyone read, or lets any signed-in user read, delete it or narrow it. The read policy that should remain lets each user read only their own rows. Then run this check again.");
       } else if(counted === 0){
@@ -2412,14 +2547,24 @@ async function probeBucketPublic(base, anonKey, bucket){
     return null;
   }catch(e){ return null; }
 }
+// One secret-pattern list, shared with the reader's extractor
+// (fetcher.py, SECRET_PATTERNS): same shapes, same kind labels, so
+// the link path and the manual path can never disagree (C1 fix,
+// 2026-11-06). Returns the first kind found, or "". A found value
+// is never returned, only its kind, and no found key is ever used.
+// Google AIza keys are deliberately absent: in a shipped web app
+// that shape is the normal Firebase config key, public by design.
 function scanForMasterKey(text){
-  if(/sbp_[A-Za-z0-9]{20,}/.test(text)) return "service key pattern (sbp_)";
-  if(/sb_secret_[A-Za-z0-9_\-]{8,}/.test(text)) return "secret key pattern (sb_secret_)";
-  if(/sk-live-[A-Za-z0-9]{8,}/.test(text)) return "live secret key pattern (sk-live)";
-  if(/-----BEGIN [A-Z ]*PRIVATE KEY-----/.test(text)) return "private key block";
+  if(/sb_secret_[A-Za-z0-9_\-]{8,}/.test(text)) return "a Supabase secret key (sb_secret_)";
+  if(/sbp_[A-Za-z0-9_\-]{20,}/.test(text)) return "a Supabase access token (sbp_)";
+  if(/sk_live_[A-Za-z0-9]{8,}|sk-live-[A-Za-z0-9]{8,}/.test(text)) return "a Stripe live secret key";
+  if(/AKIA[0-9A-Z]{16}/.test(text)) return "an AWS access key id";
+  if(/ghp_[A-Za-z0-9]{20,}|gho_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,}/.test(text)) return "a GitHub token";
+  if(/xox[baprs]-[A-Za-z0-9\-]{10,}/.test(text)) return "a Slack token";
+  if(/-----BEGIN [A-Z ]*PRIVATE KEY-----/.test(text)) return "a private key block";
   let jm = text.match(/eyJ[A-Za-z0-9_\-]+\.eyJ[A-Za-z0-9_\-]+\.[A-Za-z0-9_\-]+/g) || [];
   for(let i = 0; i < jm.length; i++){
-    if(masterKeyProblem(jm[i]) === "master") return "master key (a service_role token)";
+    if(masterKeyProblem(jm[i]) === "master") return "a Supabase master key (service_role)";
   }
   return "";
 }
@@ -2469,17 +2614,18 @@ async function probeBundle(productUrl){
     item.filesRead = read + 1; bundleFilesRead = item.filesRead;
     if(found.length > 0){
       item.status = "PROVEN"; item.level = "HIGH";
-      found.forEach(function(f){ item.findings.push("A master key pattern was found in one of your website's public code files: " + f[0] + ". Pattern type: " + f[1] + ". The key itself is never shown."); });
-      item.fixes.push("Remove the key from your website code, rotate it immediately, and keep it only on a server. Never ship a master key in code a browser can download.");
+      found.forEach(function(f){ item.findings.push("A secret key pattern was found in one of your website's public code files: " + f[0] + ". Pattern type: " + f[1] + ". The key itself is never shown."); });
+      item.fixes.push("Remove the key from your website code, rotate it immediately, and keep it only on a server. Never ship a secret key in code a browser can download.");
     } else {
-      item.status = "BLOCKED"; item.level = "LOW";
-      item.findings.push("No master key pattern showed up in your homepage or in the " + read + " code files read with it. Note: this covers only those files, not your whole site.");
+      item.status = "BLOCKED"; item.level = "LOW"; item.coverageOnly = true;
+      item.sumLine = "No secret key pattern showed up in the " + item.filesRead + " files read";
+      item.findings.push("No secret key pattern showed up in your homepage or in the " + read + " code files read with it. Note: this covers only those files, not your whole site.");
     }
   }catch(e){
     item.status = "NOT_CHECKED"; item.level = "MEDIUM"; item.filesRead = 0; bundleFilesRead = 0;
     item.reasonCode = "Assets could not be read";
-    item.findings.push("Your homepage or its code files could not be read from this browser. Browsers block reading another site's pages unless that site allows it, which is normal. This question stays unanswered. To answer it yourself, search your built JavaScript files for a master key pattern, or open this check page from your own website, where the read is allowed.");
-    item.fixes.push("Search your built JavaScript for sbp_ and service_role, and rotate anything you find. Or open this check page from your own website and run again.");
+    item.findings.push("Your homepage or its code files could not be read from this browser. Browsers block reading another site's pages unless that site allows it, which is normal. This question stays unanswered. To answer it yourself, search your built JavaScript files for secret key patterns, or open this check page from your own website, where the read is allowed.");
+    item.fixes.push("Search your built JavaScript for secret key markers (service_role, sb_secret_, sbp_, sk_live_, private key blocks), and rotate anything you find. Or open this check page from your own website and run again.");
   }
   return item;
 }
@@ -2500,11 +2646,17 @@ function p4FromReader(productUrl){
   let item = {probe:"P4", title:"Key in client bundle", status:"NOT_CHECKED", level:"MEDIUM", findings:[], fixes:[], filesRead: files};
   if(d.master_key_found){
     item.status = "PROVEN"; item.level = "HIGH";
-    item.findings.push("A master key pattern was found in your app's public code. MakerGuard's reader found it while reading the code files your visitors download" + (files ? " (" + files + " files read)" : "") + ". The key itself is never shown.");
-    item.fixes.push("Remove the key from your website code, rotate it immediately, and keep it only on a server. Never ship a master key in code a browser can download.");
+    let kinds = (d.secret_kinds && d.secret_kinds.length) ? d.secret_kinds.join("; ") : "";
+    if(kinds){
+      item.findings.push("Secret key patterns were found in your app's public code: " + kinds + ". MakerGuard's reader found them while reading the code files your visitors download" + (files ? " (" + files + " files read)" : "") + ". The keys themselves are never shown.");
+    } else {
+      item.findings.push("A secret key pattern was found in your app's public code. MakerGuard's reader found it while reading the code files your visitors download" + (files ? " (" + files + " files read)" : "") + ". The key itself is never shown.");
+    }
+    item.fixes.push("Remove the key from your website code, rotate it immediately, and keep it only on a server. Never ship a secret key in code a browser can download.");
   } else {
-    item.status = "BLOCKED"; item.level = "LOW";
-    item.findings.push("MakerGuard's reader read your app's code files from outside, the way a visitor's browser gets them" + (files ? ": " + files + " files, your homepage and the code files it loads" : "") + ". No master key pattern showed up. Note: this covers only those files, not your whole site.");
+    item.status = "BLOCKED"; item.level = "LOW"; item.coverageOnly = true;
+    if(files) item.sumLine = "No secret key pattern showed up in the " + files + " files read";
+    item.findings.push("MakerGuard's reader read your app's code files from outside, the way a visitor's browser gets them" + (files ? ": " + files + " files, your homepage and the code files it loads" : "") + ". No secret key pattern showed up. Note: this covers only those files, not your whole site.");
   }
   return item;
 }
@@ -2643,6 +2795,7 @@ $("signInBtn").addEventListener("click", async function(){
   if(!base || !anonKey){ showError("Fill in Supabase URL and anon key first, above, then sign in as your test user."); return; }
   if(masterKeyProblem(anonKey)){ showError("STOP: That looks like a master (service) key, not the public anon key. A master key bypasses all protection, so this check refuses it. Paste the anon / publishable key instead."); return; }
   if(!email || !password){ showError("Fill in your TEST user A email and its throwaway password, then sign in."); return; }
+  if(!mgConsentGiven()){ $("signInStatus").textContent = "First tick the ownership line above the Run check button at the bottom of this form. Signing in is one of the active tests, and the tests only run on an app you own, or one you have the owner's permission to test."; return; }
   $("signInBtn").disabled = true;
   $("signInStatus").textContent = "Signing in as your test user, directly to your Supabase.";
   try{
@@ -2677,6 +2830,7 @@ $("runBtn").addEventListener("click", async function(){
   telEvent("started", { fields: countFilled() });
   if(!autoRun) telEvent("manual_submitted", {});
   clearError();
+  if(!autoRun && !mgConsentGiven()){ telEvent("run_failed", { stage: "quick", reason: "consent_missing", path: runPath }); showError("Tick the ownership line above the Run check button first. The tests ask an app's backend for data, so they only run on an app you own, or one you have the owner's permission to test. Nothing has been sent to the backend."); return; }
   let base = cleanUrl($("supabaseUrl").value);
   let anonKey = cleanCred($("anonKey").value);
   let table = $("tableName").value.trim();
@@ -2715,6 +2869,21 @@ $("runBtn").addEventListener("click", async function(){
       let anonItem = await probeAnon(base, anonKey, tableNamesIn[tix], effectiveToken);
       anonItem.origin = codeNames.indexOf(tableNamesIn[tix]) > -1 ? "code" : "builder";
       results.push(anonItem);
+    }
+    // Severity tiers (C6): if any stranger read was proven, try once
+    // to read the column lists. Where a list was actually read and
+    // shows no owner or personal-data column, the item may drop to
+    // the confirm tier. Where the list cannot be read, nothing moves.
+    if(results.some(function(it){ return it.probe === "P1" && it.status === "PROVEN"; })){
+      try{
+        let specFd = await discoverTables(base, anonKey, effectiveToken);
+        results.forEach(function(it){
+          if(it.probe === "P1" && it.status === "PROVEN"){
+            let tn2 = it.title.indexOf(": ") > -1 ? it.title.split(": ").slice(1).join(": ") : "";
+            maybeConfirmTier(it, specFd.columns[tn2]);
+          }
+        });
+      }catch(e){ /* column lists unreadable: every proven read stays HIGH */ }
     }
     $("progress").textContent = "Question 2 of 4: can a signed-in user read another user's data?";
     let rowParts = rowIdVal ? rowIdVal.split(",").map(function(s){ return s.trim(); }) : [];
@@ -2783,6 +2952,7 @@ $("runBtn").addEventListener("click", async function(){
       let tn = capped[ti];
       $("progress").textContent = "Checking table " + (ti + 1) + " of " + capped.length + ": " + tn;
       let anonItem2 = await probeAnon(base, anonKey, tn, effectiveToken);
+      maybeConfirmTier(anonItem2, columnsByTable[tn]);
       anonItem2.origin = "code";
       results.push(anonItem2);
       if(effectiveToken){
@@ -2886,7 +3056,7 @@ $("runBtn").addEventListener("click", async function(){
     if(pAns === "public") pItem.findings.push("The whole store is public, not just this file: anyone who has a file's address in this store can fetch it.");
     else if(pAns === "notpublic") pItem.findings.push("The store did not answer as a public store, so this file is reachable another way: a rule on the store lets strangers read it.");
   }
-  $("progress").textContent = "Question 4 of 4: is a master key hiding in your website code?";
+  $("progress").textContent = "Question 4 of 4: is a secret key hiding in your website code?";
   let p4url = $("productUrl").value.trim();
   let p4reader = p4FromReader(p4url);
   if(p4reader){ bundleFilesRead = p4reader.filesRead; results.push(p4reader); }
@@ -2909,7 +3079,7 @@ $("sampleBtn").addEventListener("click", function(){
     {probe:"P3", title:"Public storage bucket: avatars", status:"BLOCKED", level:"LOW", findings:["Sample: your storage refused the no-login request."], fixes:[]},
     {probe:"P1", title:"Anon table read: ghost_table", status:"NOT_CHECKED", level:"MEDIUM", origin:"builder", reasonCode:"Resource not confirmed", findings:["Sample: No table answered to that name (404). The name may be spelled differently in your project, or this table may not be open to the data API. Unknown, not safe."], fixes:["Check the name letter for letter in Supabase, under Table Editor, then run again."]},
     {probe:"P1", title:"Anon table read: chunk_limit", status:"NOT_CHECKED", level:"MEDIUM", origin:"code", reasonCode:"Resource not confirmed", findings:["Sample: a name found in the app's code did not answer as a table (404)."], fixes:[]},
-    {probe:"P4", title:"Key in client bundle", status:"NOT_CHECKED", level:"MEDIUM", reasonCode:"Assets could not be read", findings:["Sample: your homepage code could not be read from this browser, so this question is unanswered. Browsers often block this read, which is normal."], fixes:["Search your built JavaScript for a master key pattern, or open this check page from your own website and run again."], filesRead: 12}
+    {probe:"P4", title:"Key in client bundle", status:"NOT_CHECKED", level:"MEDIUM", reasonCode:"Assets could not be read", findings:["Sample: your homepage code could not be read from this browser, so this question is unanswered. Browsers often block this read, which is normal."], fixes:["Search your built JavaScript for a secret key pattern, or open this check page from your own website and run again."], filesRead: 12}
   ];
   $("probeLog").textContent = "Sample only: nothing was checked and no request was made.";
   $("logWrap").classList.remove("hidden");
@@ -2919,8 +3089,15 @@ $("sampleBtn").addEventListener("click", function(){
 });
 
 $("emailBtn").addEventListener("click", function(){
-  const em = $("emailAddr").value.trim();
-  if (!em || em.indexOf("@") < 0) { $("emailStatus").textContent = "That email does not look complete yet."; return; }
+  const em = normalizeEmail($("emailAddr").value);
+  $("emailAddr").value = em;
+  if (!emailShapeOk(em)) { $("emailStatus").textContent = "That email does not look right yet. Check for a typo."; return; }
+  var sug = suggestEmail(em);
+  if (sug && $("emailBtn").getAttribute("data-sug") !== sug) {
+    $("emailBtn").setAttribute("data-sug", sug);
+    showEmailSuggestion($("emailStatus"), sug, function(){ $("emailAddr").value = sug; $("emailBtn").removeAttribute("data-sug"); $("emailStatus").textContent = ""; });
+    return;
+  }
   if (!TELEMETRY_ENDPOINT) { $("emailStatus").textContent = "Reminders are not switched on yet."; return; }
   try {
     fetch(TELEMETRY_ENDPOINT, { method: "POST", mode: "no-cors", headers: { "Content-Type": "text/plain" }, body: JSON.stringify({ type: "email", email: em, day: new Date().toISOString().slice(0, 10) }) }).catch(function () {});
@@ -2977,8 +3154,15 @@ function sendFb(btn){
   let form = btn.closest("[data-fbform]"); if(!form) return;
   let input = form.querySelector(".fbEmail");
   let status = form.querySelector(".fbStatus");
-  let em = input ? input.value.trim() : "";
-  if(!em || em.indexOf("@") < 0 || em.indexOf(".") < 0){ if(status) status.textContent = "That email does not look complete yet."; return; }
+  let em = normalizeEmail(input ? input.value : "");
+  if(input) input.value = em;
+  if(!emailShapeOk(em)){ if(status) status.textContent = "That email does not look right yet. Check for a typo."; return; }
+  var sug = suggestEmail(em);
+  if(sug && form.getAttribute("data-sug") !== sug){
+    form.setAttribute("data-sug", sug);
+    showEmailSuggestion(status, sug, function(){ if(input) input.value = sug; form.removeAttribute("data-sug"); if(status) status.textContent = ""; });
+    return;
+  }
   if(!TELEMETRY_ENDPOINT){ if(status) status.textContent = "Feedback is not switched on yet."; return; }
   let spot = btn.getAttribute("data-spot") || "";
   try {
@@ -3031,7 +3215,7 @@ function downloadReport(){
   if(!currentReportIsSample) telEvent("downloaded", { path: currentRunPath });
   if(!lastResults) return;
   let reportCss = "body{font-family:'IBM Plex Sans',-apple-system,system-ui,sans-serif;font-size:15px;font-weight:400;line-height:1.55;max-width:640px;margin:40px auto;padding:0 20px;color:#1d1d1f}strong{font-weight:600}.brandline{text-align:center;font-weight:600;margin:0 0 10px}.verdict{font-size:24px;font-weight:600;letter-spacing:-0.015em;text-align:center;margin:24px 0 6px}.verdictsub{text-align:center;color:#6e6e73;margin:0}.hostline,.issueno,.restline,.small{font-size:13px}.hostline{color:#86868b;text-align:center}.issueno{font-weight:600;color:#6e6e73}.issuePage{display:none}.issuePage.active{display:block}.issuePage h3{font-size:28px;font-weight:600;letter-spacing:-0.015em;margin:2px 0}.dot{color:#d70015}.dotG{color:#1a7f37}.dotGrey{color:#86868b}.stWord{font-weight:600}.story{margin:10px 0 4px}.atrisk{color:#424245}.fixbox{background:#f5f5f7;border-radius:16px;padding:6px 20px 12px;margin:20px 0}.lbl{font-weight:600;margin:10px 0 2px}ol.steps{margin:6px 0 6px 20px;padding:0}ol.steps li{margin:6px 0}.navRow{display:flex;justify-content:space-between;align-items:center}.navbtn{height:44px;padding:0 20px;border-radius:980px;border:1px solid #1d1d1f;background:#fff;font-size:17px;cursor:pointer}.navbtn:disabled{opacity:.25}.dots{font-size:13px;color:#86868b;letter-spacing:4px}.restline{text-align:center;color:#6e6e73}.rowline{padding:10px 4px;border-top:1px solid #e5e5e5}.qsec{margin:22px 0 0;background:#f5f5f7;border-radius:18px;padding:22px 18px 12px}.qhead{font-weight:600;margin:0 0 8px}.arow{padding:10px 2px;border-top:1px solid #e3e3e7}.qsec .fixbox{background:#ffffff}.acard{background:#fff;border:1px solid #e3e3e7;border-radius:14px;padding:12px 14px;margin:10px 0}.asum{display:flex;justify-content:space-between;align-items:flex-start;width:100%;background:none;border:0;padding:0;font:inherit;color:inherit;text-align:left;cursor:pointer}.aexp{font-size:13px;color:#0066cc;white-space:nowrap;margin-left:10px;padding-top:2px}.adet{border-top:1px solid #eee;margin-top:10px;padding-top:10px}.acard .fixbox{background:#f5f5f7}.promptBox{background:#fff;border:1px solid #e3e3e7;border-radius:12px;padding:12px 14px;font-size:13px;line-height:1.55;white-space:pre-wrap}.nudgeCard{display:none}.small{color:#6e6e73}.sampleNotice{background:#f5f5f7;border-radius:12px;padding:12px;text-align:center}details.proof summary,summary{font-size:13px;color:#0066cc;cursor:pointer}";
-  let navJs = "<script>document.addEventListener('click',function(e){var b=e.target.closest('.asum');if(!b)return;var d=b.parentElement.querySelector('.adet');var x=b.querySelector('.aexp');var o=d.hidden;d.hidden=!o;b.setAttribute('aria-expanded',o?'true':'false');var c=b.closest('.acard');if(x)x.textContent=o?'Hide \u25B4':(c&&c.getAttribute('data-fix')==='1'?'Click for the fix \u25BE':'Details \u25BE');});<\/script>";
+  let navJs = "<script>document.addEventListener('click',function(e){var b=e.target.closest('.asum');if(!b)return;var d=b.parentElement.querySelector('.adet');var x=b.querySelector('.aexp');var o=d.hidden;d.hidden=!o;b.setAttribute('aria-expanded',o?'true':'false');var c=b.closest('.acard');if(x)x.textContent=o?'Hide \u25B4':(c&&c.getAttribute('data-fix')==='1'&&c.getAttribute('data-tier')!=='confirm'?'Click for the fix \u25BE':'Details \u25BE');});<\/script>";
   let doc = "<!doctype html><html><head><meta charset='utf-8'><title>MakerGuard report</title><style>" + reportCss + ".reportTitle{font-size:24px;font-weight:700;letter-spacing:-0.02em;text-align:center;margin:6px 0 4px}.quickSnapshot{margin:0}.scopeLine{text-align:center;color:#6e6e73;font-size:13px;line-height:1.5;margin:10px auto 4px}.metaLine{text-align:center;color:#6e6e73;font-size:13px;line-height:1.55;margin:10px auto 4px}.band{margin:22px 0 0;background:#F0EEFA;border-radius:12px;padding:22px 18px 12px}.bandHead{font-weight:600;margin:0 0 8px}.bandCount{font-weight:400;color:#6e6e73;font-size:13px}.reasonTag{display:inline-block;font-size:13px;font-weight:600;background:#FBF0D9;color:#7A5410;border-radius:980px;padding:2px 10px;margin-top:6px}.reasonLine{display:block;font-size:13px;color:#7A5410;margin-top:4px}.secttl{font-size:13px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:#372A9C;text-align:center}.atag{display:inline-block;font-size:13px;font-weight:600;color:#fff;border-radius:980px;padding:3px 12px}.tagIssue{background:#B3261E}.tagProtected{background:#1A7F37}.tagNc{background:#FBF0D9;color:#7A5410}.ahead{display:flex;justify-content:space-between;align-items:center}.aobj{display:block;font-weight:600;margin-top:9px}.objkind{font-weight:400;font-size:13px;color:#86868B}.asumline{display:block;font-size:13px;color:#6E6E73;margin-top:3px;line-height:1.45}.acard{border-left:4px solid #D8D2C0}.acard.stIssue{border-left-color:#B3261E}.acard.stProtected{border-left-color:#1A7F37}.acard.stNc{border-left-color:#D9A83E}.quickEnd{border-top:1px solid #E3E3E7;margin-top:18px;padding-top:10px}.strayLine{text-align:center;color:#6e6e73;max-width:560px;margin:2px auto 4px}.unverBlock{margin:22px 0 0;background:#fbf6e9;border-radius:18px;padding:16px 18px 12px}.unverLine{margin:0}.unverList{margin:6px 0 6px 18px;padding:0}.unverList li{margin:4px 0;font-size:13px;color:#424245}.deepCard{display:none}.asum{display:block}.ahead{display:flex;justify-content:space-between;align-items:center}.aobj{display:block;font-weight:600;font-size:16px;color:#141416;margin-top:9px}.aexp{color:#372A9C;padding-top:0}.tailBlock{margin:22px 0 0;background:#fff;border:1px solid #E3E3E7;border-radius:12px;padding:16px 18px 14px}.tailLine{margin:10px 0 0;color:#424245;line-height:1.55}#nudgeSetup{display:none}.deepSection{margin:26px 0 0}.deepIntro{text-align:center;color:#6e6e73;max-width:560px;margin:4px auto 6px}.atag,.reasonTag,.bandCount,.metaLine{font-family:'IBM Plex Sans',-apple-system,system-ui,sans-serif}.atag,.reasonTag{font-size:12px;letter-spacing:.05em;text-transform:uppercase}.bandHead{font-weight:700;letter-spacing:-0.01em}.acard{border-radius:10px}.deepNoteCard{background:#fff;border:1px solid #E7E2D6;border-left:4px solid #D8D2C0;border-radius:10px;padding:12px 14px;margin:10px 0}.deepNoteCard.stIssue{border-left-color:#B3261E}.deepNoteCard.stProtected{border-left-color:#1A7F37}.deepNoteCard.stNc{border-left-color:#D9A83E}.deepNoteTitle{font-weight:600;color:#141416;margin:8px 0 0}.deepNoteLine{font-size:13px;color:#424245;margin:4px 0 0;line-height:1.5}.linkedLine{font-size:13px;color:#372A9C;background:#F0EEFA;border-radius:8px;padding:6px 10px;margin:8px 0 0;line-height:1.5}.gradeLine{font-size:13px;color:#424245;margin:8px 0 0}</style></head><body>" + reportBodyHTML(lastResults, lastOverall, lastHost, false, lastScope, true) + deepDownloadHTML() + navJs + "</body></html>";
   let parts = [doc];
   let blob = new Blob([parts.join("\n")], {type: "text/html"});
@@ -3229,9 +3413,7 @@ var MG_FETCHER = 'https://reader.midnightbuilds.fyi/fetch';
           return;
         }
         finishSteps();
-        var ref = d.projects[0];
-        document.getElementById('supabaseUrl').value = 'https://' + ref + '.supabase.co';
-        if(d.public_key){ document.getElementById('anonKey').value = d.public_key; }
+        var multi = d.projects.length > 1;
         var confirmed = d.tables || [];
         var inferred = (d.tables_inferred || []).filter(function(t){ return confirmed.indexOf(t) === -1; });
         var all = confirmed.concat(inferred).slice(0, 40);
@@ -3240,7 +3422,9 @@ var MG_FETCHER = 'https://reader.midnightbuilds.fyi/fetch';
         document.getElementById('productUrl').value = link;
         if(d.buckets && d.buckets.length === 1){ document.getElementById('bucketName').value = d.buckets[0]; }
         var rows = '';
-        rows += '<p class="foundRow"><b>Backend</b> \u00B7 Supabase, project ' + esc(ref) + '</p>';
+        rows += multi
+          ? '<p class="foundRow"><b>Backend</b> \u00B7 Supabase, ' + d.projects.length + ' projects named in the code</p>'
+          : '<p class="foundRow"><b>Backend</b> \u00B7 Supabase, project ' + esc(d.projects[0]) + '</p>';
         rows += d.public_key
           ? '<p class="foundRow"><b>Public key</b> \u00B7 found (' + esc(d.key_type || 'public') + '). It sits in your app\u2019s code for every visitor to see, which is normal.</p>'
           : '<p class="foundRow"><b>Public key</b> \u00B7 not found in the code, so the table questions cannot run yet.</p>';
@@ -3249,8 +3433,7 @@ var MG_FETCHER = 'https://reader.midnightbuilds.fyi/fetch';
         if (!confirmed.length && !inferred.length) rows += '<p class="foundRow"><b>Tables</b> \u00B7 none named in the code.</p>';
         if (d.buckets && d.buckets.length) rows += '<p class="foundRow"><b>File stores</b> \u00B7 ' + esc(d.buckets.join(', ')) + '</p>';
         if (d.files && d.files.length) rows += '<p class="foundRow"><b>Files your app names</b> \u00B7 ' + esc(d.files.map(function(f){ return f.bucket + '/' + f.path; }).join(', ')) + '. Each one is tested as a stranger.</p>';
-        if (d.projects.length > 1) rows += '<p class="small">More than one backend was found in this app (' + esc(d.projects.join(', ')) + '). This run covers the first one only.</p>';
-        if (d.master_key_found) rows += '<p><strong>First finding: a master key pattern is sitting in your app\u2019s public code.</strong> That is the most serious thing this check looks for. The report covers it in full.</p>';
+        if (d.master_key_found) rows += '<p><strong>First finding: ' + esc((d.secret_kinds && d.secret_kinds.length) ? ('secret key patterns are sitting in your app\u2019s public code: ' + d.secret_kinds.join("; ")) : 'a secret key pattern is sitting in your app\u2019s public code') + '.</strong> That is the most serious thing this check looks for. The report covers it in full.</p>';
         rows += '<p class="small">This covers the tables your app\u2019s code names. A table your code never mentions cannot be seen from a link, so it is not covered here, and it will never be called safe.</p>';
         titleEl.textContent = 'Found your backend';
         clockEl.textContent = '';
@@ -3260,12 +3443,17 @@ var MG_FETCHER = 'https://reader.midnightbuilds.fyi/fetch';
           reveal();
           return;
         }
-        foundEl.innerHTML = rows;
-        setTimeout(function(){
+        function autoRun(picked){
+          document.getElementById('supabaseUrl').value = 'https://' + picked + '.supabase.co';
+          document.getElementById('anonKey').value = d.public_key;
+          window.__mgBackendNote = multi ? {picked: picked, others: d.projects.filter(function(x){ return x !== picked; })} : null;
+          var shown = rows + (multi ? '<p class="small">Testing project ' + esc(picked) + '. The other backend named in the code is not tested in this run.</p>' : '');
+          foundEl.innerHTML = shown;
+          setTimeout(function(){
           titleEl.textContent = 'Running the check on your live app';
-          foundEl.innerHTML = rows + '<p class="scanRow on">\u203A Asking as a stranger, with no login</p>'
+          foundEl.innerHTML = shown + '<p class="scanRow on">\u203A Asking as a stranger, with no login</p>'
             + '<p class="scanRow">\u00B7 Asking as one user reaching for another user\u2019s row, if you set that up</p>'
-            + '<p class="scanRow">\u00B7 Trying your file stores and hunting for a master key</p>'
+            + '<p class="scanRow">\u00B7 Trying your file stores and hunting for secret keys</p>'
             + '<p class="small">Your report appears below when the answers are in.</p>';
           window.__mgAutoRun = true;
           document.getElementById('runBtn').click();
@@ -3278,7 +3466,55 @@ var MG_FETCHER = 'https://reader.midnightbuilds.fyi/fetch';
               res.scrollIntoView({behavior:'smooth', block:'start'});
             }
           }, 1000);
-        }, 1400);
+          }, 1400);
+        }
+        function gateOrRun(picked){
+          if(window.__mgConsent){ autoRun(picked); return; }
+          var gate = '<div style="margin-top:12px">'
+            + '<p style="font-weight:600;margin:0 0 6px">One thing before the tests run</p>'
+            + '<p class="small" style="margin:0 0 8px">Reading your app\u2019s public code is done. The tests themselves ask your app\u2019s backend for data, the way a stranger would. They only run on an app you own, or one you have permission to test.</p>'
+            + '<label style="display:block;margin:6px 0"><input type="checkbox" id="mgConsentTick"> I own this app, or I have the owner\u2019s permission to test it.</label>'
+            + '<p style="margin:10px 0 0"><button id="mgConsentBtn" class="primary" type="button" disabled>Run the tests</button></p>'
+            + '<p class="small" style="margin:8px 0 0">If your app was tested and you want it left out, reach us through Contact us at the bottom of this page.</p>'
+            + '</div>';
+          foundEl.innerHTML = rows + (multi ? '<p class="small">Project ' + esc(picked) + ' is the one that will be tested. The other backend named in the code is not tested in this run.</p>' : '') + gate;
+          var tick = document.getElementById('mgConsentTick');
+          var go = document.getElementById('mgConsentBtn');
+          tick.addEventListener('change', function(){ go.disabled = !tick.checked; });
+          go.addEventListener('click', function(){
+            window.__mgConsent = true;
+            var mc = document.getElementById('mgConsentManual'); if(mc) mc.checked = true;
+            telEvent('consent_ticked', { path: 'link' });
+            autoRun(picked);
+          });
+        }
+        if(!multi){ gateOrRun(d.projects[0]); }
+        else {
+          telEvent('backend_choice_offered', { backends: d.projects.length >= 3 ? '3+' : '2' });
+          var pick = '<div style="margin-top:10px"><p style="font-weight:600;margin:0 0 6px">This app names ' + d.projects.length + ' backends in its code. Pick the one to test:</p>';
+          d.projects.forEach(function(pr, ix){
+            var isKey = !!(d.key_ref && d.key_ref === pr);
+            pick += '<label style="display:block;margin:4px 0"><input type="radio" name="mgBackendPick" value="' + esc(pr) + '"' + ((isKey || (!d.key_ref && ix === 0)) ? ' checked' : '') + '> Project ' + esc(pr) + (isKey ? ' \u00B7 the public key found in the code belongs to this project' : '') + '</label>';
+          });
+          pick += '<p style="margin:10px 0 0"><button id="mgPickBtn" class="primary" type="button">Test the picked backend</button></p></div>';
+          foundEl.innerHTML = rows + pick;
+          document.getElementById('mgPickBtn').addEventListener('click', function(){
+            var sel = document.querySelector('input[name="mgBackendPick"]:checked');
+            var picked = sel ? sel.value : d.projects[0];
+            if(d.key_ref && d.key_ref !== picked){
+              telEvent('backend_chosen', { key: 'other_project' });
+              document.getElementById('supabaseUrl').value = 'https://' + picked + '.supabase.co';
+              document.getElementById('anonKey').value = '';
+              window.__mgBackendNote = {picked: picked, others: d.projects.filter(function(x){ return x !== picked; })};
+              foundEl.innerHTML = rows + '<p class="small">The public key found in the code belongs to project ' + esc(d.key_ref) + ', so it cannot test project ' + esc(picked) + '. Paste the public key for project ' + esc(picked) + ' in the form below, then run the check.</p>';
+              reveal();
+              setStatus('The public key in the code belongs to the other backend. Paste the public key for this project in the form below to run its checks.', 'info');
+              return;
+            }
+            telEvent('backend_chosen', { key: d.key_ref ? 'matches' : 'unknown' });
+            gateOrRun(picked);
+          });
+        }
       })
       .catch(function(){
         if(timer) clearTimeout(timer);
