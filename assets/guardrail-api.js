@@ -151,9 +151,7 @@ export async function attachKey(provider, apiKey, model) {
         attached: true,
         provider: extractProvider(html) || provider,
         model: extractModel(html) || model,
-        maskedKey: (apiKey || '').length > 8
-          ? apiKey.slice(0, 4) + '…' + apiKey.slice(-4)
-          : '••••',
+        maskedKey: (apiKey || '').length > 8 ? '…' + apiKey.slice(-4) : '••••',
         at: Date.now()
       });
     }

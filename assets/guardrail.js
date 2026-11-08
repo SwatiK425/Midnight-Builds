@@ -161,9 +161,9 @@ function initByokModal() {
   modal.onAttach(async (provider, key, model) => {
     const result = await attachKey(provider, key, model);
     if (result.success) {
-      updateKeyUI(true, { provider: result.provider, model: result.model, maskedKey: key.slice(0,4)+'…'+key.slice(-4), rateLimit: {} });
+      updateKeyUI(true, { provider: result.provider, model: result.model, maskedKey: '…' + key.slice(-4), rateLimit: {} });
       modal.close();
-      showToast('<strong>✦ LLM Judge attached</strong><br>Provider: ' + result.provider + '<br>Model: ' + result.model, 'success');
+      showToast('<strong>✦ LLM Judge attached</strong><br>Provider: ' + escapeHtml(result.provider) + '<br>Model: ' + escapeHtml(result.model), 'success');
     }
     return result;
   });
@@ -296,8 +296,9 @@ function renderArsenal() {
   `).join('');
 }
 
+// Also used for values that came from the backend: insert as text, never as HTML.
 function escapeHtml(text) {
-  return text.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  return String(text ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
 
 function capitalize(str) {

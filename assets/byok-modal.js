@@ -17,7 +17,19 @@ export function createByokModal() {
   
   let onAttachCallback = null;
   let onClearCallback = null;
-  
+
+  // Anything that came from the backend is shown as plain text, never as HTML,
+  // so a broken or compromised backend can't run code on this site.
+  function esc(value) {
+    const div = document.createElement('div');
+    div.textContent = value == null ? '' : String(value);
+    return div.innerHTML;
+  }
+  function backendText(html) {
+    const text = new DOMParser().parseFromString(String(html || ''), 'text/html').body.textContent;
+    return esc(text.trim());
+  }
+
   function openModal() {
     modal.hidden = false;
     requestAnimationFrame(() => modal.classList.add('visible'));
@@ -66,7 +78,7 @@ export function createByokModal() {
       modelInput.value = info.model || '';
       attachBtn.hidden = true;
       clearBtn.hidden = false;
-      showStatus(`<strong>✅ LLM Judge attached</strong><br>Provider: ${info.provider}<br>Model: ${info.model}<br>Key: ${info.maskedKey}<br><small>Rate budget: ${info.rateLimit?.remaining ?? '?'}/${info.rateLimit?.limit ?? '?'} remaining</small>`, 'success');
+      showStatus(`<strong>✅ LLM Judge attached</strong><br>Provider: ${esc(info.provider)}<br>Model: ${esc(info.model)}<br>Key: ${esc(info.maskedKey)}<br><small>Rate budget: ${esc(info.rateLimit?.remaining ?? '?')}/${esc(info.rateLimit?.limit ?? '?')} remaining</small>`, 'success');
     } else {
       attachBtn.hidden = false;
       clearBtn.hidden = true;
@@ -103,14 +115,14 @@ export function createByokModal() {
       if (onAttachCallback) {
         const result = await onAttachCallback(provider, key, model);
         if (result.success) {
-          updateKeyUI(true, { provider: result.provider, model: result.model, maskedKey: key.slice(0,4)+'…'+key.slice(-4), rateLimit: {} });
+          updateKeyUI(true, { provider: result.provider, model: result.model, maskedKey: '…' + key.slice(-4), rateLimit: {} });
           // NOTE: `modal` here is the overlay DOM element (no .close() method),
           // and showToast lives in guardrail.js module scope — not callable here.
           // The onAttach callback in guardrail.js already toasts + closes via the
           // modal API object, so just close via the local helper.
           closeModal();
         } else {
-          showStatus(result.html || 'Failed to attach key', 'error');
+          showStatus(backendText(result.html) || 'Failed to attach key', 'error');
         }
       }
     } finally {
@@ -128,7 +140,7 @@ export function createByokModal() {
         if (result.success) {
           updateKeyUI(false);
         } else {
-          showStatus(result.html, 'error');
+          showStatus(backendText(result.html) || 'Failed to clear key', 'error');
         }
       }
     } finally {
