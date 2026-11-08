@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Notes — Midnight Builds</title>
-  <meta name="description" content="Notes from the workbench. Each piece pairs with a build as it ships — the why behind the code." />
-  <link rel="stylesheet" href="assets/styles.css?v=2" />
+  <title>Notes | Midnight Builds</title>
+  <meta name="description" content="Notes from the workbench. Nothing is published yet; these are the topics on the list." />
+  <link rel="stylesheet" href="assets/styles.css?v=3" />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='M63 18 A38 38 0 1 0 84 74 A30 30 0 1 1 63 18 Z' fill='%23E9C46A' stroke='%232E201B' stroke-width='6'/></svg>" />
 </head>
 <body class="sub">
@@ -29,54 +29,34 @@
       </svg>
       <p class="dept">thinking, in progress</p>
       <h1>Notes</h1>
-      <p class="dek">The why behind the code. Each piece lands with its build as I ship it.</p>
+      <p class="dek">Nothing published yet. These are the topics on the list.</p>
     </div>
 
     <div class="rows">
-      <a class="row" href="https://github.com/SwatiK425/soc-copilot">
+      <div class="row">
         <span class="row__num">soon</span>
         <span class="row__body">
-          <span class="row__name">Cutting SOC alert noise 99.2%</span>
-          <span class="row__desc">How soc-copilot turns a flood of alerts into a handful of real playbooks — and where the human stays in control.</span>
+          <span class="row__name">What a stranger can see in your Supabase app</span>
+          <span class="row__desc">The access mistakes MakerGuard looks for, and how to fix them.</span>
         </span>
-        <span class="row__cta">project →</span>
-      </a>
-      <a class="row" href="https://github.com/SwatiK425/DLP_guardrail">
+      </div>
+      <div class="row">
         <span class="row__num">soon</span>
         <span class="row__body">
           <span class="row__name">Stopping AI from leaking your data</span>
           <span class="row__desc">What a data-loss guardrail actually has to catch, and the cases that surprise you.</span>
         </span>
-        <span class="row__cta">project →</span>
-      </a>
-      <a class="row" href="https://github.com/SwatiK425/YT-Learn">
+      </div>
+      <div class="row">
         <span class="row__num">soon</span>
         <span class="row__body">
-          <span class="row__name">From video to notes</span>
-          <span class="row__desc">The architecture behind YT-Learn — turning hours of video into something you can actually study.</span>
+          <span class="row__name">From alert flood to shortlist</span>
+          <span class="row__desc">How SOC Copilot groups noisy alerts, and where the human stays in control.</span>
         </span>
-        <span class="row__cta">project →</span>
-      </a>
-      <a class="row" href="https://github.com/SwatiK425/GenAI_Guardrail">
-        <span class="row__num">soon</span>
-        <span class="row__body">
-          <span class="row__name">Guardrails that don't get in the way</span>
-          <span class="row__desc">Designing safety for generative apps without burying the product in friction.</span>
-        </span>
-        <span class="row__cta">project →</span>
-      </a>
+      </div>
     </div>
 
-    <div class="toc-rule"><span class="label">get them the moment they land</span></div>
-
-    <section class="letter">
-      <p class="letter__text">No filler here — these exist when the builds do.</p>
-      <form class="letter__form" data-subscribe>
-        <input type="email" name="email" placeholder="you@example.com" aria-label="Email address" required />
-        <button type="submit">Subscribe</button>
-      </form>
-      <p class="note">Or head <a href="index.html">home</a>.</p>
-    </section>
+    <p class="start">Until then, <a href="projects.html">try the products →</a></p>
 
     <footer class="footer">
       <p>© <span id="yr"></span> Midnight Builds · built after dark</p>
@@ -84,6 +64,5 @@
 
   </div>
   <script>document.getElementById('yr').textContent = new Date().getFullYear();</script>
-  <script src="assets/site.js"></script>
 </body>
 </html>

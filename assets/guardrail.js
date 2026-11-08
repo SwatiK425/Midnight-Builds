@@ -38,7 +38,7 @@ let hasKey = false;
 let keyInfo = null;
 let lastResult = null;
 let abortController = null;
-let demoMode = false;
+let backendOffline = false;
 
 // ===== INITIALIZATION =====
 async function init() {
@@ -57,9 +57,6 @@ async function init() {
   // Initialize BYOK modal
   initByokModal();
   
-  // Bind events
-  bindEvents();
-  
   // Focus prompt
   setTimeout(() => promptInput.focus(), 600);
   
@@ -69,12 +66,28 @@ async function init() {
   // Test API connection
   const connResult = await testConnection();
   if (!connResult.success) {
-    demoMode = true;
-    console.warn('Guardrail API unavailable. Running in demo mode.');
-    showToast('⚠️ Guardrail API unavailable — running in demo mode', 'warning');
+    console.warn('Guardrail API unavailable.');
+    showBackendOffline();
   } else {
     console.log('Guardrail API connected');
   }
+}
+
+// With no backend there is nothing real to judge the attack, so say that
+// plainly and lock the controls. Never show a verdict the guardrail didn't give.
+function showBackendOffline() {
+  backendOffline = true;
+  setVaultState('locked');
+  resultBanner.classList.add('visible');
+  resultIcon.textContent = '🌙';
+  resultText.textContent = 'Live demo offline';
+  keyHint.textContent = 'The guardrail backend is offline right now. Please check back soon.';
+  keyBtn.disabled = true;
+  promptInput.disabled = false;
+  promptInput.classList.remove('testing');
+  launchBtn.classList.remove('loading');
+  resetLayerDots(layerIndicators.querySelectorAll('.layer-dot'));
+  validateInput();
 }
 
 function createLayerDots() {
@@ -308,7 +321,7 @@ renderArsenal();
 // ===== INPUT VALIDATION =====
 function validateInput() {
   const hasPrompt = promptInput.value.trim().length > 0;
-  launchBtn.disabled = !hasPrompt;
+  launchBtn.disabled = !hasPrompt || backendOffline;
 }
 
 promptInput.addEventListener('input', validateInput);
@@ -400,55 +413,15 @@ async function launchAttack() {
       const verdictWord = gameVerdict === 'breached' ? 'BREACHED 💎' : 'REJECTED 🛡️';
       const verb = gameVerdict === 'breached' ? 'breached' : 'failed to breach';
       const llmTag = hasKey ? ' • LLM Judge active' : ' • Heuristic only';
-      const demoTag = demoMode ? ' (Demo)' : '';
-      shareCopy.dataset.text = `I ${verb} the vault with: "${prompt.slice(0,60)}…" — ${verdictWord} (Risk: ${riskScore}/100)${llmTag}${demoTag}`;
+      shareCopy.dataset.text = `I ${verb} the vault with: "${prompt.slice(0,60)}…" — ${verdictWord} (Risk: ${riskScore}/100)${llmTag}`;
     }, delay);
     
   } catch (error) {
-    // Superseded by a newer attack — that attack owns the UI now. Render
-    // nothing (previously this fell through to the demo fallback and showed
-    // a fabricated verdict for the cancelled request).
+    // Superseded by a newer attack — that attack owns the UI now.
     if (signal.aborted) return;
 
     console.error('Attack failed:', error);
-    
-    // Demo mode fallback
-    const lower = prompt.toLowerCase();
-    const attackIndicators = [
-      lower.includes('ignore'), lower.includes('dan'), lower.includes('system prompt'),
-      lower.includes('credit card'), lower.includes('training data'), lower.includes('ssn'),
-      lower.includes('list_tables'), lower.includes('tool'), lower.includes('grandmother'),
-      lower.includes('deceased'), lower.includes('override'), lower.includes('no rules')
-    ];
-    const attackScore = attackIndicators.filter(Boolean).length;
-    const detectionThreshold = hasKey ? 1 : 2;
-    const isBenign = lower.includes('testing') && (lower.includes('format') || lower.includes('valid') || lower.includes('example'));
-    const verdict = (isBenign || attackScore < detectionThreshold) ? 'breached' : 'rejected';
-    const risk = verdict === 'breached' ? 15 + Math.floor(Math.random() * 25) : 75 + Math.floor(Math.random() * 25);
-    
-    lastResult = { verdict, risk_score: risk, prompt, gameVerdict: verdict, demo: true };
-    
-    if (verdict === 'breached') stats.breached++; else stats.blocked++;
-    saveStats();
-    
-    const dots = layerIndicators.querySelectorAll('.layer-dot');
-    animateLayerDots(dots, verdict, hasKey);
-    setVaultState(verdict, risk);
-    scrollVaultIntoView();
-    
-    promptInput.disabled = false;
-    promptInput.classList.remove('testing');
-    validateInput();
-    launchBtn.classList.remove('loading');
-    
-    const delay = verdict === 'breached' ? 1200 : 600;
-    setTimeout(() => {
-      shareMoment.hidden = false;
-      requestAnimationFrame(() => shareMoment.classList.add('visible'));
-      const verdictWord = verdict === 'breached' ? 'BREACHED 💎' : 'REJECTED 🛡️';
-      const verb = verdict === 'breached' ? 'breached' : 'failed to breach';
-      shareCopy.dataset.text = `I ${verb} the vault with: "${prompt.slice(0,60)}…" — ${verdictWord} (Risk: ${risk}/100) (Demo mode)`;
-    }, delay);
+    showBackendOffline();
   }
 }
 

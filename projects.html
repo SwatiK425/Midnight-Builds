@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Products — Midnight Builds</title>
-  <meta name="description" content="Every project, in public on GitHub — security tooling, AI apps, and the occasional utility. A video and a write-up arrive with each build." />
-  <link rel="stylesheet" href="assets/styles.css?v=2" />
+  <title>Products | Midnight Builds</title>
+  <meta name="description" content="Everything I've built so far: what's live, what's in progress, and what's just an experiment." />
+  <link rel="stylesheet" href="assets/styles.css?v=3" />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='M63 18 A38 38 0 1 0 84 74 A30 30 0 1 1 63 18 Z' fill='%23E9C46A' stroke='%232E201B' stroke-width='6'/></svg>" />
 </head>
 <body class="sub">
@@ -30,130 +30,76 @@
       </svg>
       <p class="dept">off the bench</p>
       <h1>Products</h1>
-      <p class="dek">Everything I ship, in public. Each one gets a build video and a write-up as it lands.</p>
+      <p class="dek">What's live, what's in progress, and what's just an experiment.</p>
     </div>
 
     <div class="rows">
-      <a class="row" href="https://github.com/SwatiK425/DLP_guardrail">
+      <a class="row" href="makerguard/">
         <span class="row__num">01</span>
         <span class="row__body">
-          <span class="row__name">DLP_guardrail</span>
-          <span class="row__desc">A guardrail layer that keeps AI features from leaking sensitive data — jailbreaks, injections, and exfiltration, caught before the LLM.</span>
-          <span class="row__meta">Python · Security · DLP</span>
+          <span class="status status--live">Live</span>
+          <span class="row__name">MakerGuard</span>
+          <span class="row__desc">Can a stranger read your users' data? A 60-second security check for Supabase apps. Free and read-only.</span>
+          <span class="row__meta">Security · Supabase · Solo builders</span>
+        </span>
+        <span class="row__cta">try it →</span>
+      </a>
+      <a class="row" href="cuddles-and-cue/">
+        <span class="row__num">02</span>
+        <span class="row__body">
+          <span class="status status--live">Live</span>
+          <span class="row__name">Cuddles &amp; Cue</span>
+          <span class="row__desc">One 3-minute play idea a day for your little one, matched to their age, using what's already at home.</span>
+          <span class="row__meta">Parents · Ages 0–36 months · No account</span>
+        </span>
+        <span class="row__cta">try it →</span>
+      </a>
+      <a class="row" href="https://github.com/SwatiK425/DLP_guardrail">
+        <span class="row__num">03</span>
+        <span class="row__body">
+          <span class="status status--offline">Demo offline</span>
+          <span class="row__name">DLP Guardrail</span>
+          <span class="row__desc">A 4-layer guardrail that checks prompts for jailbreaks, injections, and data theft before they reach your LLM. Its evaluation plan was written down before the results, and that evaluation is still in progress.</span>
+          <span class="row__meta">Python · Security · AI</span>
         </span>
         <span class="row__cta">source →</span>
       </a>
       <a class="row" href="https://github.com/SwatiK425/soc-copilot">
-        <span class="row__num">02</span>
+        <span class="row__num">04</span>
         <span class="row__body">
-          <span class="row__name">soc-copilot</span>
-          <span class="row__desc">GenAI SOC copilot that cuts alert noise 99.2% and drafts remediation playbooks — the analyst stays in control.</span>
+          <span class="status">Prototype</span>
+          <span class="row__name">SOC Copilot</span>
+          <span class="row__desc">Groups noisy data-loss alerts into a prioritized queue of incidents and drafts playbooks for an analyst to review.</span>
           <span class="row__meta">TypeScript · GenAI · Security</span>
         </span>
         <span class="row__cta">source →</span>
       </a>
-      <a class="row" href="https://github.com/SwatiK425/YT-Learn">
-        <span class="row__num">03</span>
+    </div>
+
+    <div class="toc-rule"><span class="label">the lab: small experiments</span></div>
+
+    <div class="rows">
+      <a class="row" href="https://github.com/SwatiK425/open-in-google">
+        <span class="row__num">·</span>
         <span class="row__body">
-          <span class="row__name">YT-Learn</span>
-          <span class="row__desc">Turn YouTube videos into structured, searchable study notes.</span>
-          <span class="row__meta">JavaScript · AI · Learning</span>
+          <span class="row__name">open-in-google</span>
+          <span class="row__desc">Right-click any Excel, CSV, Word, or PowerPoint file, and it uploads to Google Drive and opens in Sheets, Docs, or Slides.</span>
+          <span class="row__meta">PowerShell · Windows</span>
         </span>
         <span class="row__cta">source →</span>
       </a>
       <a class="row" href="https://github.com/SwatiK425/GenAI_Guardrail">
-        <span class="row__num">04</span>
+        <span class="row__num">·</span>
         <span class="row__body">
           <span class="row__name">GenAI_Guardrail</span>
-          <span class="row__desc">Safety guardrails for generative-AI apps.</span>
-          <span class="row__meta">Python · GenAI · Safety</span>
+          <span class="row__desc">An early terminal prototype of per-app policies and audit logs in front of an LLM.</span>
+          <span class="row__meta">Python · Prototype</span>
         </span>
         <span class="row__cta">source →</span>
-      </a>
-      <a class="row" href="https://github.com/SwatiK425/YT-Scraper">
-        <span class="row__num">05</span>
-        <span class="row__body">
-          <span class="row__name">YT-Scraper</span>
-          <span class="row__desc">Pull transcripts and metadata from YouTube at scale.</span>
-          <span class="row__meta">Python · YouTube · Data</span>
-        </span>
-        <span class="row__cta">source →</span>
-      </a>
-      <a class="row" href="https://github.com/SwatiK425/company_research">
-        <span class="row__num">06</span>
-        <span class="row__body">
-          <span class="row__name">company_research</span>
-          <span class="row__desc">Research companies from the command line.</span>
-          <span class="row__meta">Python · Research</span>
-        </span>
-        <span class="row__cta">source →</span>
-      </a>
-      <a class="row" href="https://github.com/SwatiK425/onboarding-buddy">
-        <span class="row__num">07</span>
-        <span class="row__body">
-          <span class="row__name">onboarding-buddy</span>
-          <span class="row__desc">Streamlines team onboarding so new hires ship faster.</span>
-          <span class="row__meta">Python · Tooling</span>
-        </span>
-        <span class="row__cta">source →</span>
-      </a>
-      <a class="row" href="https://github.com/SwatiK425/Nourish_Meal_Planner">
-        <span class="row__num">08</span>
-        <span class="row__body">
-          <span class="row__name">Nourish_Meal_Planner</span>
-          <span class="row__desc">Plan meals without the weekly decision fatigue.</span>
-          <span class="row__meta">Utility</span>
-        </span>
-        <span class="row__cta">source →</span>
-      </a>
-      <a class="row" href="https://github.com/SwatiK425/project-guardian">
-        <span class="row__num">09</span>
-        <span class="row__body">
-          <span class="row__name">project-guardian</span>
-          <span class="row__desc">Keeps an eye on your projects so nothing slips.</span>
-          <span class="row__meta">Utility</span>
-        </span>
-        <span class="row__cta">source →</span>
-      </a>
-      <a class="row" href="https://github.com/SwatiK425/Codex-Demo">
-        <span class="row__num">10</span>
-        <span class="row__body">
-          <span class="row__name">Codex-Demo</span>
-          <span class="row__desc">A hands-on demo built on OpenAI Codex.</span>
-          <span class="row__meta">Demo · AI</span>
-        </span>
-        <span class="row__cta">source →</span>
-      </a>
-      <a class="row" href="https://github.com/SwatiK425/open-in-google">
-        <span class="row__num">11</span>
-        <span class="row__body">
-          <span class="row__name">open-in-google</span>
-          <span class="row__desc">Right-click any Excel, CSV, Word, or PowerPoint file — it uploads to your Google Drive and opens in Sheets / Docs / Slides.</span>
-          <span class="row__meta">PowerShell · Windows · Google Drive</span>
-        </span>
-        <span class="row__cta">source →</span>
-      </a>
-      <a class="row" href="/makerguard/">
-        <span class="row__num">12</span>
-        <span class="row__body">
-          <span class="row__name">MakerGuard</span>
-          <span class="row__desc">60-second Supabase security check for solo builders — can a stranger read your users' data? Free, read-only, nothing stored.</span>
-          <span class="row__meta">Security · Supabase · Solo Builders</span>
-        </span>
-        <span class="row__cta">try it →</span>
       </a>
     </div>
 
-    <div class="toc-rule"><span class="label">want these as they ship?</span></div>
-
-    <section class="letter">
-      <p class="letter__text">One email per build. That's the whole deal.</p>
-      <form class="letter__form" data-subscribe>
-        <input type="email" name="email" placeholder="you@example.com" aria-label="Email address" required />
-        <button type="submit">Subscribe</button>
-      </form>
-      <p class="note">Or head <a href="index.html">home</a>.</p>
-    </section>
+    <p class="start">Questions or feedback? <a href="https://www.linkedin.com/in/swatikumari425/">Find me on LinkedIn →</a></p>
 
     <footer class="footer">
       <p>© <span id="yr"></span> Midnight Builds · built after dark</p>
@@ -161,6 +107,5 @@
 
   </div>
   <script>document.getElementById('yr').textContent = new Date().getFullYear();</script>
-  <script src="assets/site.js"></script>
 </body>
 </html>
